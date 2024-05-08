@@ -1,0 +1,147 @@
+:root {
+    --gray-1: #CED4DA;
+    --gray-2: #6C757D;
+
+    --blue-1: #0DCAF0;
+    --blue-2: #f5faff;
+    --background: #f5faff;
+
+    font-size: 16px;
+}
+
+.feedback {
+    color: white;
+    background-color: white;
+    
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translate(-50%);
+
+    padding: 10px;
+    border-radius: 8px;
+    display: none;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+    font-family: Roboto, sans-serif;
+    line-height: 1.5;
+}
+
+
+
+header {
+    background-color: #009640;
+    height: 48px;
+    width: 100%;
+    padding: 0 312px;
+    
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+header ul {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    gap: 10px;
+}
+
+header nav img {
+    width: 25px;
+    height: 25px;
+}
+
+header p {
+    color: White;
+    font-size: 16px;
+}
+
+header a {
+    display: inline-block;
+    font-size: 0;
+}
+
+header button {
+    color: white;
+    font-size: 20px;
+    border: none;
+    background: none;
+    font-family: Roboto, sans-serif;
+    font-weight: 700;
+    padding: 3px 10px 0 10pxF;
+}
+
+header div.user-options {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+div.form-header {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+div.form-header h1 {
+    color: white;
+    font-family: Viga, sans-serif;
+    line-height: 24px;
+    font-size: 64px;
+}
+
+div.form-header p {
+    color: white;
+    font-family: Roboto, sans-serif;
+    font-size: 24px;
+    margin: 18px 0 48px 0;
+}
+@media (max-width: 1440px) {
+
+    footer > div:nth-child(2), header {
+        padding: 0 144px;
+    }
+}
+@media (max-width: 1024px) {
+    footer > div:nth-child(2), header {
+        padding: 0 72px;
+    }
+    div.form-header h1 {
+        font-size: 48px;
+    }
+
+    div.form-header p {
+        font-size: 16px;
+    }
+
+    div.form-header img {
+        aspect-ratio: auto;
+        height: 300px;
+    }
+
+    div.form-files {
+        gap: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    footer > div:nth-child(2), header {
+        padding: 0 24px;
+    }
+    div.form-header h1 {
+        font-size: 32px;
+    }
+
+    div.form-header p {
+        font-size: 12px;
+    }
+
+    div.form-header img {
+        height: 200px;
+    }
+}
