@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tela de Perguntas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        form {
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 15px;
+            color: #555;
+        }
+        input[type="radio"] {
+            display: none;
+        }
+        .opcao-label {
+            font-size: 14px;
+            display: inline-block;
+            width: 50px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 40px;
+        }
+        input[type="radio"]:checked + .opcao-label {
+            background-color: #009640;
+            color: #fff;
+            border-color: #009640;
+        }
+        input[type="submit"] {
+            background-color: #009640;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin-top: 20px;
+        }
+        input[type="submit"]:hover {
+            background-color: #036a30;
+        }
+    
+        .topbar-secondary {
+            background-color: #f2f2f2;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd; 
+            text-align: center; 
+            margin-bottom: 40px; 
+
+        }
+
+        .topbar-secondary .container_bar {
+            max-width: 1200px;
+            margin: 0 auto; 
+        }
+
+        .topbar-secondary a {
+            color: #333;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .topbar-secondary a:hover {
+            color: #666;
+        }
+
+        .topbar-secondary .separator {
+            color: #666;
+        }
+        header {
+            background-color: #009640;
+            height: 48px;
+            padding: 0 312px;
+            
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        header ul {
+            display: flex;
+            align-items: center;
+            list-style: none;
+            gap: 10px;
+        }
+
+        header nav img {
+            width: 25px;
+            height: 25px;
+        }
+
+        header p {
+            color: White;
+            font-size: 16px;
+        }
+
+        header a {
+            display: inline-block;
+            font-size: 0;
+        }
+
+        header button {
+            color: white;
+            font-size: 20px;
+            border: none;
+            background: none;
+            font-family: Roboto, sans-serif;
+            font-weight: 700;
+            padding: 3px 10px 0 10pxF;
+        }
+
+        header div.user-options {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+
+
+
+
+    </style>
+</head>
+<header>
+    <nav>
+        <ul>
+            <a>
+                <li><a href="https://www.instagram.com/prefeituradepaudosferros/">
+                    <img src="../assets/instagram.png">
+                    </a>
+                </li>
+            </a>
+            <a>
+                <li><a href="https://www.facebook.com/prefeituradepaudosferros/">
+                    <img src="../assets/facebook.png">
+                    </a>
+            </a>
+            <a>
+                <li><a href="https://twitter.com/paudosferros">
+                    <img src="../assets/twitter.png">
+                    </a>
+            </a>
+            <a>
+                <li><a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros">
+                    <img src="../assets/youtube.png">
+                    </a>
+            </a>
+            <a>
+                <li><a href="https://instagram.com">
+                    <img src="../assets/copy-url.png">
+                    </a>
+            </a>
+        </ul>
+    </nav>
+
+    <div class="user-options">
+        <p id="alter-font">Tamanho da fonte</p>
+        <button onclick="increaseFont()">A+</button>
+        <p>|</p>
+        <button onclick="decreaseFont()">A-</button>
+    </div>
+        
+    </header>
+    
+    
+    <div class="topbar-secondary">
+        <div class="container_bar">
+            <a href="../index.html">Início</a> > <a href="https://paudosferros.rn.gov.br/secretaria.php?sec=19">Demutran – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</a>
+            <span class="separator"> | </span>
+            <a href="https://paudosferros.rn.gov.br/lai.php">Acesso à Informação</a> - <a href="https://paudosferros.rn.gov.br/omunicipio.php">Sobre a Prefeitura</a>
+        </div>
+    </div>
+<body>
+    <div class="container">
+        <h2><i class="fas fa-question-circle"></i> Tela de Perguntas</h2>
+        <form action="#" method="post" onsubmit="return validarRespostas()">
+            <label for="pergunta1">Este acidente ocorreu em uma rodovia/estrada Federal (BR) atendida pela PRF?</label>
+            <input type="radio" id="pergunta1_sim" name="pergunta1" value="Sim">
+            <label class="opcao-label" for="pergunta1_sim">Sim</label>
+            <input type="radio" id="pergunta1_nao" name="pergunta1" value="Não">
+            <label class="opcao-label" for="pergunta1_nao">Não</label>
+
+            <label for="pergunta2">Você é maior de 18 anos ou emancipado civilmente?</label>
+            <input type="radio" id="pergunta2_sim" name="pergunta2" value="Sim">
+            <label class="opcao-label" for="pergunta2_sim">Sim</label>
+            <input type="radio" id="pergunta2_nao" name="pergunta2" value="Não">
+            <label class="opcao-label" for="pergunta2_nao">Não</label>
+
+            <label for="pergunta3">Alguém feriu-se, ainda que levemente, nesse acidente?</label>
+            <input type="radio" id="pergunta3_sim" name="pergunta3" value="Sim">
+            <label class="opcao-label" for="pergunta3_sim">Sim</label>
+            <input type="radio" id="pergunta3_nao" name="pergunta3" value="Não">
+            <label class="opcao-label" for="pergunta3_nao">Não</label>
+
+            <label for="pergunta4">O acidente envolveu mais de 5(cinco) veículos?</label>
+            <input type="radio" id="pergunta4_sim" name="pergunta4" value="Sim">
+            <label class="opcao-label" for="pergunta4_sim">Sim</label>
+            <input type="radio" id="pergunta4_nao" name="pergunta4" value="Não">
+            <label class="opcao-label" for="pergunta4_nao">Não</label>
+
+            <label for="pergunta5">O acidente envolveu veículo de transporte de produtos perigosos, do qual houve avaria ao compartimento de carga a granel, derramamento ou vazamento do produto?</label>
+            <input type="radio" id="pergunta5_sim" name="pergunta5" value="Sim">
+            <label class="opcao-label" for="pergunta5_sim">Sim</label>
+            <input type="radio" id="pergunta5_nao" name="pergunta5" value="Não">
+            <label class="opcao-label" for="pergunta5_nao">Não</label>
+
+            <div class="submit-section">
+                <input type="submit" value="Enviar" id="submit-btn">
+                <div id="mensagem" class="mensagem" style="display: none; margin-top: 10px;"></div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function validarRespostas() {
+            var pergunta1 = document.querySelector('input[name="pergunta1"]:checked');
+            var pergunta2 = document.querySelector('input[name="pergunta2"]:checked');
+            var pergunta3 = document.querySelector('input[name="pergunta3"]:checked');
+            var pergunta4 = document.querySelector('input[name="pergunta4"]:checked');
+            var pergunta5 = document.querySelector('input[name="pergunta5"]:checked');
+
+            var mensagem = document.getElementById('mensagem');
+            var submitBtn = document.getElementById('submit-btn');
+            if (pergunta1 && pergunta1.value === "Sim") {
+                mensagem.innerText = "Para esta declaração de acidente, clique em próximo para ser direcionado para o Sistema de Declaração de Acidente de Trânsito - DAT da PRF.";
+                mensagem.style.display = 'block';
+                return false;
+            }
+
+            if (pergunta2 && pergunta2.value === "Não") {
+                mensagem.innerText = "Somente pessoas emancipadas ou maiores de 18 anos podem realizar a declaração do acidente.";
+                mensagem.style.display = 'block';
+                return false;
+            }
+
+            if (pergunta3 && pergunta3.value === "Sim") {
+                mensagem.innerText = "Este boletim não pode ser feito eletronicamente. Favor entrar em contato com Secretaria de Segurança Pública, Defesa Civil, Mobilidade Urbana e Trânsito - SESDEM.";
+                mensagem.style.display = 'block';
+                return false;
+            }
+
+            if (pergunta4 && pergunta4.value === "Sim") {
+                mensagem.innerText = "Este boletim não pode ser feito eletronicamente. Favor entrar em contato com Secretaria de Segurança Pública, Defesa Civil, Mobilidade Urbana e Trânsito - SESDEM.";
+                mensagem.style.display = 'block';
+                return false;
+            }
+
+            if (pergunta5 && pergunta5.value === "Sim") {
+                mensagem.innerText = "Este boletim não pode ser feito eletronicamente. Favor entrar em contato com Secretaria de Segurança Pública, Defesa Civil, Mobilidade Urbana e Trânsito - SESDEM.";
+                mensagem.style.display = 'block';
+                return false;
+            }
+            if (!pergunta1 || !pergunta2 || !pergunta3 || !pergunta4 || !pergunta5) {
+                mensagem.innerText = "Por favor, responda a todas as perguntas.";
+                mensagem.style.display = 'block';
+                return false;
+            }
+            
+
+            // Se todas as perguntas foram respondidas
+            // Redireciona para outra página            
+            return true;
+
+            window.location.href = "outra_pagina.html";
+
+        }
+
+    </script>
+</body>

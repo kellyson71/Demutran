@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Defesa Prévia DMUT</title>
+    <link rel="stylesheet" href="../pages css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+</head>
+<style>
+    li {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+    p{
+        margin-bottom: 15px;
+    }
+    
+</style>
+
+<body>
+    <div class="feedback" id="feedback">
+        
+    </div>
+    <header>
+        <nav>
+            <ul>
+                <a>
+                    <li><a href="https://www.instagram.com/prefeituradepaudosferros/">
+                        <img src="../assets/instagram.png">
+                        </a>
+                    </li>
+                </a>
+                <a>
+                    <li><a href="https://www.facebook.com/prefeituradepaudosferros/">
+                        <img src="../assets/facebook.png">
+                        </a>
+                </a>
+                <a>
+                    <li><a href="https://twitter.com/paudosferros">
+                        <img src="../assets/twitter.png">
+                        </a>
+                </a>
+                <a>
+                    <li><a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros">
+                        <img src="../assets/youtube.png">
+                        </a>
+                </a>
+                <a>
+                    <li><a href="https://instagram.com">
+                        <img src="../assets/copy-url.png">
+                        </a>
+                </a>
+            </ul>
+        </nav>
+    
+        <div class="user-options">
+            <p id="alter-font">Tamanho da fonte</p>
+            <button onclick="increaseFont()">A+</button>
+            <p>|</p>
+            <button onclick="decreaseFont()">A-</button>
+        </div>
+            
+        </header>
+        
+        
+        <div class="topbar-secondary">
+            <div class="container_bar">
+                <a href="../index.html">Início</a> > <a href="https://paudosferros.rn.gov.br/secretaria.php?sec=19">Demutran – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</a>
+                <span class="separator"> | </span>
+                <a href="https://paudosferros.rn.gov.br/lai.php">Acesso à Informação</a> - <a href="https://paudosferros.rn.gov.br/omunicipio.php">Sobre a Prefeitura</a>
+            </div>
+        </div>
+        <body>
+            <div class="container">
+                <h2><i class="fas fa-file-alt"></i> Termos e Condições de Uso</h2>
+                <p><strong>Por favor, leia os seguintes termos e condições antes de prosseguir:</strong></p>
+                <ul>
+                    <li>As informações prestadas serão utilizadas de maneira sigilosa para fins estatísticos e de estudos objetivando a prevenção de acidentes e o reforço da segurança pública;</li>
+                    <li>O declarante é responsável pelas informações e pode sofrer sanções penais/administrativas diante de informações falsas;</li>
+                    <li>O DAT se propõe a registrar os casos de acidentes sem vítima, que não tenha envolvido veículo de transporte de produtos perigosos, do qual houve avaria ao compartimento de carga a granel, derramamento ou vazamento do produto, nem veículos públicos e que não tenham provocado dano ao meio ambiente ou ao patrimônio público;</li>
+                    <li>É necessária a utilização do Acrobat Reader para impressão da declaração. Clique no ícone para efetuar o download <a href="https://get.adobe.com/br/reader/">Adobe Acrobat Reader</a>;</li>
+                    <li>O declarante deve ter mais de 18 anos ou ser emancipado;</li>
+                    <li>Serão registrados o IP e a data de abertura da declaração;</li>
+                    <li>A declaração uma vez finalizada não terá mais possibilidade de alteração, a não ser através do modo de retificação;</li>
+                    <li>Caso o Sistema fique inativo pelo período de 1 hora, os dados serão desconsiderados;</li>
+                    <li>Após a geração de protocolo da declaração, o declarante terá o prazo de 48 horas para concluir a inclusão das informações. Caso este processo não seja efetuado dentro deste período de tempo, o protocolo será desconsiderado;</li>
+                    <li>Esta declaração estará sujeita à conferência para posterior liberação. Você será informado via e-mail da aprovação da declaração;</li>
+                    <li>É obrigatória a indicação de um endereço eletrônico (e-mail) para o preenchimento da declaração. Ele será o principal meio de comunicação;</li>
+                    <li>Você pode informar valores parciais para uma placa de veículo, caso não tenha a identificação por completo. Exemplos: 'ABC12??', 'ABC??34', 'A??1234';</li>
+                    <li>Campos marcados com (*) são obrigatórios;</li>
+                    <li>Campos de ajuda (?) estão disponíveis no formulário, utilize-os em caso de dúvida;</li>
+                </ul>
+                <form action="./form.html" method="get" onsubmit="return validarTermos()">
+                    <label for="aceitar"><input type="checkbox" id="aceitar" name="aceitar" required> - Li e concordo com os termos e condições de uso</label>
+                    <br>
+                    <input type="submit" value="Aceitar e Continuar">
+                </form>
+            </div>
+        
+            <script>
+                function validarTermos() {
+                    var checkbox = document.getElementById("aceitar");
+                    if (!checkbox.checked) {
+                        alert("Você deve concordar com os termos e condições para continuar.");
+                        return false;
+                    }
+                    return true;
+                }
+            </script>
+        </body>
+        </html>
