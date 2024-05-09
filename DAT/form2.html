@@ -1,0 +1,493 @@
+<!-- Formulário de Acidente de Trânsito -->
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de Acidente de Trânsito</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../pages css/bar_style.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .progressbar {
+            counter-reset: step;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+        .progressbar li {
+            list-style-type: none;
+            flex: 1;
+            position: relative;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+        }
+        .progressbar li:before {
+            content: counter(step);
+            counter-increment: step;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            border: 2px solid #ddd;
+            display: block;
+            text-align: center;
+            margin: 0 auto 10px auto;
+            border-radius: 50%;
+            background-color: #fff;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .progressbar li:after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: #ddd;
+            top: 15px;
+            left: -50%;
+            z-index: -1;
+        }
+        .progressbar li:first-child:after {
+            content: none;
+        }
+        .progressbar li.active:before {
+            background-color: #009640;
+            color: #fff;
+        }
+        form {
+            margin-top: 20px;
+        }
+        label {
+            margin-top: 20px;
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="tel"],
+        input[type="email"],
+        select,
+        textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        input[type="checkbox"] {
+            margin-right: 5px;
+        }
+        input[type="submit"] {
+            background-color: #009640;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            font-weight: bold;
+        }
+        input[type="submit"]:hover {
+            background-color: #064f26;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<header>
+    <nav>
+        <ul>
+            <a>
+                <li><a href="https://www.instagram.com/prefeituradepaudosferros/">
+                    <img src="../assets/instagram.png">
+                    </a>
+                </li>
+            </a>
+            <a>
+                <li><a href="https://www.facebook.com/prefeituradepaudosferros/">
+                    <img src="../assets/facebook.png">
+                    </a>
+            </a>
+            <a>
+                <li><a href="https://twitter.com/paudosferros">
+                    <img src="../assets/twitter.png">
+                    </a>
+            </a>
+            <a>
+                <li><a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros">
+                    <img src="../assets/youtube.png">
+                    </a>
+            </a>
+            <a>
+                <li><a href="https://instagram.com">
+                    <img src="../assets/copy-url.png">
+                    </a>
+            </a>
+        </ul>
+    </nav>
+
+    <div class="user-options">
+        <p id="alter-font">Tamanho da fonte</p>
+        <button onclick="increaseFont()">A+</button>
+        <p>|</p>
+        <button onclick="decreaseFont()">A-</button>
+    </div>
+        
+    </header>
+    
+    
+    <div class="topbar-secondary">
+        <div class="container_bar">
+            <a href="../index.html">Início</a> > <a href="https://paudosferros.rn.gov.br/secretaria.php?sec=19">Demutran – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</a>
+            <span class="separator"> | </span>
+            <a href="https://paudosferros.rn.gov.br/lai.php">Acesso à Informação</a> - <a href="https://paudosferros.rn.gov.br/omunicipio.php">Sobre a Prefeitura</a>
+        </div>
+    </div>
+<body>
+    <ul class="progressbar">
+        <li class="active">Declaração de Acidente de Trânsito</li>
+        <li>Informações Gerais</li>
+        <li>Veículo Principal</li>
+        <li>Outros Veículos</li>
+        <li>Narrativa</li>
+        <li>Finalização</li>
+    </ul>
+    
+    <div class="container">
+        <h2><i class="fas fa-car"></i> Formulário de Acidente de Trânsito</h2>
+        <form action="#" method="post">
+
+            <hr>
+
+            <h3>DECLARANTE</h3>
+            <label for="relacao_veiculo">Indique a sua relação com o veículo principal: <span>*</span></label>
+            <select id="relacao_veiculo" name="relacao_veiculo" required>
+                <option value="">Selecione...</option>
+                <option value="Condutor">Condutor</option>
+                <option value="Corretor">Corretor</option>
+                <option value="Proprietario">Proprietário</option>
+                <option value="Passageiro">Passageiro</option>
+                <option value="Condutor_e_Proprietario">Condutor e Proprietário</option>
+                <option value="Terceiro_Atingido">Terceiro Atingido</option>
+            </select>
+
+            <label for="estrangeiro">Estrangeiro?</label>
+            <input type="checkbox" id="estrangeiro" name="estrangeiro">
+
+            <div id="documento_estrangeiro" class="hidden">
+                <label for="tipo_documento">Tipo de documento: <span>*</span></label>
+                <select id="tipo_documento" name="tipo_documento" required>
+                    <option value="">Selecione...</option>
+                    <option value="Passaporte">Passaporte</option>
+                    <option value="Outro">Outro</option>
+                </select>
+
+                <label for="numero_documento">Número: <span>*</span></label>
+                <input type="text" id="numero_documento" name="numero_documento" required>
+
+                <label for="pais">País: <span>*</span></label>
+                <input type="text" id="pais" name="pais" required>
+            </div>
+
+            <label for="nome">Nome: <span>*</span></label>
+            <input type="text" id="nome" name="nome" required>
+
+            <label for="cpf">CPF:</label>
+            <input type="text" id="cpf" name="cpf">
+
+            <label for="profissao">Profissão: <span>*</span></label>
+            <input type="text" id="profissao" name="profissao" required>
+
+            <label for="sexo">Sexo: <span>*</span></label>
+            <select id="sexo" name="sexo" required>
+                <option value="">Selecione...</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Feminino">Feminino</option>
+                <option value="Outro">Outro</option>
+            </select>
+
+            <label for="data_nascimento">Nasc.: <span>*</span></label>
+            <input type="date" id="data_nascimento" name="data_nascimento" required>
+
+            <label for="email">E-mail: <span>*</span></label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="celular">Celular:</label>
+            <input type="tel" id="celular" name="celular">
+
+            <label for="cep">CEP: <span>*</span></label>
+            <input type="text" id="cep" name="cep" required>
+
+            <label for="logradouro">Logradouro: <span>*</span></label>
+            <input type="text" id="logradouro" name="logradouro" required>
+
+            <label for="numero">Número: <span>*</span></label>
+            <input type="text" id="numero" name="numero" required>
+
+            <label for="complemento">Complemento:</label>
+            <input type="text" id="complemento" name="complemento">
+
+            <label for="bairro">Bairro/Localidade: <span>*</span></label>
+            <input type="text" id="bairro" name="bairro" required>
+
+            <label for="cidade">Cidade: <span>*</span></label>
+            <input type="text" id="cidade" name="cidade" required>
+
+            <label for="uf">UF: <span>*</span></label>
+            <input type="text" id="uf" name="uf" required>
+
+            <hr>
+
+            <h3>ACIDENTE</h3>
+            <label for="data_acidente">Quando foi o acidente?</label>
+            <input type="date" id="data_acidente" name="data_acidente" required>
+
+            <label for="horario_acidente">Horário: <span>*</span></label>
+            <input type="time" id="horario_acidente" name="horario_acidente" required>
+
+            <label for="local_acidente">Onde foi o acidente?</label>
+            <input type="text" id="local_acidente" name="local_acidente">
+
+            <label for="condicoes_via">Condições da Via: <span>*</span></label>
+            <select id="condicoes_via" name="condicoes_via" required>
+                <option value="">Selecione...</option>
+                <option value="Boas">Boas</option>
+                <option value="Regulares">Regulares</option>
+                <option value="Ruins">Ruins</option>
+            </select>
+
+            <label for="sinalizacao">Sinalização Horizontal e Vertical: <span>*</span></label>
+            <select id="sinalizacao" name="sinalizacao" required>
+                <option value="">Selecione...</option>
+                <option value="Boas">Boas</option>
+                <option value="Regulares">Regulares</option>
+                <option value="Ruins">Ruins</option>
+            </select>
+
+            <label for="tracado_via">Traçado da Via: <span>*</span></label>
+            <select id="tracado_via" name="tracado_via" required>
+                <option value="">Selecione...</option>
+                <option value="Reto">Reto</option>
+                <option value="Curva">Curva</option>
+                <option value="Subida">Subida</option>
+                <option value="Descida">Descida</option>
+                <option value="Rotatória">Rotatória</option>
+                <option value="Interseção">Interseção</option>
+            </select>
+
+            <label for="condicoes_meteorologicas">Condições Meteorológicas: <span>*</span></label>
+            <select id="condicoes_meteorologicas" name="condicoes_meteorologicas" required>
+                <option value="">Selecione...</option>
+                <option value="Céu Claro">Céu Claro</option>
+                <option value="Nublado">Nublado</option>
+                <option value="Chuva">Chuva</option>
+                <option value="Neblina">Neblina</option>
+                <option value="Vento Forte">Vento Forte</option>
+                <option value="Neve">Neve</option>
+                <option value="Granizo">Granizo</option>
+            </select>
+
+            <label for="tipo_acidente">Tipo de acidente: <span>*</span></label>
+            <select id="tipo_acidente" name="tipo_acidente" required>
+                <option value="">Selecione...</option>
+                <option value="Atropelamento_de_Animal">Atropelamento de Animal</option>
+                <option value="Colisao_Frontal">Colisão Frontal</option>
+                <option value="Colisao_Lateral">Colisão Lateral</option>
+                <option value="Colisao_Traseira">Colisão Traseira</option>
+                <option value="Colisao_Transversal">Colisão Transversal</option>
+                <option value="Colisao_com_Objeto_Estatico">Colisão com Objeto Estático</option>
+                <option value="Colisao_com_Objeto_Movel">Colisão com Objeto Móvel</option>
+                <option value="Derramamento_de_Carga">Derramamento de Carga</option>
+                <option value="Saida_de_Pista">Saída de Pista</option>
+                <option value="Tombamento">Tombamento</option>
+                <option value="Engavetamento">Engavetamento</option>
+                <option value="Danos_Eventuais">Danos Eventuais</option>
+            </select>
+
+            <input id="submit-declarante" type="submit" value="Próximo">
+        </form>
+
+        <form id="form-acidente" action="#" method="post" class="hidden">
+            <h3>ACIDENTE</h3>
+            <label for="situacao_veiculo">Situação do Veículo: <span>*</span></label>
+            <select id="situacao_veiculo" name="situacao_veiculo" required>
+                <option value="">Selecione...</option>
+                <option value="Licenciado_no_Brasil">Licenciado no Brasil</option>
+                <option value="Licenciado_no_Exterior">Licenciado no Exterior</option>
+                <option value="Nao_Registrado">Não Registrado</option>
+                <option value="Dispensado_de_Registro">Dispensado de Registro</option>
+            </select>
+
+            <label for="placa">Placa: <span>*</span></label>
+            <input type="text" id="placa" name="placa" required>
+
+            <label for="renavam">RENAVAM: <span>*</span></label>
+            <input type="text" id="renavam" name="renavam" required>
+
+            <label for="tipo_veiculo">Tipo de Veículo: <span>*</span></label>
+            <select id="tipo_veiculo" name="tipo_veiculo" required>
+                <option value="">Selecione...</option>
+                <option value="Carro">Carro</option>
+                <option value="Motocicleta">Motocicleta</option>
+                <option value="Caminhao">Caminhão</option>
+                <option value="Onibus">Ônibus</option>
+                <option value="Outro">Outro</option>
+            </select>
+
+            <label for="chassi">Chassi: <span>*</span></label>
+            <input type="text" id="chassi" name="chassi" required>
+
+            <label for="uf">UF: <span>*</span></label>
+            <select id="uf" name="uf" required>
+                <option value="">Selecione...</option>
+                <option value="AC">AC</option>
+                <option value="AL">AL</option>
+                <option value="AP">AP</option>
+                <option value="AM">AM</option>
+                <option value="BA">BA</option>
+                <option value="CE">CE</option>
+                <option value="DF">DF</option>
+                <option value="ES">ES</option>
+                <option value="GO">GO</option>
+                <option value="MA">MA</option>
+                <option value="MT">MT</option>
+                <option value="MS">MS</option>
+                <option value="MG">MG</option>
+                <option value="PA">PA</option>
+                <option value="PB">PB</option>
+                <option value="PR">PR</option>
+                <option value="PE">PE</option>
+                <option value="PI">PI</option>
+                <option value="RJ">RJ</option>
+                <option value="RN">RN</option>
+                <option value="RS">RS</option>
+                <option value="RO">RO</option>
+                <option value="RR">RR</option>
+                <option value="SC">SC</option>
+                <option value="SP">SP</option>
+                <option value="SE">SE</option>
+                <option value="TO">TO</option>
+            </select>
+
+            <label for="cor">Cor: <span>*</span></label>
+            <input type="text" id="cor" name="cor" required>
+
+            <label for="marca_modelo">Marca/Modelo: <span>*</span></label>
+            <input type="text" id="marca_modelo" name="marca_modelo" required>
+
+            <label for="ano_modelo">Ano Modelo: <span>*</span></label>
+            <input type="text" id="ano_modelo" name="ano_modelo" required>
+
+            <label for="ano_fabricacao">Ano Fabricação: <span>*</span></label>
+            <input type="text" id="ano_fabricacao" name="ano_fabricacao" required>
+
+            <label for="categoria">Categoria: <span>*</span></label>
+            <select id="categoria" name="categoria" required>
+                <option value="">Selecione...</option>
+                <option value="Particular">Particular</option>
+                <option value="Colecao">Coleção</option>
+                <option value="Aprendizagem">Aprendizagem</option>
+                <option value="Diplomatico">Diplomático</option>
+                <option value="Aluguel">Aluguel</option>
+                <option value="Experiencia">Experiência</option>
+            </select>
+
+            <label for="segurado">Segurado: <span>*</span></label>
+            <select id="segurado" name="segurado" required>
+                <option value="">Selecione...</option>
+                <option value="Sim">Sim</option>
+                <option value="Nao">Não</option>
+                <option value="Nao_sei">Não sei</option>
+            </select>
+
+            <label for="seguradora">Seguradora:</label>
+            <input type="text" id="seguradora" name="seguradora">
+
+            <label for="carretinha">Veículo articulado ou possui "carretinha"?: <span>*</span></label>
+            <select id="carretinha" name="carretinha" required>
+                <option value="">Selecione...</option>
+                <option value="Nao">Não</option>
+                <option value="Uma">Uma</option>
+                <option value="Duas">Duas</option>
+            </select>
+
+            <label for="manobra">Manobra durante o acidente?: <span>*</span></label>
+            <select id="manobra" name="manobra" required>
+                <option value="">Selecione...</option>
+                <option value="Contramao">Estava na contramão</option>
+                <option value="Cruzando_via">Cruzava a via</option>
+                <option value="Entrando_via">Entrava na via</option>
+                <option value="Estacionado">Estava estacionado</option>
+                <option value="Marcha_re">Estava em marcha ré</option>
+                <option value="Mudanca_faixa">Mudava de faixa</option>
+                <option value="Parado_via">Estava parado na via</option>
+                <option value="Parado_acostamento">Estava parado no acostamento</option>
+                <option value="Efetuando_retorno">Estava efetuando retorno</option>
+                <option value="Saindo_via">Estava saindo da via</option>
+                <option value="Seguindo_fluxo">Seguia o fluxo</option>
+                <option value="Ultrapassando">Estava ultrapassando</option>
+                <option value="Virando_direita">Virava à direita</option>
+                <option value="Virando_esquerda">Virava à esquerda</option>
+            </select>
+
+            <!-- Outros campos do formulário aqui -->
+
+            <input id="submit-acidente" type="submit" value="Enviar">
+        </form>
+    </div>
+
+    <script>
+        const estrangeiroCheckbox = document.getElementById('estrangeiro');
+        const documentoEstrangeiro = document.getElementById('documento_estrangeiro');
+        const formDeclarante = document.getElementById('form-declarante');
+        const formAcidente = document.getElementById('form-acidente');
+
+        estrangeiroCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                documentoEstrangeiro.classList.remove('hidden');
+            } else {
+                documentoEstrangeiro.classList.add('hidden');
+            }
+        });
+
+        formDeclarante.addEventListener('submit', function(event) {
+            event.preventDefault();
+            // Esconder o formulário do declarante e mostrar o formulário de acidente
+            formDeclarante.classList.add('hidden');
+            formAcidente.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>

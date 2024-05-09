@@ -204,7 +204,7 @@
 <body>
     <div class="container">
         <h2><i class="fas fa-question-circle"></i> Tela de Perguntas</h2>
-        <form action="#" method="post" onsubmit="return validarRespostas()">
+        <form method="post">
             <label for="pergunta1">Este acidente ocorreu em uma rodovia/estrada Federal (BR) atendida pela PRF?</label>
             <input type="radio" id="pergunta1_sim" name="pergunta1" value="Sim">
             <label class="opcao-label" for="pergunta1_sim">Sim</label>
@@ -287,14 +287,19 @@
                 return false;
             }
             
+            console.log("END")
 
-            // Se todas as perguntas foram respondidas
-            // Redireciona para outra página            
-            return true;
-
-            window.location.href = "outra_pagina.html";
+            window.location.href = "form2.html";
 
         }
+
+        const form = document.getElementsByTagName("form")[0]
+
+        form.addEventListener('submit', e => {
+            e.preventDefault()
+
+            validarRespostas()
+        })
 
     </script>
 </body>

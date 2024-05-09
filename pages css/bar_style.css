@@ -1,0 +1,74 @@
+.topbar-secondary {
+    background-color: #f2f2f2;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd; 
+    text-align: center; 
+    margin-bottom: 40px; 
+
+}
+
+.topbar-secondary .container_bar {
+    max-width: 1200px;
+    margin: 0 auto; 
+}
+
+.topbar-secondary a {
+    color: #333;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+.topbar-secondary a:hover {
+    color: #666;
+}
+
+.topbar-secondary .separator {
+    color: #666;
+}
+header {
+    background-color: #009640;
+    height: 48px;
+    padding: 0 312px;
+    
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+header ul {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    gap: 10px;
+}
+
+header nav img {
+    width: 25px;
+    height: 25px;
+}
+
+header p {
+    color: White;
+    font-size: 16px;
+}
+
+header a {
+    display: inline-block;
+    font-size: 0;
+}
+
+header button {
+    color: white;
+    font-size: 20px;
+    border: none;
+    background: none;
+    font-family: Roboto, sans-serif;
+    font-weight: 700;
+    padding: 3px 10px 0 10pxF;
+}
+
+header div.user-options {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
