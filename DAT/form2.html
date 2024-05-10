@@ -561,5 +561,86 @@
         toggleHabilitacao();
     </script>
     
-</body>
-</html>
+    <style>
+        /* Estilos CSS */
+        .damage-title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .damage-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 10px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease;
+            margin-top: 30px;
+        }
+        .damage-checkbox {
+            display: flex;
+            align-items: center;
+        }
+        .checkbox-label {
+            margin-left: 10px;
+            margin-top: 10px;
+        }
+        .damage-button {
+            width: 100%;
+            height: 50px;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            text-align: center;
+            line-height: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .damage-button:hover {
+            background-color: #f0f0f0;
+        }
+        .damage-button.selected {
+            background-color: #007bff;
+            color: #ffffff;
+        }
+        .damage-button.selected:hover {
+            background-color: #0056b3;
+        }
+        .button-spacer {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+
+    </style>
+    <body>
+        <div class="container">
+            <h2 class="damage-title">Danos no Veículo</h2>
+    
+            <div class="damage-checkbox">
+                <input type="checkbox" id="seguranca_checkbox" name="seguranca_checkbox">
+                <label for="seguranca_checkbox" class="checkbox-label">Houve danos ao sistema de segurança, freios, direção ou de suspensão do veículo?</label>
+            </div>
+    
+            <div class="damage-container">
+                <div class="damage-button" onclick="toggleSelected(1)">Dianteira Direita</div>
+                <div class="damage-button" onclick="toggleSelected(2)">Dianteira Esquerda</div>
+                <div class="damage-button" onclick="toggleSelected(3)">Lateral/Teto Direito</div>
+                <div class="damage-button" onclick="toggleSelected(4)">Lateral/Teto Esquerdo</div>
+                <div class="damage-button" onclick="toggleSelected(5)">Traseira Direita</div>
+                <div class="damage-button" onclick="toggleSelected(6)">Traseira Esquerda</div>
+            </div>
+        </div>
+    
+  
+    
+        <script>
+            function toggleSelected(buttonIndex) {
+                const button = document.querySelector(`.damage-container .damage-button:nth-child(${buttonIndex})`);
+                button.classList.toggle('selected');
+            }
+        </script>
+    </body>
+    </html>
