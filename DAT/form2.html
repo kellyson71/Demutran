@@ -445,7 +445,6 @@
                 <option value="Virava_esquerda">Virava à esquerda</option>
             </select>
 
-            <!-- Outros campos do formulário aqui -->
 
         </form>
     </div>
@@ -613,7 +612,27 @@
             text-align: center;
         }
 
-
+        .cargo-damage-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: inline-block;
+            width: 250px;
+            vertical-align: top;
+        }
+        .checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 10px;
+        }
     </style>
     <body>
         <div class="container">
@@ -634,9 +653,69 @@
             </div>
         </div>
     
-  
+        <div class="cargo-damage-container">
+            <h2>Danos na Carga do Veículo</h2>
+            <div class="form-group">
+                <input type="checkbox" id="carga_checkbox" name="carga_checkbox">
+                <label for="carga_checkbox" class="checkbox-label">Houve danos na carga do veículo?</label>
+            </div>
+            <div class="form-group">
+                <label for="notas_fiscais" class="form-label">Nº das Notas Fiscais, Manifestos ou Equivalentes:</label>
+                <input type="text" id="notas_fiscais" name="notas_fiscais" disabled>
+            </div>
+            <div class="form-group">
+                <label for="tipo_mercadoria" class="form-label">Tipo de Mercadoria:</label>
+                <input type="text" id="tipo_mercadoria" name="tipo_mercadoria" disabled>
+            </div>
+            <div class="form-group">
+                <label for="valor_total" class="form-label">Valor Total:</label>
+                <input type="text" id="valor_total" name="valor_total" disabled>
+            </div>
+            <div class="form-group">
+                <label for="extensao_danos" class="form-label">Extensão estimada dos danos da carga:</label>
+                <input type="text" id="extensao_danos" name="extensao_danos" disabled>
+            </div>
+            <div class="form-group">
+                <input type="checkbox" id="seguro_checkbox" name="seguro_checkbox">
+                <label for="seguro_checkbox" class="checkbox-label">Seguro</label>
+            </div>
+            <div class="form-group">
+                <label for="seguradora" class="form-label">Informe a Seguradora:</label>
+                <input type="text" id="seguradora" name="seguradora" disabled>
+            </div>
+        </div>
     
         <script>
+            const cargaCheckbox = document.getElementById('carga_checkbox');
+            const notasFiscaisInput = document.getElementById('notas_fiscais');
+            const tipoMercadoriaInput = document.getElementById('tipo_mercadoria');
+            const valorTotalInput = document.getElementById('valor_total');
+            const extensaoDanosInput = document.getElementById('extensao_danos');
+            const seguroCheckbox = document.getElementById('seguro_checkbox');
+            const seguradoraInput = document.getElementById('seguradora');
+    
+            cargaCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    notasFiscaisInput.removeAttribute('disabled');
+                    tipoMercadoriaInput.removeAttribute('disabled');
+                    valorTotalInput.removeAttribute('disabled');
+                    extensaoDanosInput.removeAttribute('disabled');
+                } else {
+                    notasFiscaisInput.setAttribute('disabled', 'disabled');
+                    tipoMercadoriaInput.setAttribute('disabled', 'disabled');
+                    valorTotalInput.setAttribute('disabled', 'disabled');
+                    extensaoDanosInput.setAttribute('disabled', 'disabled');
+                }
+            });
+    
+            seguroCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    seguradoraInput.removeAttribute('disabled');
+                } else {
+                    seguradoraInput.setAttribute('disabled', 'disabled');
+                }
+            });
+
             function toggleSelected(buttonIndex) {
                 const button = document.querySelector(`.damage-container .damage-button:nth-child(${buttonIndex})`);
                 button.classList.toggle('selected');
