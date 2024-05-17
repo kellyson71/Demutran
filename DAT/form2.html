@@ -470,11 +470,12 @@
                 <label for="validade_cnh">Validade:</label>
                 <input type="date" id="validade_cnh" name="validade_cnh">
             </div>
+
+            <label for="estrangeiro_checkbox">Estrangeiro?</label>
+            <input type="checkbox" id="estrangeiro_checkbox" name="estrangeiro" onchange="toggleEstrangeiro()">
             
-            <label for="estrangeiro">Estrangeiro?</label>
-            <input type="checkbox" id="estrangeiro" name="estrangeiro">
         
-            <div id="documento_estrangeiro" class="hidden">
+            <div id="documento_estrangeiro2" >
                 <label for="tipo_documento">Tipo de documento: <span>*</span></label>
                 <select id="tipo_documento" name="tipo_documento" required>
                     <option value="">Selecione...</option>
@@ -537,31 +538,70 @@
         </form>
     </div>
     <script>
-        function toggleHabilitacao() {
-            const dadosHabilitacao = document.getElementById('dados_habilitacao');
-            const naoHabilitadoCheckbox = document.getElementById('nao_habilitado');
-    
-            if (naoHabilitadoCheckbox.checked) {
-                dadosHabilitacao.classList.add('hidden');
+        document.addEventListener('DOMContentLoaded', function() {
+            const estrangeiroCheckbox = document.getElementById('estrangeiro');
+            const documentoEstrangeiro = document.getElementById('documento_estrangeiro');
+            toggleEstrangeiro(estrangeiroCheckbox, documentoEstrangeiro);
+
+            estrangeiroCheckbox.addEventListener('change', function() {
+                toggleEstrangeiro(estrangeiroCheckbox, documentoEstrangeiro);
+            });
+
+            const estrangeiroCheckbox2 = document.getElementById('estrangeiro_checkbox2');
+            const documentoEstrangeiro2 = document.getElementById('documento_estrangeiro2');
+            toggleEstrangeiro(estrangeiroCheckbox2, documentoEstrangeiro2);
+
+            estrangeiroCheckbox2.addEventListener('change', function() {
+                toggleEstrangeiro(estrangeiroCheckbox2, documentoEstrangeiro2);
+            });
+        });
+
+        function toggleEstrangeiro(checkbox, documento) {
+            if (checkbox.checked) {
+                enableFields(documento);
             } else {
-                dadosHabilitacao.classList.remove('hidden');
+                disableFields(documento);
             }
         }
+
+        function disableFields(container) {
+            const inputs = container.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
+        }
+
+        function enableFields(container) {
+            const inputs = container.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.disabled = false;
+            });
+        }
+
         const estrangeiroCheckbox = document.getElementById('estrangeiro');
         const documentoEstrangeiro = document.getElementById('documento_estrangeiro');
-        
+
         estrangeiroCheckbox.addEventListener('change', function() {
             if (this.checked) {
-                documentoEstrangeiro.classList.remove('hidden');
+                enableFields(documentoEstrangeiro);
             } else {
-                documentoEstrangeiro.classList.add('hidden');
+                disableFields(documentoEstrangeiro);
             }
         });
-        toggleHabilitacao();
+
+        const estrangeiroCheckbox2 = document.getElementById('estrangeiro_checkbox');
+        const documentoEstrangeiro2 = document.getElementById('documento_estrangeiro2');
+
+        estrangeiroCheckbox2.addEventListener('change', function() {
+            if (this.checked) {
+                enableFields(documentoEstrangeiro2);
+            } else {
+                disableFields(documentoEstrangeiro2);
+            }
+        });
     </script>
     
     <style>
-        /* Estilos CSS */
         .damage-title {
             text-align: center;
             margin-bottom: 20px;

@@ -6,85 +6,70 @@
     <title>Defesa Prévia DMUT</title>
     <link rel="stylesheet" href="../pages css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="feedback" id="feedback">
-        
-    </div>
+    <div class="feedback" id="feedback"></div>
     <header>
         <nav>
             <ul>
-                <a>
-                    <li><a href="https://www.instagram.com/prefeituradepaudosferros/">
-                        <img src="../assets/instagram.png">
-                        </a>
-                    </li>
-                </a>
-                <a>
-                    <li><a href="https://www.facebook.com/prefeituradepaudosferros/">
-                        <img src="../assets/facebook.png">
-                        </a>
-                </a>
-                <a>
-                    <li><a href="https://twitter.com/paudosferros">
-                        <img src="../assets/twitter.png">
-                        </a>
-                </a>
-                <a>
-                    <li><a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros">
-                        <img src="../assets/youtube.png">
-                        </a>
-                </a>
-                <a>
-                    <li><a href="https://instagram.com">
-                        <img src="../assets/copy-url.png">
-                        </a>
-                </a>
+                <li><a href="https://www.instagram.com/prefeituradepaudosferros/"><img src="../assets/instagram.png" alt="Instagram"></a></li>
+                <li><a href="https://www.facebook.com/prefeituradepaudosferros/"><img src="../assets/facebook.png" alt="Facebook"></a></li>
+                <li><a href="https://twitter.com/paudosferros"><img src="../assets/twitter.png" alt="Twitter"></a></li>
+                <li><a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros"><img src="../assets/youtube.png" alt="YouTube"></a></li>
+                <li><a href="https://instagram.com"><img src="../assets/copy-url.png" alt="Instagram"></a></li>
             </ul>
         </nav>
-    
         <div class="user-options">
             <p id="alter-font">Tamanho da fonte</p>
             <button onclick="increaseFont()">A+</button>
             <p>|</p>
             <button onclick="decreaseFont()">A-</button>
         </div>
-            
-        </header>
-        
-        
-        <div class="topbar-secondary">
-            <div class="container_bar">
-                <a href="../index.html">Início</a> > <a href="https://paudosferros.rn.gov.br/secretaria.php?sec=19">Demutran – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</a>
-                <span class="separator"> | </span>
-                <a href="https://paudosferros.rn.gov.br/lai.php">Acesso à Informação</a> - <a href="https://paudosferros.rn.gov.br/omunicipio.php">Sobre a Prefeitura</a>
-            </div>
+    </header>
+    <div class="topbar-secondary">
+        <div class="container_bar">
+            <a href="../index.html">Início</a> > <a href="https://paudosferros.rn.gov.br/secretaria.php?sec=19">Demutran – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</a>
+            <span class="separator"> | </span>
+            <a href="https://paudosferros.rn.gov.br/lai.php">Acesso à Informação</a> - <a href="https://paudosferros.rn.gov.br/omunicipio.php">Sobre a Prefeitura</a>
         </div>
-        <div class="container">
-            <h2><i class="far fa-id-card"></i><span> Cartão Vaga Especial – PCD</span></h2>
-            <p>Preencha todos os dados para podermos dar continuidade a sua solicitação.</p>
-            <form action="#" method="post" enctype="multipart/form-data">
-                <label for="nome"><i class="fas fa-user"></i> Seu nome:</label>
+    </div>
+    <div class="container google-form-container">
+        <h2><i class="far fa-id-card"></i><span> Cartão Vaga Especial – PCD</span></h2>
+        <p>Preencha todos os dados para podermos dar continuidade a sua solicitação.</p>
+        <form action="#" method="post" enctype="multipart/form-data">
+            <div class="input-field">
                 <input type="text" id="nome" name="nome" required>
-    
-                <label for="telefone"><i class="fas fa-phone"></i> Telefone Para Contato:</label>
+                <label for="nome"><i class="fas fa-user"></i> Seu nome:</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
                 <input type="tel" id="telefone" name="telefone" required>
-    
-                <label for="email"><i class="fas fa-envelope"></i> Seu e-mail:</label>
+                <label for="telefone"><i class="fas fa-phone"></i> Telefone Para Contato:</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
                 <input type="email" id="email" name="email" required>
-    
-                <label for="doc_identidade"><i class="far fa-id-card"></i> Anexar Identidade (Frente e Verso):</label>
+                <label for="email"><i class="fas fa-envelope"></i> Seu e-mail:</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
                 <input type="file" id="doc_identidade" name="doc_identidade">
-    
-                <label for="comprovante_residencia"><i class="far fa-address-card"></i> Anexar COMPROVANTE DE RESIDÊNCIA:</label>
+                <label for="doc_identidade"><i class="far fa-id-card"></i> Anexar Identidade (Frente e Verso):</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
                 <input type="file" id="comprovante_residencia" name="comprovante_residencia">
-    
-                <label for="laudo_medico"><i class="fas fa-file-medical"></i> Anexar Laudo Médico:</label>
+                <label for="comprovante_residencia"><i class="far fa-address-card"></i> Anexar COMPROVANTE DE RESIDÊNCIA:</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
                 <input type="file" id="laudo_medico" name="laudo_medico">
-    
-                <input type="submit" value="Enviar">
-            </form>
-        </div>
-    </body>
-    </html>
+                <label for="laudo_medico"><i class="fas fa-file-medical"></i> Anexar Laudo Médico:</label>
+                <div class="underline"></div>
+            </div>
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+</body>
+</html>

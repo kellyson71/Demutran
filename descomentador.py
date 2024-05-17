@@ -5,7 +5,7 @@ def remove_comments(code):
     code = re.sub(r'<!--.*?-->', '', code, flags=re.DOTALL)
     return code
 
-with open('index.html', 'r+', encoding='utf-8') as file:
+with open('./DAT/form2_teste.html', 'r+', encoding='utf-8') as file:
     codigo = file.read()
     file.seek(0)  
 
