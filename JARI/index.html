@@ -4,104 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Defesa Prévia DMUT</title>
-    <link rel="stylesheet" href="../pages css/style.css">
+    <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
 </head>
 <body>
-    <div class="feedback" id="feedback">
-        
-    </div>
+    <div class="feedback" id="feedback"></div>
     <header>
         <nav>
             <ul>
-                <a>
-                    <li><a href="https://www.instagram.com/prefeituradepaudosferros/">
-                        <img src="../assets/instagram.png">
-                        </a>
-                    </li>
-                </a>
-                <a>
-                    <li><a href="https://www.facebook.com/prefeituradepaudosferros/">
-                        <img src="../assets/facebook.png">
-                        </a>
-                </a>
-                <a>
-                    <li><a href="https://twitter.com/paudosferros">
-                        <img src="../assets/twitter.png">
-                        </a>
-                </a>
-                <a>
-                    <li><a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros">
-                        <img src="../assets/youtube.png">
-                        </a>
-                </a>
-                <a>
-                    <li><a href="https://instagram.com">
-                        <img src="../assets/copy-url.png">
-                        </a>
-                </a>
+                <li><a href="https://www.instagram.com/prefeituradepaudosferros/"><img src="../assets/instagram.png" alt="Instagram"></a></li>
+                <li><a href="https://www.facebook.com/prefeituradepaudosferros/"><img src="../assets/facebook.png" alt="Facebook"></a></li>
+                <li><a href="https://twitter.com/paudosferros"><img src="../assets/twitter.png" alt="Twitter"></a></li>
+                <li><a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros"><img src="../assets/youtube.png" alt="YouTube"></a></li>
+                <li><a href="https://instagram.com"><img src="../assets/copy-url.png" alt="URL"></a></li>
             </ul>
         </nav>
-    
         <div class="user-options">
             <p id="alter-font">Tamanho da fonte</p>
             <button onclick="increaseFont()">A+</button>
             <p>|</p>
             <button onclick="decreaseFont()">A-</button>
         </div>
-            
-        </header>
-        
-        
-        <div class="topbar-secondary">
-            <div class="container_bar">
-                <a href="../index.html">Início</a> > <a href="https://paudosferros.rn.gov.br/secretaria.php?sec=19">Demutran – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</a>
-                <span class="separator"> | </span>
-                <a href="https://paudosferros.rn.gov.br/lai.php">Acesso à Informação</a> - <a href="https://paudosferros.rn.gov.br/omunicipio.php">Sobre a Prefeitura</a>
-            </div>
+    </header>
+    <div class="topbar-secondary">
+        <div class="container_bar">
+            <a href="../index.html">Início</a> > <a href="https://paudosferros.rn.gov.br/secretaria.php?sec=19">Demutran – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</a>
+            <span class="separator"> | </span>
+            <a href="https://paudosferros.rn.gov.br/lai.php">Acesso à Informação</a> - <a href="https://paudosferros.rn.gov.br/omunicipio.php">Sobre a Prefeitura</a>
         </div>
-        <div class="container">
-            <h2><span> Defesa JARI – Junta administrativa de recursos de infrações DMUT</span></h2>
-            <p><strong>Preencha todos os dados para podermos dar continuidade a sua solicitação.</strong></p>
-            <form action="#" method="post" enctype="multipart/form-data">
-                <label for="nome"><i class="fas fa-user"></i> Seu nome:</label>
+    </div>
+    <div class="form-container">
+        <h2><span>Defesa JARI – Junta administrativa de recursos de infrações DMUT</span></h2>
+        <p><strong>Preencha todos os dados para podermos dar continuidade a sua solicitação.</strong></p>
+        <form action="#" method="post" enctype="multipart/form-data">
+            <div class="input-field">
                 <input type="text" id="nome" name="nome" required>
-    
-                <label for="telefone"><i class="fas fa-phone"></i> Telefone Para Contato:</label>
+                <label for="nome"><i class="fas fa-user"></i> Seu nome:</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
                 <input type="tel" id="telefone" name="telefone" required>
-    
-                <label for="email"><i class="fas fa-envelope"></i> Seu e-mail:</label>
+                <label for="telefone"><i class="fas fa-phone"></i> Telefone Para Contato:</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
                 <input type="email" id="email" name="email" required>
-    
-                <label for="assunto"><i class="fas fa-comment"></i> Assunto:</label>
+                <label for="email"><i class="fas fa-envelope"></i> Seu e-mail:</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
                 <input type="text" id="assunto" name="assunto" required>
-    
-                <label for="doc_requerimento"><i class="far fa-file-alt"></i> Anexar Requerimento Jari (Requerimento preenchido e assinado)</label>
+                <label for="assunto"><i class="fas fa-comment"></i> Assunto:</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
                 <input type="file" id="doc_requerimento" name="doc_requerimento">
-    
-                <label for="cnh"><i class="fas fa-id-card"></i> Anexar CNH (Carteira Nacional de Habilitação):</label>
+                <label for="doc_requerimento"><i class="far fa-file-alt"></i> Anexar Requerimento Jari (Requerimento preenchido e assinado)</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
                 <input type="file" id="cnh" name="cnh">
-    
-                <label for="notif_dmut"><i class="far fa-file"></i> Anexar NOTIFICAÇÃO DMUT:</label>
+                <label for="cnh"><i class="fas fa-id-card"></i> Anexar CNH (Carteira Nacional de Habilitação):</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
                 <input type="file" id="notif_dmut" name="notif_dmut">
-    
-                <label for="crlv"><i class="fas fa-car"></i> Anexar CRLV (Certificado de Registro e Licenciamento do Veículo):</label>
+                <label for="notif_dmut"><i class="far fa-file"></i> Anexar NOTIFICAÇÃO DMUT:</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
                 <input type="file" id="crlv" name="crlv">
-
-                <label for="comprovante_residencia"><i class="far fa-address-card"></i> Anexar COMPROVANTE DE RESIDÊNCIA:</label>
+                <label for="crlv"><i class="fas fa-car"></i> Anexar CRLV (Certificado de Registro e Licenciamento do Veículo):</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
                 <input type="file" id="comprovante_residencia" name="comprovante_residencia">
-    
-                <label class="file-label" for="doc_complementares"><i class="far fa-file"></i> Adicione Documentos Complementares:</label>
-                <div class="file-input">
-                    <input type="file" id="doc_complementares" name="doc_complementares" multiple>
-                </div>
-    
-                <label for="descricao"><i class="fas fa-comment-alt"></i> Descreva sua Solicitação:</label>
+                <label for="comprovante_residencia"><i class="far fa-address-card"></i> Anexar COMPROVANTE DE RESIDÊNCIA:</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
+                <input type="file" id="doc_complementares" name="doc_complementares" multiple>
+                <label for="doc_complementares"><i class="far fa-file"></i> Adicione Documentos Complementares:</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
                 <textarea id="descricao" name="descricao" rows="4" required></textarea>
-    
-                <input type="submit" value="Enviar">
-            </form>
-        </div>
-    </body>
-    </html>     
+                <label for="descricao"><i class="fas fa-comment-alt"></i> Descreva sua Solicitação:</label>
+                <div class="underline"></div>
+            </div>
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+</body>
+</html>

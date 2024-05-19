@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Veículos</title>
+    <link rel="stylesheet" href="../pages css/bar_style.css">
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease;
+        }
+
+        h2 {
+            color: #343a40;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .damage-title {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 24px;
+            color: #495057;
+        }
+
+        .damage-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .damage-checkbox {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-label {
+            margin-left: 10px;
+            color: #495057;
+        }
+
+        .damage-button {
+            width: 100%;
+            height: 50px;
+            background-color: #e9ecef;
+            border: none;
+            text-align: center;
+            line-height: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #495057;
+        }
+
+        .damage-button:hover {
+            background-color: #dee2e6;
+        }
+
+        .damage-button.selected {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .damage-button.selected:hover {
+            background-color: #0056b3;
+        }
+
+        .cargo-damage-container {
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #495057;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        input[type="submit"], #botao {
+            background-color: #28a745;
+            color: #fff;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+            text-align: center;
+            display: block;         
+            margin: 20px auto;   
+            width: fit-content;   
+        }
+
+        input[type="submit"]:hover, #botao:hover {
+            background-color: #218838;
+        }
+
+        .veiculo-title {
+            background-color: #28a745;
+            color: #fff;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+            text-align: center;
+            display: block;         
+            margin: 20px auto;   
+            width: 50%;   
+        }
+
+        .veiculo-title-open {
+            background-color: #218838;
+        }
+
+        .veiculo-form {
+            display: none;
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .progressbar {
+            counter-reset: step;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 20px;
+            margin-bottom: 60px;
+        }
+        .progressbar li {
+            list-style-type: none;
+            flex: 1;
+            position: relative;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+        }
+        .progressbar li:before {
+            content: counter(step);
+            counter-increment: step;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            border: 2px solid #ddd;
+            display: block;
+            text-align: center;
+            margin: 0 auto 10px auto;
+            border-radius: 50%;
+            background-color: #fff;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .progressbar li:after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: #ddd;
+            top: 15px;
+            left: -50%;
+            z-index: -1;
+        }
+        .progressbar li:first-child:after {
+            content: none;
+        }
+        .progressbar li.active:before {
+            background-color: #009640;
+            color: #fff;
+        }
+        @media screen and (max-width: 600px) {
+            .progressbar {
+                display: none;
+            }   
+            
+        }
+    </style>
+</head>
+<header>
+    <nav>
+        <ul>
+            <a>
+                <li><a href="https://www.instagram.com/prefeituradepaudosferros/">
+                    <img src="../assets/instagram.png">
+                    </a>
+                </li>
+            </a>
+            <a>
+                <li><a href="https://www.facebook.com/prefeituradepaudosferros/">
+                    <img src="../assets/facebook.png">
+                    </a>
+            </a>
+            <a>
+                <li><a href="https://twitter.com/paudosferros">
+                    <img src="../assets/twitter.png">
+                    </a>
+            </a>
+            <a>
+                <li><a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros">
+                    <img src="../assets/youtube.png">
+                    </a>
+            </a>
+            <a>
+                <li><a href="https://instagram.com">
+                    <img src="../assets/copy-url.png">
+                    </a>
+            </a>
+        </ul>
+    </nav>
+
+    <div class="user-options">
+        <p id="alter-font">Tamanho da fonte</p>
+        <button onclick="increaseFont()">A+</button>
+        <p>|</p>
+        <button onclick="decreaseFont()">A-</button>
+    </div>
+        
+    </header>
+    
+    
+    <div class="topbar-secondary">
+        <div class="container_bar">
+            <a href="../index.html">Início</a> > <a href="https://paudosferros.rn.gov.br/secretaria.php?sec=19">Demutran – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</a>
+            <span class="separator"> | </span>
+            <a href="https://paudosferros.rn.gov.br/lai.php">Acesso à Informação</a> - <a href="https://paudosferros.rn.gov.br/omunicipio.php">Sobre a Prefeitura</a>
+        </div>
+    </div>
+<body>
+    <ul class="progressbar">
+        <li class="active">Declaração de Acidente de Trânsito</li>
+        <li class="active">Informações Gerais</li>
+        <li>Veículo Principal</li>
+        <li>Outros Veículos</li>
+        <li>Narrativa</li>
+        <li>Finalização</li>
+    </ul>
+
+
+    <button id="botao" onclick="adicionarVeiculo()">Adicionar Veículo</button>
+
+    <div id="formulario-veiculo"></div>
+
+    <script>
+        var contadorVeiculos = 0;
+
+        function adicionarVeiculo() {
+            contadorVeiculos++;
+            var novoVeiculoId = 'veiculo' + contadorVeiculos;
+            var novoVeiculoTitle = 'Veículo ' + contadorVeiculos;
+
+            var novoVeiculoTitleElement = document.createElement('h2');
+            novoVeiculoTitleElement.textContent = novoVeiculoTitle;
+            novoVeiculoTitleElement.classList.add('veiculo-title');
+            novoVeiculoTitleElement.onclick = function() { toggleForm(novoVeiculoId); };
+            document.getElementById('formulario-veiculo').appendChild(novoVeiculoTitleElement);
+
+            var novoVeiculoForm = document.createElement('div');
+            novoVeiculoForm.id = novoVeiculoId;
+            novoVeiculoForm.classList.add('veiculo-form');
+            novoVeiculoForm.innerHTML = `
+                <div class="container">
+                    <h2 class="damage-title">Danos no Veículo</h2>
+                    <div class="damage-checkbox">
+                        <input type="checkbox" id="seguranca_checkbox${contadorVeiculos}" name="seguranca_checkbox${contadorVeiculos}">
+                        <label for="seguranca_checkbox${contadorVeiculos}" class="checkbox-label">Houve danos ao sistema de segurança, freios, direção ou de suspensão do veículo?</label>
+                    </div>
+                    <div class="damage-container">
+                        <div class="damage-button" onclick="toggleSelected(${contadorVeiculos * 6 - 5})">Dianteira Direita</div>
+                        <div class="damage-button" onclick="toggleSelected(${contadorVeiculos * 6 - 4})">Dianteira Esquerda</div>
+                        <div class="damage-button" onclick="toggleSelected(${contadorVeiculos * 6 - 3})">Lateral/Teto Direito</div>
+                        <div class="damage-button" onclick="toggleSelected(${contadorVeiculos * 6 - 2})">Lateral/Teto Esquerdo</div>
+                        <div class="damage-button" onclick="toggleSelected(${contadorVeiculos * 6 - 1})">Traseira Direita</div>
+                        <div class="damage-button" onclick="toggleSelected(${contadorVeiculos * 6})">Traseira Esquerda</div>
+                    </div>
+                </div>
+                <div class="cargo-damage-container">
+                    <h2 class="damage-title">Danos na Carga do Veículo</h2>
+                    <div class="form-group">
+                        <input type="checkbox" id="carga_checkbox${contadorVeiculos}" name="carga_checkbox${contadorVeiculos}" onchange="toggleCargoInputs(${contadorVeiculos})">
+                        <label for="carga_checkbox${contadorVeiculos}" class="checkbox-label">Houve danos na carga do veículo?</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="notas_fiscais${contadorVeiculos}" class="form-label">Nº das Notas Fiscais, Manifestos ou Equivalentes:</label>
+                        <input type="text" id="notas_fiscais${contadorVeiculos}" name="notas_fiscais${contadorVeiculos}" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="tipo_mercadoria${contadorVeiculos}" class="form-label">Tipo de Mercadoria:</label>
+                        <input type="text" id="tipo_mercadoria${contadorVeiculos}" name="tipo_mercadoria${contadorVeiculos}" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="valor_total${contadorVeiculos}" class="form-label">Valor Total:</label>
+                        <input type="text" id="valor_total${contadorVeiculos}" name="valor_total${contadorVeiculos}" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="extensao_danos${contadorVeiculos}" class="form-label">Extensão estimada dos danos da carga:</label>
+                        <input type="text" id="extensao_danos${contadorVeiculos}" name="extensao_danos${contadorVeiculos}" disabled>
+                    </div>
+                    <div class="form-group">
+                        <input type="checkbox" id="seguro_checkbox${contadorVeiculos}" name="seguro_checkbox${contadorVeiculos}" onchange="toggleSeguroInput(${contadorVeiculos})">
+                        <label for="seguro_checkbox${contadorVeiculos}" class="checkbox-label">Seguro</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="seguradora${contadorVeiculos}" class="form-label">Informe a Seguradora:</label>
+                        <input type="text" id="seguradora${contadorVeiculos}" name="seguradora${contadorVeiculos}" disabled>
+                    </div>
+                </div>
+            `;
+            document.getElementById('formulario-veiculo').appendChild(novoVeiculoForm);
+
+            if (contadorVeiculos === 1) {
+                document.getElementById(novoVeiculoId).style.display = 'block';
+            }
+        }
+
+        function toggleForm(veiculoId) {
+            var veiculoForm = document.getElementById(veiculoId);
+            var veiculoTitle = document.getElementById('title-' + veiculoId);
+            if (veiculoForm.style.display === 'none') {
+                veiculoForm.style.display = 'block';
+            } else {
+                veiculoForm.style.display = 'none';
+            }
+            veiculoTitle.classList.toggle('veiculo-title-open');
+        }
+
+        function toggleSelected(index) {
+            var button = document.getElementsByClassName('damage-button')[index - 1];
+            button.classList.toggle('selected');
+        }
+
+        function toggleCargoInputs(veiculoIndex) {
+            var inputs = [
+                document.getElementById('notas_fiscais' + veiculoIndex),
+                document.getElementById('tipo_mercadoria' + veiculoIndex),
+                document.getElementById('valor_total' + veiculoIndex),
+                document.getElementById('extensao_danos' + veiculoIndex)
+            ];
+            inputs.forEach(function(input) {
+                input.disabled = !input.disabled;
+            });
+        }
+
+        function toggleSeguroInput(veiculoIndex) {
+            var input = document.getElementById('seguradora' + veiculoIndex);
+            input.disabled = !input.disabled;
+        }
+    </script>
+
+</body>
+</html>
