@@ -216,12 +216,52 @@
             background-color: #009640;
             color: #fff;
         }
-        @media screen and (max-width: 600px) {
-            .progressbar {
-                display: none;
-            }   
-            
-        }
+/* Desktop Styles (Unchanged) */
+.progressbar {
+  counter-reset: step;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 60px;
+  padding: 0 20px; /* Restore original padding for desktop */
+}
+
+.progressbar li {
+  list-style-type: none;
+  flex: 1;
+  position: relative;
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+}
+
+/* ... (rest of the desktop styles remain the same) ... */
+
+
+/* Mobile Styles (New/Modified) */
+@media (max-width: 767px) { /* Adjust breakpoint as needed */
+  .progressbar {
+    flex-direction: column; /* Stack items vertically */
+    align-items: flex-start; /* Align to the left */
+  }
+
+  .progressbar li {
+    flex: none; /* Remove flex-grow so items don't stretch */
+    width: 100%; /* Make each item take full width */
+    margin-bottom: 20px;
+    text-align: left; /* Align text to the left */
+  }
+
+  .progressbar li:before {
+    float: left; /* Float the circle to the left */
+    margin-right: 15px; /* Add spacing between circle and text */
+  }
+
+  .progressbar li:after {
+    left: 35px; /* Adjust line position to start after the circle */
+    top: 13px; /* Fine-tune vertical alignment */
+  }
+}
+
     </style>
 </head>
 <header>
