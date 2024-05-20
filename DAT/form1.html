@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Declaração de Acidente de Trânsito - DAT</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../pages css/bar_style.css">
+</head>
+<style>
+
+.progressbar {
+    counter-reset: step;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 0 20px;
+}
+.progressbar li {
+    list-style-type: none;
+    flex: 1;
+    position: relative;
+    text-align: center;
+    font-size: 14px;
+    color: #555;
+}
+.progressbar li:before {
+    content: counter(step);
+    counter-increment: step;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    border: 2px solid #ddd;
+    display: block;
+    text-align: center;
+    margin: 0 auto 10px auto;
+    border-radius: 50%;
+    background-color: #fff;
+    font-weight: bold;
+    color: #007BFF;
+}
+.progressbar li:after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background-color: #ddd;
+    top: 15px;
+    left: -50%;
+    z-index: -1;
+}
+.progressbar li:first-child:after {
+    content: none;
+}
+.progressbar li.active:before {
+    background-color: #009640;
+    color: #fff;
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@media (max-width: 600px) {
+    .button-container {
+        flex-direction: column;
+    }
+    .button-container button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    .progressbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .progressbar li {
+        flex: none;
+        width: 100%;
+        margin-bottom: 20px;
+        text-align: left;
+    }
+    .progressbar li:before {
+        float: left;
+        margin-right: 15px;
+    }
+    .progressbar li:after {
+        left: 35px;
+        top: 13px;
+    }
+}
+nav {
+    display: flex;
+    justify-content: center;
+    background-color: 009640;
+    padding: 10px 0;
+}
+nav ul {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+nav ul li {
+    margin: 0 10px;
+}
+nav ul li a img {
+    width: 24px;
+    height: 24px;
+}
+.user-options {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+}
+.user-options p {
+    margin: 0 10px;
+}
+.topbar-secondary {
+    width: 100%;
+    background-color: lightgray;
+    padding: 10px 0;
+    text-align: center;
+}
+.container_bar a {
+    color: #333;
+    text-decoration: none;
+    margin: 0 5px;
+}
+.container_bar a:hover {
+    text-decoration: underline;
+}
+</style>
+</head>
+<body>
+<header>
+<nav>
+    <ul>
+        <li><a href="https://www.instagram.com/prefeituradepaudosferros/"><img src="../assets/instagram.png"></a></li>
+        <li><a href="https://www.facebook.com/prefeituradepaudosferros/"><img src="../assets/facebook.png"></a></li>
+        <li><a href="https://twitter.com/paudosferros"><img src="../assets/twitter.png"></a></li>
+        <li><a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros"><img src="../assets/youtube.png"></a></li>
+        <li><a href="https://instagram.com"><img src="../assets/copy-url.png"></a></li>
+    </ul>
+</nav>
+<div class="user-options">
+    <p id="alter-font">Tamanho da fonte</p>
+    <button onclick="increaseFont()">A+</button>
+    <p>|</p>
+    <button onclick="decreaseFont()">A-</button>
+</div>
+</header>
+<div class="topbar-secondary">
+<div class="container_bar">
+    <a href="../index.html">Início</a> > 
+    <a href="https://paudosferros.rn.gov.br/secretaria.php?sec=19">Demutran – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</a>
+    <span class="separator"> | </span>
+    <a href="https://paudosferros.rn.gov.br/lai.php">Acesso à Informação</a> - 
+    <a href="https://paudosferros.rn.gov.br/omunicipio.php">Sobre a Prefeitura</a>
+</div>
+</div>
+<div class="main-container">
+<ul class="progressbar">
+    <li class="active">Declaração de Acidente de Trânsito</li>
+    <li class="active">Informações Gerais</li>
+    <li>Veículo Principal</li>
+    <li>Outros Veículos</li>
+    <li>Narrativa</li>
+    <li>Finalização</li>
+</ul>
+    <div class="container">
+        <h1>Sistema de Declaração de Acidente de Trânsito - DAT</h1>
+        <form id="accidentForm">
+            <div class="section">
+                <h2>Informações Gerais</h2>
+                <div class="form-group">
+                    <label for="relation">Indique a sua relação com o veículo principal: *</label>
+                    <select id="relation" required>
+                        <option value="">Selecione</option>
+                        <option value="Condutor">Condutor</option>
+                        <option value="Corretor">Corretor</option>
+                        <option value="Proprietário">Proprietário</option>
+                        <option value="Passageiro">Passageiro</option>
+                        <option value="Condutor e Proprietário">Condutor e Proprietário</option>
+                        <option value="Terceiro Atingido">Terceiro Atingido</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="foreigner">Estrangeiro?</label>
+                    <input type="checkbox" id="foreigner" name="foreigner" onclick="toggleForeignFields()">
+                </div>
+
+                <div class="form-group foreign-only">
+                    <label for="documentType">Tipo de documento *</label>
+                    <input type="text" id="documentType" name="documentType" disabled required>
+                </div>
+
+                <div class="form-group foreign-only">
+                    <label for="documentNumber">Número *</label>
+                    <input type="text" id="documentNumber" name="documentNumber" disabled required>
+                </div>
+
+                <div class="form-group foreign-only">
+                    <label for="country">País *</label>
+                    <input type="text" id="country" name="country" disabled required>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Nome *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="cpf">CPF *</label>
+                    <input type="text" id="cpf" name="cpf" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="profession">Profissão *</label>
+                    <input type="text" id="profession" name="profession" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Sexo *</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Selecione</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Feminino">Feminino</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="birthdate">Data de Nascimento *</label>
+                    <input type="date" id="birthdate" name="birthdate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">E-mail *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Celular</label>
+                    <input type="tel" id="phone" name="phone">
+                </div>
+
+                <div class="form-group">
+                    <label for="zip">CEP *</label>
+                    <input type="text" id="zip" name="zip" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Logradouro *</label>
+                    <input type="text" id="address" name="address" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="number">Número *</label>
+                    <input type="text" id="number" name="number" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="complement">Complemento</label>
+                    <input type="text" id="complement" name="complement">
+                </div>
+
+                <div class="form-group">
+                    <label for="neighborhood">Bairro/Localidade *</label>
+                    <input type="text" id="neighborhood" name="neighborhood" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="city">Cidade *</label>
+                    <input type="text" id="city" name="city" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="state">UF *</label>
+                    <select id="state" name="state" required>
+                        <option value="">Selecione</option>
+                        <option value="AC">Acre</option>
+                        <option value="AL">Alagoas</option>
+                        <option value="AP">Amapá</option>
+                        <option value="AM">Amazonas</option>
+                        <option value="BA">Bahia</option>
+                        <option value="CE">Ceará</option>
+                        <option value="DF">Distrito Federal</option>
+                        <option value="ES">Espírito Santo</option>
+                        <option value="GO">Goiás</option>
+                        <option value="MA">Maranhão</option>
+                        <option value="MT">Mato Grosso</option>
+                        <option value="MS">Mato Grosso do Sul</option>
+                        <option value="MG">Minas Gerais</option>
+                        <option value="PA">Pará</option>
+                        <option value="PB">Paraíba</option>
+                        <option value="PR">Paraná</option>
+                        <option value="PE">Pernambuco</option>
+                        <option value="PI">Piauí</option>
+                        <option value="RJ">Rio de Janeiro</option>
+                        <option value="RN">Rio Grande do Norte</option>
+                        <option value="RS">Rio Grande do Sul</option>
+                        <option value="RO">Rondônia</option>
+                        <option value="RR">Roraima</option>
+                        <option value="SC">Santa Catarina</option>
+                        <option value="SP">São Paulo</option>
+                        <option value="SE">Sergipe</option>
+                        <option value="TO">Tocantins</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Acidente</h2>
+                <div class="form-group">
+                    <label for="accidentDate">Data *</label>
+                    <input type="date" id="accidentDate" name="accidentDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="accidentTime">Horário *</label>
+                    <input type="time" id="accidentTime" name="accidentTime" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="accidentCity">Cidade *</label>
+                    <input type="text" id="accidentCity" name="accidentCity" value="Mossoró" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="accidentState">UF *</label>
+                    <input type="text" id="accidentState" name="accidentState" value="RN" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="accidentZip">CEP</label>
+                    <input type="text" id="accidentZip" name="accidentZip">
+                </div>
+
+                <div class="form-group">
+                    <label for="accidentAddress">Logradouro *</label>
+                    <input type="text" id="accidentAddress" name="accidentAddress" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="accidentNumber">Número *</label>
+                    <input type="text" id="accidentNumber" name="accidentNumber" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="accidentComplement">Complemento</label>
+                    <input type="text" id="accidentComplement" name="accidentComplement">
+                </div>
+
+                <div class="form-group">
+                    <label for="accidentNeighborhood">Bairro/Localidade</label>
+                    <input type="text" id="accidentNeighborhood" name="accidentNeighborhood">
+                </div>
+
+                <div class="form-group">
+                    <label for="referencePoint">Ponto de Referência</label>
+                    <input type="text" id="referencePoint" name="referencePoint">
+                </div>
+
+                <div class="form-group">
+                    <label for="roadConditions">Condições da Via *</label>
+                    <input type="text" id="roadConditions" name="roadConditions" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="signalization">Sinalização Horizontal e Vertical *</label>
+                    <input type="text" id="signalization" name="signalization" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="roadTrace">Traçado da Via *</label>
+                    <input type="text" id="roadTrace" name="roadTrace" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="weatherConditions">Condições Meteorológicas *</label>
+                    <input type="text" id="weatherConditions" name="weatherConditions" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="accidentType">Tipo de acidente *</label>
+                    <select id="accidentType" name="accidentType" required>
+                        <option value="">Selecione</option>
+                        <option value="Atropelamento de Animal">Atropelamento de Animal</option>
+                        <option value="Colisão Frontal">Colisão Frontal</option>
+                        <option value="Colisão Lateral">Colisão Lateral</option>
+                        <option value="Colisão Traseira">Colisão Traseira</option>
+                        <option value="Colisão Transversal">Colisão Transversal</option>
+                        <option value="Colisão com Objeto Estático">Colisão com Objeto Estático</option>
+                        <option value="Colisão com Objeto Móvel">Colisão com Objeto Móvel</option>
+                        <option value="Derramamento de Carga">Derramamento de Carga</option>
+                        <option value="Saída de Pista">Saída de Pista</option>
+                        <option value="Tombamento">Tombamento</option>
+                        <option value="Engavetamento">Engavetamento</option>
+                        <option value="Danos Eventuais">Danos Eventuais</option>
+                    </select>
+                </div>
+                
+            </div>
+
+            <div class="form-actions">
+                <button type="button" onclick="window.location.href='form2.html'">Enviar</button>
+
+                <!-- <button type="button" onclick="validateForm()">Enviar</button> -->
+            </div>
+        </form>
+    </div>
+    <script src="scripts.js"></script>
+</body>
+</html>
