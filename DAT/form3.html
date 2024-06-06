@@ -131,6 +131,24 @@
         input[type="submit"]:hover, #botao:hover {
             background-color: #218838;
         }
+        input[type="submit"], #botao_voltar {
+            background-color: #28a745;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background-color 0.3s ease;
+            text-align: center;
+            display: block;         
+            margin: 20px auto;   
+            width: fit-content;   
+        }
+
+        input[type="submit"]:hover, #botao_voltar:hover {
+            background-color: #218838;
+        }
 
         .veiculo-title {
             background-color: #28a745;
@@ -289,9 +307,8 @@
                     </a>
             </a>
             <a>
-                <li><a href="https://instagram.com">
-                    <img src="../assets/copy-url.png">
-                    </a>
+                <li><a href="https://wa.me/5584999440704">
+                    <img src="../assets/copy-url.png" style="border-radius: 100%;">                    </a>
             </a>
         </ul>
     </nav>
@@ -328,7 +345,7 @@
 
     <div id="formulario-veiculo"></div>
     <button id="botao" type="button" onclick="saveFormData()">Concluir</button>
-    <button id="botao" type="button" onclick="window.location.href='form2.html'">anterior</button>
+    <button id="botao_voltar" type="button" onclick="window.location.href='form2.html'">anterior</button>
 
     <script>
         var contadorVeiculos = 0;

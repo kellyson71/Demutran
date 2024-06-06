@@ -2,10 +2,10 @@
 
 :root {
     --gray-1: #CED4DA;
-    --gray-2: #6C757D;
+    --gray-2: #bbd3e9;
     --blue-1: #0DCAF0;
     --blue-2: #f5faff;
-    --background: #f5faff;
+    /* --background: #ffaf021e; */
     --font-primary: 'Roboto', sans-serif;
     --font-secondary: 'Georgia', serif;
 }
