@@ -327,7 +327,7 @@
     <button id="botao" onclick="adicionarVeiculo()">Adicionar Veículo</button>
 
     <div id="formulario-veiculo"></div>
-    <button id="botao" onclick="window.location.href = 'form4.html'">concluir</button>
+    <button id="botao" type="button" onclick="saveFormData()">Concluir</button>
 
     <script>
         var contadorVeiculos = 0;
@@ -434,6 +434,42 @@
             input.disabled = !input.disabled;
         }
     </script>
+<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const storedFormData = localStorage.getItem('formData');
+                const storedformData3 = localStorage.getItem('formData3');
+                
+                if (storedFormData) {
+                    const formData = JSON.parse(storedFormData);
+                    const formData3 = JSON.parse(storedformData3);
+                    
+                    console.log('Dados do primeiro formulário:', formData);
+                    console.log('Dados do segundo formulário:', formData3);
+                } else {
+                    console.log('Nenhum dado encontrado no localStorage.');
+                }
+            });
+            function saveFormData() {
+            const selectedButtons = document.querySelectorAll('.damage-button.selected');
+            const selectedParts = Array.from(selectedButtons).map(button => button.textContent);
+            // console.log('Partes selecionadas:', selectedParts);
+            
+            var formElement = document.querySelector("form");
+            var formData = new FormData(formElement);
 
+            const formData3 = {};
+
+            formData.forEach((value, key) => {
+                formData3[key] = value;
+            });
+            formData3['selectedParts'] = selectedParts;
+
+            localStorage.setItem('formData3', JSON.stringify(formData3));
+            window.location.href = 'form4.html';
+
+        }
+
+
+</script>
 </body>
 </html>

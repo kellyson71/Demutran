@@ -188,7 +188,7 @@
         <li>Finalização</li>
     </ul>
     
-    <div class="container" style="margin-top: 50px;">
+    <div  id="formDataDisplay" class="container" style="margin-top: 50px;">
         <form action="#" method="post">
             <h3>VEÍCULO PRINCIPAL</h3>
             
@@ -317,7 +317,7 @@
 
         </form>
     </div>
-    <div class="container">
+    <div id="formDataDisplay" class="container">
         <h2><i class="fas fa-user"></i> Formulário do Condutor</h2>
         <form action="#" method="post">
             <label for="nao_habilitado">Não Habilitado?</label>
@@ -341,7 +341,8 @@
             </div>
 
             <label for="estrangeiro_checkbox">Estrangeiro?</label>
-            <input type="checkbox" id="estrangeiro_checkbox" name="estrangeiro" onchange="toggleEstrangeiro()">
+            <!-- <input type="checkbox" id="estrangeiro_checkbox" name="estrangeiro" onchange="toggleEstrangeiro()"> -->
+            <input type="checkbox" id="estrangeiro_checkbox" name="estrangeiro">
             
         
             <div id="documento_estrangeiro2" >
@@ -406,31 +407,30 @@
         </form>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const estrangeiroCheckbox = document.getElementById('estrangeiro');
-            const documentoEstrangeiro = document.getElementById('documento_estrangeiro');
-            toggleEstrangeiro(estrangeiroCheckbox, documentoEstrangeiro);
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     const estrangeiroCheckbox = document.getElementById('estrangeiro');
+        //     const documentoEstrangeiro = document.getElementById('documento_estrangeiro');
+        //     toggleEstrangeiro(estrangeiroCheckbox, documentoEstrangeiro);
 
-            estrangeiroCheckbox.addEventListener('change', function() {
-                toggleEstrangeiro(estrangeiroCheckbox, documentoEstrangeiro);
-            });
+        //     estrangeiroCheckbox.addEventListener('change', function() {
+        //         toggleEstrangeiro(estrangeiroCheckbox, documentoEstrangeiro);
+        //     });
 
-            const estrangeiroCheckbox2 = document.getElementById('estrangeiro_checkbox2');
-            const documentoEstrangeiro2 = document.getElementById('documento_estrangeiro2');
-            toggleEstrangeiro(estrangeiroCheckbox2, documentoEstrangeiro2);
+        //     const documentoEstrangeiro2 = document.getElementById('documento_estrangeiro2');
+        //     toggleEstrangeiro(estrangeiroCheckbox2, documentoEstrangeiro2);
 
-            estrangeiroCheckbox2.addEventListener('change', function() {
-                toggleEstrangeiro(estrangeiroCheckbox2, documentoEstrangeiro2);
-            });
-        });
+        //     estrangeiroCheckbox2.addEventListener('change', function() {
+        //         toggleEstrangeiro(estrangeiroCheckbox2, documentoEstrangeiro2);
+        //     });
+        // });
 
-        function toggleEstrangeiro(checkbox, documento) {
-            if (checkbox.checked) {
-                enableFields(documento);
-            } else {
-                disableFields(documento);
-            }
-        }
+        // function toggleEstrangeiro(checkbox, documento) {
+        //     if (checkbox.checked) {
+        //         enableFields(documento);
+        //     } else {
+        //         disableFields(documento);
+        //     }
+        // }
 
         function disableFields(container) {
             const inputs = container.querySelectorAll('input, select, textarea');
@@ -449,13 +449,13 @@
         const estrangeiroCheckbox = document.getElementById('estrangeiro');
         const documentoEstrangeiro = document.getElementById('documento_estrangeiro');
 
-        estrangeiroCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                enableFields(documentoEstrangeiro);
-            } else {
-                disableFields(documentoEstrangeiro);
-            }
-        });
+        // estrangeiroCheckbox.addEventListener('change', function() {
+        //     if (this.checked) {
+        //         enableFields(documentoEstrangeiro);
+        //     } else {
+        //         disableFields(documentoEstrangeiro);
+        //     }
+        // });
 
         const estrangeiroCheckbox2 = document.getElementById('estrangeiro_checkbox');
         const documentoEstrangeiro2 = document.getElementById('documento_estrangeiro2');
@@ -591,10 +591,46 @@
                 <label for="seguradora" class="form-label">Informe a Seguradora:</label>
                 <input type="text" id="seguradora" name="seguradora" disabled>
             </div>
-            <input type="submit" value="Enviar" onclick="window.location.href='./form3.html'">
+            <button type="button" onclick="saveFormData()">Enviar</button>
 
         </div>
-    
+        <script>
+            
+            document.addEventListener('DOMContentLoaded', function() {
+                const storedFormData = localStorage.getItem('formData');
+                
+                if (storedFormData) {
+                    const formData = JSON.parse(storedFormData);
+                    
+                    console.log('Dados do primeiro formulário:', formData);
+                } else {
+                    console.log('Nenhum dado encontrado no localStorage.');
+                }
+            });
+
+            function saveFormData() {
+            const selectedButtons = document.querySelectorAll('.damage-button.selected');
+            const selectedParts = Array.from(selectedButtons).map(button => button.textContent);
+            // console.log('Partes selecionadas:', selectedParts);
+            
+            var formElement = document.querySelector('form');
+            var formData = new FormData(formElement);
+
+            const formData2 = {};
+
+            formData.forEach((value, key) => {
+                formData2[key] = value;
+            });
+
+            formData2['selectedParts'] = selectedParts;
+
+            localStorage.setItem('formData2', JSON.stringify(formData2));
+            window.location.href = 'form3.html';
+
+        }
+
+
+</script>
         <script>
             const cargaCheckbox = document.getElementById('carga_checkbox');
             const notasFiscaisInput = document.getElementById('notas_fiscais');
@@ -627,9 +663,9 @@
             });
 
             function toggleSelected(buttonIndex) {
-                const button = document.querySelector(`.damage-container .damage-button:nth-child(${buttonIndex})`);
-                button.classList.toggle('selected');
-            }
+            const button = document.querySelector(`.damage-container .damage-button:nth-child(${buttonIndex})`);
+            button.classList.toggle('selected');
+        }
         </script>
     </body>
     </html>

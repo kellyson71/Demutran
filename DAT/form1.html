@@ -404,12 +404,36 @@ nav ul li a img {
             </div>
 
             <div class="form-actions">
-                <button type="button" onclick="window.location.href='form2.html'">Enviar</button>
-
-                <!-- <button type="button" onclick="validateForm()">Enviar</button> -->
-            </div>
-        </form>
-    </div>
+                <div class="form-actions">
+                    <button type="button" onclick="saveFormData()">Enviar</button>
+                </div>
+            </form>
+        </div>
+    
+        <script>
+            function saveFormData() {
+                const form = document.getElementById('accidentForm');
+                const formData = new FormData(form);
+                const formObject = {};
+    
+                formData.forEach((value, key) => {
+                    formObject[key] = value;
+                });
+    
+                localStorage.setItem('formData', JSON.stringify(formObject));
+                window.location.href = 'form2.html';
+            }
+    
+            function toggleForeignFields() {
+                const foreignCheckbox = document.getElementById('foreigner');
+                const foreignFields = document.querySelectorAll('.foreign-only input');
+    
+                foreignFields.forEach(field => {
+                    field.disabled = !foreignCheckbox.checked;
+                    field.required = foreignCheckbox.checked;
+                });
+            }
+        </script>
     <script src="scripts.js"></script>
 </body>
 </html>

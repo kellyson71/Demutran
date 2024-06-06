@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dados dos Formulários</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Dados dos Formulários</h1>
+        <pre id="formDataDisplay"></pre>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstForm = JSON.parse(localStorage.getItem('firstForm')) || {};
+            const secondForm = JSON.parse(localStorage.getItem('accidentForm')) || {};
+
+            console.log('Primeiro Formulário:', firstForm);
+            console.log('Segundo Formulário:', secondForm);
+
+            const formDataDisplay = document.getElementById('formDataDisplay');
+            formDataDisplay.textContent = JSON.stringify({ firstForm, secondForm }, null, 2);
+        });
+    </script>
+</body>
+</html>

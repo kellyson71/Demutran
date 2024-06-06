@@ -7,6 +7,414 @@
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+<style>
+        :root {
+    --gray-1: #CED4DA;
+    --gray-2: #6C757D;
+    --blue-1: #0DCAF0;
+    --blue-2: #f5faff;
+    --background: #f5faff;
+    font-size: 16px;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+}
+
+.feedback {
+    color: white;
+    background-color: #28a745;
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translate(-50%, -200%);
+    padding: 10px;
+    border-radius: 8px;
+    display: none;
+    animation: feedbackSlideDown 0.5s forwards;
+}
+
+@keyframes feedbackSlideDown {
+    to { transform: translate(-50%, 0); }
+}
+
+header {
+    background: linear-gradient(90deg, #009640, #00C851);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    z-index: 1000;
+}
+
+header ul {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    gap: 20px;
+    padding: 0;
+    margin: 0;
+}
+
+header nav ul li a img {
+    width: 30px;
+    height: 30px;
+    transition: transform 0.3s;
+}
+
+header nav ul li a img:hover {
+    transform: scale(1.2);
+}
+
+header p {
+    color: white;
+    font-size: 16px;
+}
+
+header button {
+    color: white;
+    font-size: 20px;
+    border: none;
+    background: none;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    padding: 3px 10px;
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+header button:hover {
+    color: #00C851;
+    transform: scale(1.1);
+}
+
+.topbar-secondary {
+    background-color: #f2f2f2;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+    width: 100%;
+    position: fixed;
+    top: 60px;
+    z-index: 999;
+}
+
+.topbar-secondary .container_bar {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.topbar-secondary a {
+    color: #333;
+    text-decoration: none;
+    margin: 0 10px;
+    transition: color 0.3s;
+}
+
+.topbar-secondary a:hover {
+    color: #666;
+}
+
+.topbar-secondary .separator {
+    color: #666;
+}
+
+.form-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    width: 100%;
+    margin: 160px auto 20px auto; 
+}
+
+h2 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 28px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    position: relative;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+p {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #555;
+}
+
+.input-field {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+input,
+textarea {
+    width: 100%;
+    padding: 10px 0;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+label {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    color: #999;
+    pointer-events: none;
+    transition: top 0.3s, font-size 0.3s, color 0.3s;
+
+}
+
+input:focus ~ label,
+input:valid ~ label,
+textarea:focus ~ label,
+textarea:valid ~ label {
+    top: -20px;
+    left: 0;
+    font-size: 12px;
+    color: #00C851;
+}
+
+.underline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #00C851;
+    transform: scaleX(0);
+    transition: transform 0.3s;
+}
+
+input:focus ~ .underline,
+textarea:focus ~ .underline {
+    transform: scaleX(1);
+}
+
+button {
+    background-color: #00C851;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    display: block;
+    margin: 0 auto;
+}
+
+button:hover {
+    background-color: #009640;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 10px 0;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    box-sizing: border-box;
+    font-size: 16px;
+    background: none;
+    color: #333;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    outline: none;
+}
+
+select {
+    position: relative;
+    padding-right: 30px;
+    background: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><polygon fill="%23009640" points="5,7 10,12 15,7"/></svg>') no-repeat right center;
+    background-size: 15px;
+}
+
+select:focus {
+    border-bottom: 1px solid #00C851;
+}
+
+select:focus ~ .underline,
+input:focus ~ .underline,
+textarea:focus ~ .underline {
+    transform: scaleX(1);
+}
+
+
+.input-field {
+    position: relative;
+}
+
+.input-field select {
+    background-position: calc(100% - 10px) center;
+}
+
+
+input:focus ~ label,
+input:valid ~ label,
+textarea:focus ~ label,
+textarea:valid ~ label,
+select:focus ~ label,
+select:valid ~ label {
+    top: -20px;
+    left: 0;
+    font-size: 12px;
+    color: #00C851;
+}
+
+.underline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #00C851;
+    transform: scaleX(0);
+    transition: transform 0.3s;
+}
+h3 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    position: relative;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+
+input[type="checkbox"] {
+    -webkit-appearance: checkbox; 
+    -moz-appearance: checkbox; 
+    appearance: checkbox; 
+    width: auto; 
+    height: auto; 
+    margin: 0; 
+    padding: 0; 
+    border: none; 
+    background: none; 
+}
+
+input[type="file"]:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+.input-field {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+input,
+textarea {
+    width: 100%;
+    padding: 10px 0;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+label {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    color: #999;
+    pointer-events: none;
+    transition: top 0.3s, font-size 0.3s, color 0.3s;
+    margin-top: 8px;
+}
+
+input:focus ~ label,
+input:valid ~ label,
+textarea:focus ~ label,
+textarea:valid ~ label {
+    top: -20px;
+    left: 0;
+    font-size: 12px;
+    color: #00C851;
+}
+.custom-label {
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #333; 
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    margin-top: 3px;
+    margin-left: 20px;
+}
+.custom-label i {
+    margin-right: 8px;
+    color: #555;
+}
+.input-field {
+    margin-bottom: 20px;
+}
+input:disabled {
+    opacity: 0.6;
+    background-color: #f0f0f0;
+    color: #888;
+}
+.underline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #00C851;
+    transform: scaleX(0);
+    transition: transform 0.3s;
+}
+
+input:focus ~ .underline,
+textarea:focus ~ .underline {
+    transform: scaleX(1);
+}
+.align-checkbox {
+    display: flex;
+    align-items: center;
+}
+
+.align-checkbox input[type="checkbox"] {
+    margin: 0 8px 0 0;
+}
+
+@media (max-width: 600px) {
+    .form-container {
+        width: 90%;
+    }
+
+    header {
+        padding: 0 16px;
+    }
+
+    .topbar-secondary .container_bar {
+        padding: 0 16px;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+}
+
+
+    </style>
 </head>
 <body>
     <div class="feedback" id="feedback"></div>
@@ -20,12 +428,7 @@
                 <li><a href="https://instagram.com"><img src="../assets/copy-url.png" alt="Instagram"></a></li>
             </ul>
         </nav>
-        <div class="user-options">
-            <p id="alter-font">Tamanho da fonte</p>
-            <button onclick="increaseFont()">A+</button>
-            <p>|</p>
-            <button onclick="decreaseFont()">A-</button>
-        </div>
+
     </header>
     <div class="topbar-secondary">
         <div class="container_bar">
@@ -35,23 +438,83 @@
         </div>
     </div>
     <div class="form-container">
-        <h2><i class="far fa-id-card"></i><span> Cartão Vaga Especial – PCD</span></h2>
+        <h2><i class="far fa-id-card"></i><span> Cartão Vaga Especial – PCD/Idoso</span></h2>
         <p>Preencha todos os dados para podermos dar continuidade a sua solicitação.</p>
         <form action="#" method="post" enctype="multipart/form-data">
+            <div class="align-checkbox">
+                <input type="checkbox" id="resident_check" name="resident_check" required>
+                <h6 style="font-size: 15px; font-family: 'Roboto', sans-serif; color: #6C757D; ">Eu sou residente de Pau dos Ferros</h6>
+            </div>
+            <div class="input-field">
+                <select id="tipo_solicitacao" name="tipo_solicitacao" required>
+                    <option value="" disabled selected></option>
+                    <option value="idoso">PARA IDOSO</option>
+                    <option value="pcd">PARA PESSOA COM DEFICIÊNCIA (PCD)</option>
+                </select>
+                <label for="tipo_solicitacao"><i class="fas fa-list"></i> TIPO DA SOLICITAÇÃO</label>
+                <div class="underline"></div>
+            </div>
+        
+            <div class="input-field">
+                <select id="emissao_cartao" name="emissao_cartao" required>
+                    <option value="" disabled selected></option>
+                    <option value="inicial">INICIAL</option>
+                    <option value="renovacao">RENOVAÇÃO</option>
+                    <option value="segunda_via">SEGUNDA VIA</option>
+                </select>
+                <label for="emissao_cartao"><i class="fas fa-list"></i> EMISSÃO DO CARTÃO ESPECIAL DE ESTACIONAMENTO</label>
+                <div class="underline"></div>
+            </div>
+        
+            <div class="input-field">
+                <select id="solicitante" name="solicitante" required>
+                    <option value="" disabled selected></option>
+                    <option value="requerente">REQUERENTE</option>
+                    <option value="representante_legal">REPRESENTANTE LEGAL</option>
+                </select>
+                <label for="solicitante"><i class="fas fa-list"></i> SOLICITANTE: </label>
+                <div class="underline"></div>
+            </div>
+
+            
             <div class="input-field">
                 <input type="text" id="nome" name="nome" required>
                 <label for="nome"><i class="fas fa-user"></i> Seu nome:</label>
                 <div class="underline"></div>
             </div>
             <div class="input-field">
+                <input  type="date" id="data_nascimento" name="data_nascimento" required>
+                <label style="background-color: white;" for="data_nascimento"><i class="fas fa-calendar"></i> Data de Nascimento:</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
+                <input type="text" id="cpf" name="cpf" required>
+                <label for="cpf"><i class="fas fa-id-card"></i> CPF:</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
+                <input type="text" id="endereco" name="endereco" required>
+                <label for="endereco"><i class="fas fa-home"></i> ENDEREÇO:</label>
+                <div class="underline"></div>
+            </div>
+            <div class="input-field">
                 <input type="tel" id="telefone" name="telefone" required>
-                <label for="telefone"><i class="fas fa-phone"></i> Telefone Para Contato:</label>
+                <label for="telefone"><i class="fas fa-phone"></i> Numero de Telefone/Celular:</label>
+                <div class="underline"></div>
+            </div>
+            
+            <div class="input-field">
+                <input type="text" id="doc_identidade_num" name="doc_identidade_num" required>
+                <label for="doc_identidade_num"><i class="far fa-id-card"></i> DOCUMENTO DE IDENTIDADE N°:</label>
                 <div class="underline"></div>
             </div>
             <div class="input-field">
                 <input type="email" id="email" name="email" required>
                 <label for="email"><i class="fas fa-envelope"></i> Seu e-mail:</label>
                 <div class="underline"></div>
+            </div>
+            <div>
+                <h1 style="font-size: 15px; margin-bottom: 30px; margin-top: 40px; font-family: 'Roboto', sans-serif; color: #6C757D;            ;">apenas em pdf*</h1>            
             </div>
             <div class="input-field">
                 <input type="file" id="doc_identidade" name="doc_identidade">
@@ -65,11 +528,66 @@
             </div>
             <div class="input-field">
                 <input type="file" id="laudo_medico" name="laudo_medico">
-                <label for="laudo_medico"><i class="fas fa-file-medical"></i> Anexar Laudo Médico:</label>
+                <label for="laudo_medico"><i class="fas fa-file-medical"></i> Anexar Laudo Médico (Caso for PCD):</label>
                 <div class="underline"></div>
             </div>
+
+            
+            <h3>DADOS DO REPRESENTANTE LEGAL</h3>
+            <div class="input-field">
+                <input type="checkbox" id="representante_legal_check" name="representante_legal_check" onclick="toggleLegalRepresentative()">
+                <label for="representante_legal_check" class="custom-label" style="color: gray;"></i> Necessita de representante legal?</label>
+            </div>
+            <div id="representante_legal_section">
+                <div class="input-field">
+                    <input type="text" id="nome_representante" name="nome_representante" disabled>
+                    <label for="nome_representante"><i class="fas fa-user"></i> NOME:</label>
+                    <div class="underline"></div>
+                </div>
+                <div class="input-field">
+                    <input type="text" id="cpf_representante" name="cpf_representante" disabled>
+                    <label for="cpf_representante"><i class="fas fa-id-card"></i> CPF nº:</label>
+                    <div class="underline"></div>
+                </div>
+                <div class="input-field">
+                    <input type="text" id="endereco_representante" name="endereco_representante" disabled>
+                    <label for="endereco_representante"><i class="fas fa-home"></i> ENDEREÇO:</label>
+                    <div class="underline"></div>
+                </div>
+                <div class="input-field">
+                    <input type="tel" id="telefone_representante" name="telefone_representante" disabled>
+                    <label for="telefone_representante"><i class="fas fa-phone"></i> Numero de Telefone/Celular:</label>
+                    <div class="underline"></div>
+                </div>
+                <div class="input-field">
+                    <input type="email" id="email_representante" name="email_representante" disabled>
+                    <label for="email_representante"><i class="fas fa-envelope"></i> E-mail:</label>
+                    <div class="underline"></div>
+                </div>
+                <div class="input-field">
+                    <input type="file" id="doc_identidade_representante" name="doc_identidade_representante" disabled>
+                    <label style="background-color: #f6f6f6;" for="doc_identidade_representante"><i class="far fa-id-card"></i> ADICIONAR FOTO DE DOCUMENTO DE IDENTIFICAÇÃO COM FOTO:</label>
+                    <div class="underline"></div>
+                </div>
+                <div class="input-field">
+                    <input type="file" id="proc_comprovante" name="proc_comprovante" disabled>
+                    <label style="background-color: #f6f6f6;" for="proc_comprovante"><i class="fas fa-file-alt"></i> ENVIAR COMPROVANTE DE PROCURAÇÃO COMO REPRESENTANTE LEGAL:</label>
+                    <div class="underline"></div>
+                </div>
+            </div>
+
             <button type="submit">Enviar</button>
         </form>
     </div>
+
+    <script>
+        function toggleLegalRepresentative() {
+            var isChecked = document.getElementById('representante_legal_check').checked;
+            var inputs = document.querySelectorAll('#representante_legal_section input');
+            inputs.forEach(input => {
+                input.disabled = !isChecked;
+            });
+        }
+    </script>
 </body>
 </html>

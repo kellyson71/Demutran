@@ -253,10 +253,10 @@
             var mensagem = document.getElementById('mensagem');
             var submitBtn = document.getElementById('submit-btn');
             if (pergunta1 && pergunta1.value === "Sim") {
-                mensagem.innerText = "Para esta declaração de acidente, clique em próximo para ser direcionado para o Sistema de Declaração de Acidente de Trânsito - DAT da PRF.";
-                mensagem.style.display = 'block';
-                return false;
-            }
+            mensagem.innerHTML = 'Para esta declaração de acidente, clique <a href="https://declarante.prf.gov.br/declarante/" target="_blank">aqui</a> para ser direcionado para o Sistema de Declaração de Acidente de Trânsito - DAT da PRF.';
+            mensagem.style.display = 'block';
+            return false;
+            }   
 
             if (pergunta2 && pergunta2.value === "Não") {
                 mensagem.innerText = "Somente pessoas emancipadas ou maiores de 18 anos podem realizar a declaração do acidente.";

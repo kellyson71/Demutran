@@ -40,24 +40,72 @@
 
     <div class="content">
         <div class="container">
-            <h1>DMUT – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</h1>
+            <h1>DEMUTRAN – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</h1>
             <p class="gray-text">
                 <strong>LEI N° 1129/2014, DE 07 DE MAIO DE 2014.</strong> DISPÕE SOBRE A CRIAÇÃO DO DEPARTAMENTO MUNICIPAL DE TRÂNSITO, ÓRGÃO EXECUTIVO DE TRÂNSITO RODOVIÁRIO, VINCULADO AO GABINETE DO MUNICÍPIO, BEM COMO DA JUNTA ADMINISTRATIVA DE RECURSOS DE INFRAÇÃO – JARI.
             </p>
-            <div class="image-container">
-                <img src="./assets/fardamento.jpg" alt="Descrição da imagem">
-            </div>
+                <div class="container_news">
+                    <div class="main-news">
+                        <div class="carousel">
+                            <img id="carousel-image" src="https://via.placeholder.com/800x400" alt="Main news">
+                            <div class="caption" id="carousel-caption">Prefeita assina ordem de serviço para pavimentar ruas dos bairros Manoel Domingos e João XXIII</div>
+                        </div>
+                        <div class="carousel-buttons">
+                            <button class="carousel-button" id="prev-button">&#10094;</button>
+                            <button class="carousel-button" id="next-button">&#10095;</button>
+                        </div>
+                        <div class="carousel-indicators" id="carousel-indicators"></div>
+                    </div>
+                    <div class="sidebar">
+                        <div class="news-item">
+                            <img src="https://via.placeholder.com/400x200" alt="Vacinação">
+                            <div class="text">
+                                <div class="tags">#vacinação</div>
+                                <div class="date">Há 6 dia(s)</div>
+                                <div class="caption">Já conferiu se suas vacinas estão em dia?</div>
+                                <p>Não perca tempo! Dirija-se à Unidade Básica de Saúde mais próxima da sua residência para [...]</p>
+                            </div>
+                        </div>
+                        <div class="news-item">
+                            <img src="https://via.placeholder.com/400x200" alt="Juventudes em Movimento">
+                            <div class="text">
+                                <div class="tags">#cidadania</div>
+                                <div class="date">Há 6 dia(s)</div>
+                                <div class="caption">SEPLAN confirma mais uma palestra em evento Juventudes em Movimento</div>
+                                <p>O Juventudes em Movimento está chegando e a Secretaria Municipal de Planejamento e Desenvo [...]</p>
+                            </div>
+                        </div>
+                        <!-- <div class="news-item">
+                            <img src="https://via.placeholder.com/400x200" alt="Farmácias">
+                            <div class="text">
+                                <div class="tags">#saúde</div>
+                                <div class="date">Há 6 dia(s)</div>
+                                <div class="caption">Descentralização de Farmácias: Perímetro Irrigado ganha Farmácia Básica que beneficiará 10 [...]</div>
+                                <p>Nesta quarta-feira (22), foi inaugurada e entregue à população, na Unidade Básica de Saú [...]</p>
+                            </div>
+                        </div> -->
+                    </div>
+                </div>
+
             <p class="gray-text">
                 <strong>DE ACORDO COM A RESOLUÇÃO CONTRAN Nº 900, DE 9 DE MARÇO DE 2022,</strong> consolida as normas sobre a padronização dos procedimentos para apresentação de defesa prévia e de recurso, em 1ª e 2ª instâncias, contra a imposição de penalidades de advertência por escrito e de multa de trânsito.
             </p>
         </div>
     </div>
 
+
     <div class="options">
         <div class="option">
-            <a href="https://macau.rn.gov.br/wp-content/uploads/2022/12/REQUERIMENTO-DE-DEFESA-PREVIA-1.pdf">
+            <a>
                 <img src="./assets/seta.png" alt="Formulário">
-                <span>Formulário - Requerimento de Defesa Prévia/JARI</span>
+                <div class="select-container" id="selectContainer">
+                    <select id="pageSelect">
+                        <option hidden value="">Formulários</option>
+                        <option value="./pagina1.html">formaulario 1</option>
+                        <option value="./pagina2.html">formulario 2</option>
+                        <option value="./pagina3.html">formulario 3</option>
+                    </select>
+                </div>
             </a>
         </div>
         <div class="option">
@@ -67,21 +115,35 @@
             </a>
         </div>
         <div class="option">
-            <a href="./JARI/index.html">
+            <a href="#" id="jariLink">
                 <img src="./assets/formularios-do-google.png" alt="Defesa JARI">
                 <span>Sua Defesa JARI (Junta Administrativa de Recursos de Infrações)</span>
             </a>
         </div>
-        <div class="option">
+    
+        <script>
+            document.getElementById('jariLink').addEventListener('click', function(event) {
+                event.preventDefault();
+                document.getElementById('selectContainer').style.display = 'block';
+            });
+    
+            document.getElementById('pageSelect').addEventListener('change', function() {
+                var selectedPage = this.value;
+                if (selectedPage) {
+                    window.location.href = selectedPage;
+                }
+            });
+        </script>
+        <!-- <div class="option">
             <a href="./Idoso/index.html">
                 <img src="./assets/id-card (1).png" alt="Cartão Vaga Especial Idoso">
                 <span>Cartão Vaga Especial Idoso</span>
             </a>
-        </div>
+        </div> -->
         <div class="option">
             <a href="./PCD/index.html">
                 <img src="./assets/id-card.png" alt="Cartão Vaga Especial PCD">
-                <span>Cartão Vaga Especial PCD</span>
+                <span>Cartão Vaga Especial PCD/Idoso</span>
             </a>
         </div>
         <div class="option">
@@ -125,3 +187,66 @@
     </footer>
 </body>
 </html>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const newsList = [
+            {
+                img: "https://via.placeholder.com/800x400",
+                caption: "Prefeita assina ordem de serviço para pavimentar ruas dos bairros Manoel Domingos e João XXIII"
+            },
+            {
+                img: "https://via.placeholder.com/800x400",
+                caption: "Nova escola é inaugurada no bairro Central"
+            },
+            {
+                img: "https://via.placeholder.com/800x400",
+                caption: "Campanha de vacinação contra a gripe começa na próxima semana"
+            }
+        ];
+
+        let currentNewsIndex = 0;
+        const carouselImage = document.getElementById("carousel-image");
+        const carouselCaption = document.getElementById("carousel-caption");
+        const carouselIndicators = document.getElementById("carousel-indicators");
+
+        function updateCarousel() {
+            carouselImage.src = newsList[currentNewsIndex].img;
+            carouselCaption.textContent = newsList[currentNewsIndex].caption;
+            updateIndicators();
+        }
+
+        function updateIndicators() {
+            carouselIndicators.innerHTML = '';
+            newsList.forEach((_, index) => {
+                const indicator = document.createElement('span');
+                indicator.classList.add('carousel-indicator');
+                if (index === currentNewsIndex) {
+                    indicator.classList.add('active');
+                }
+                indicator.addEventListener('click', () => {
+                    currentNewsIndex = index;
+                    updateCarousel();
+                });
+                carouselIndicators.appendChild(indicator);
+            });
+        }
+
+        document.getElementById("prev-button").addEventListener("click", () => {
+            currentNewsIndex = (currentNewsIndex - 1 + newsList.length) % newsList.length;
+            updateCarousel();
+        });
+
+        document.getElementById("next-button").addEventListener("click", () => {
+            currentNewsIndex = (currentNewsIndex + 1) % newsList.length;
+            updateCarousel();
+        });
+
+        // Alternar entre notícias a cada 5 segundos
+        setInterval(() => {
+            currentNewsIndex = (currentNewsIndex + 1) % newsList.length;
+            updateCarousel();
+        }, 8000);
+
+        updateCarousel(); 
+    });
+</script>
