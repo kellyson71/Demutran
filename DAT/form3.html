@@ -328,6 +328,7 @@
 
     <div id="formulario-veiculo"></div>
     <button id="botao" type="button" onclick="saveFormData()">Concluir</button>
+    <button id="botao" type="button" onclick="window.location.href='form2.html'">anterior</button>
 
     <script>
         var contadorVeiculos = 0;
@@ -450,24 +451,57 @@
                 }
             });
             function saveFormData() {
-            const selectedButtons = document.querySelectorAll('.damage-button.selected');
-            const selectedParts = Array.from(selectedButtons).map(button => button.textContent);
-            // console.log('Partes selecionadas:', selectedParts);
-            
-            var formElement = document.querySelector("form");
-            var formData = new FormData(formElement);
+    const allVehicleData = [];
 
-            const formData3 = {};
+    // Iterar sobre todos os formulários de veículos
+    for (let i = 1; i <= contadorVeiculos; i++) {
+        const vehicleData = {};
 
-            formData.forEach((value, key) => {
-                formData3[key] = value;
-            });
-            formData3['selectedParts'] = selectedParts;
+        // Extrair dados do formulário atual
+        vehicleData["Veículo"] = "Veículo " + i;
 
-            localStorage.setItem('formData3', JSON.stringify(formData3));
-            window.location.href = 'form4.html';
-
+        // Adicionar danos do veículo de forma diferente
+        const danosVeiculo = [];
+        if (document.getElementsByClassName('damage-button')[i * 6 - 6].classList.contains('selected')) {
+            danosVeiculo.push("dianteira direita");
         }
+        if (document.getElementsByClassName('damage-button')[i * 6 - 5].classList.contains('selected')) {
+            danosVeiculo.push("dianteira esquerda");
+        }
+        if (document.getElementsByClassName('damage-button')[i * 6 - 4].classList.contains('selected')) {
+            danosVeiculo.push("lateral/teto direito");
+        }
+        if (document.getElementsByClassName('damage-button')[i * 6 - 3].classList.contains('selected')) {
+            danosVeiculo.push("lateral/teto esquerdo");
+        }
+        if (document.getElementsByClassName('damage-button')[i * 6 - 2].classList.contains('selected')) {
+            danosVeiculo.push("traseira direita");
+        }
+        if (document.getElementsByClassName('damage-button')[i * 6 - 1].classList.contains('selected')) {
+            danosVeiculo.push("traseira esquerda");
+        }
+        vehicleData["Danos no Veículo"] = danosVeiculo.join(", ") || "Nenhum dano marcado";
+
+        // Adicionar outros dados do veículo
+        vehicleData["Houve danos ao sistema de segurança, freios, direção ou de suspensão do veículo?"] = document.getElementById('seguranca_checkbox' + i).checked;
+        vehicleData["Houve danos na carga do veículo?"] = document.getElementById('carga_checkbox' + i).checked;
+        vehicleData["Nº das Notas Fiscais, Manifestos ou Equivalentes"] = document.getElementById('notas_fiscais' + i).value;
+        vehicleData["Tipo de Mercadoria"] = document.getElementById('tipo_mercadoria' + i).value;
+        vehicleData["Valor Total"] = document.getElementById('valor_total' + i).value;
+        vehicleData["Extensão estimada dos danos da carga"] = document.getElementById('extensao_danos' + i).value;
+        vehicleData["Seguro"] = document.getElementById('seguro_checkbox' + i).checked;
+        vehicleData["Seguradora"] = document.getElementById('seguradora' + i).value;
+
+        // Adicionar dados do veículo ao array
+        allVehicleData.push(vehicleData);
+    }
+
+    // Armazenar dados no armazenamento local
+    localStorage.setItem('formData3', JSON.stringify(allVehicleData));
+
+    // Redirecionar para a próxima página
+    window.location.href = 'form4.html';
+}
 
 
 </script>

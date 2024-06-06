@@ -11,6 +11,27 @@
     <link rel="stylesheet" href="../pages css/bar_style.css">
 
     <style>
+        #documento_estrangeiro2 {
+            display: none;
+        }
+        .form-actions {
+            text-align: right;
+        }
+
+        .form-actions button {
+            padding: 10px 20px;
+            margin-left: 10px;
+            border: none;
+            background-color: #009640;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .form-actions button:hover {
+            background-color: #015325;
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -126,6 +147,85 @@
         }
         .hidden {
             display: none;
+        }
+        .damage-title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .damage-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 10px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease;
+            margin-top: 30px;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.5s ease;
+        }
+
+        .damage-container.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+        .damage-checkbox {
+            display: flex;
+            align-items: center;
+        }
+        .checkbox-label {
+            margin-left: 10px;
+            margin-top: 10px;
+        }
+        .damage-button {
+            width: 100%;
+            height: 50px;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            text-align: center;
+            line-height: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .damage-button:hover {
+            background-color: #f0f0f0;
+        }
+        .damage-button.selected {
+            background-color: #007bff;
+            color: #ffffff;
+        }
+        .damage-button.selected:hover {
+            background-color: #0056b3;
+        }
+        .button-spacer {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .cargo-damage-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: inline-block;
+            width: 250px;
+            vertical-align: top;
+        }
+        .checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -341,7 +441,6 @@
             </div>
 
             <label for="estrangeiro_checkbox">Estrangeiro?</label>
-            <!-- <input type="checkbox" id="estrangeiro_checkbox" name="estrangeiro" onchange="toggleEstrangeiro()"> -->
             <input type="checkbox" id="estrangeiro_checkbox" name="estrangeiro">
             
         
@@ -359,7 +458,7 @@
                 <label for="pais">País: <span>*</span></label>
                 <input type="text" id="pais" name="pais" required>
             </div>
-
+ 
             <label for="nome">Nome:</label>
             <input type="text" id="nome" name="nome" required>
 
@@ -432,22 +531,22 @@
         //     }
         // }
 
-        function disableFields(container) {
-            const inputs = container.querySelectorAll('input, select, textarea');
-            inputs.forEach(input => {
-                input.disabled = true;
-            });
-        }
+        // function disableFields(container) {
+        //     const inputs = container.querySelectorAll('input, select, textarea');
+        //     inputs.forEach(input => {
+        //         input.disabled = true;
+        //     });
+        // }
 
-        function enableFields(container) {
-            const inputs = container.querySelectorAll('input, select, textarea');
-            inputs.forEach(input => {
-                input.disabled = false;
-            });
-        }
+        // function enableFields(container) {
+        //     const inputs = container.querySelectorAll('input, select, textarea');
+        //     inputs.forEach(input => {
+        //         input.disabled = false;
+        //     });
+        // }
 
-        const estrangeiroCheckbox = document.getElementById('estrangeiro');
-        const documentoEstrangeiro = document.getElementById('documento_estrangeiro');
+        // const estrangeiroCheckbox = document.getElementById('estrangeiro');
+        // const documentoEstrangeiro = document.getElementById('documento_estrangeiro');
 
         // estrangeiroCheckbox.addEventListener('change', function() {
         //     if (this.checked) {
@@ -457,101 +556,29 @@
         //     }
         // });
 
-        const estrangeiroCheckbox2 = document.getElementById('estrangeiro_checkbox');
-        const documentoEstrangeiro2 = document.getElementById('documento_estrangeiro2');
+        // const estrangeiroCheckbox2 = document.getElementById('estrangeiro_checkbox');
+        // const documentoEstrangeiro2 = document.getElementById('documento_estrangeiro2');
 
-        estrangeiroCheckbox2.addEventListener('change', function() {
-            if (this.checked) {
-                enableFields(documentoEstrangeiro2);
-            } else {
-                disableFields(documentoEstrangeiro2);
-            }
-        });
+        // estrangeiroCheckbox2.addEventListener('change', function() {
+        //     if (this.checked) {
+        //         enableFields(documentoEstrangeiro2);
+        //     } else {
+        //         disableFields(documentoEstrangeiro2);
+        //     }
+        // });
     </script>
     
-    <style>
-        .damage-title {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .damage-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-gap: 10px;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 1s ease;
-            margin-top: 30px;
-        }
-        .damage-checkbox {
-            display: flex;
-            align-items: center;
-        }
-        .checkbox-label {
-            margin-left: 10px;
-            margin-top: 10px;
-        }
-        .damage-button {
-            width: 100%;
-            height: 50px;
-            background-color: #ffffff;
-            border: 1px solid #ccc;
-            text-align: center;
-            line-height: 50px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-        .damage-button:hover {
-            background-color: #f0f0f0;
-        }
-        .damage-button.selected {
-            background-color: #007bff;
-            color: #ffffff;
-        }
-        .damage-button.selected:hover {
-            background-color: #0056b3;
-        }
-        .button-spacer {
-            margin-top: 20px;
-            text-align: center;
-        }
 
-        .cargo-damage-container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-label {
-            display: inline-block;
-            width: 250px;
-            vertical-align: top;
-        }
-        .checkbox-label {
-            display: inline-flex;
-            align-items: center;
-            margin-left: 10px;
-        }
-    </style>
     <body>
         <div class="container">
             <h2 class="damage-title">Danos no Veículo</h2>
     
             <div class="damage-checkbox">
-                <input type="checkbox" id="seguranca_checkbox" name="seguranca_checkbox">
+                <input type="checkbox" id="seguranca_checkbox" name="seguranca_checkbox" onchange="toggleDamageContainer()">
                 <label for="seguranca_checkbox" class="checkbox-label">Houve danos ao sistema de segurança, freios, direção ou de suspensão do veículo?</label>
             </div>
-    
-            <div class="damage-container">
+            
+            <div class="damage-container" id="damageContainer">
                 <div class="damage-button" onclick="toggleSelected(1)">Dianteira Direita</div>
                 <div class="damage-button" onclick="toggleSelected(2)">Dianteira Esquerda</div>
                 <div class="damage-button" onclick="toggleSelected(3)">Lateral/Teto Direito</div>
@@ -560,6 +587,8 @@
                 <div class="damage-button" onclick="toggleSelected(6)">Traseira Esquerda</div>
             </div>
         </div>
+
+            
     
         <div class="cargo-damage-container">
             <h2>Danos na Carga do Veículo</h2>
@@ -585,17 +614,22 @@
             </div>
             <div class="form-group">
                 <input type="checkbox" id="seguro_checkbox" name="seguro_checkbox">
-                <label for="seguro_checkbox" class="checkbox-label">Seguro</label>
+                <label for="seguro_checkbox" class="checkbox-label">Tem seguro?</label>
             </div>
             <div class="form-group">
                 <label for="seguradora" class="form-label">Informe a Seguradora:</label>
                 <input type="text" id="seguradora" name="seguradora" disabled>
             </div>
-            <button type="button" onclick="saveFormData()">Enviar</button>
+            <div class="form-actions">
+                <button type="button" onclick="saveFormData()">Enviar</button>
+            </div>
 
         </div>
         <script>
-            
+                document.getElementById('estrangeiro_checkbox').addEventListener('change', function() {
+                    var documentoEstrangeiroDiv = document.getElementById('documento_estrangeiro2');
+                    documentoEstrangeiroDiv.style.display = this.checked ? 'block' : 'none';
+                });
             document.addEventListener('DOMContentLoaded', function() {
                 const storedFormData = localStorage.getItem('formData');
                 
@@ -629,9 +663,6 @@
 
         }
 
-
-</script>
-        <script>
             const cargaCheckbox = document.getElementById('carga_checkbox');
             const notasFiscaisInput = document.getElementById('notas_fiscais');
             const tipoMercadoriaInput = document.getElementById('tipo_mercadoria');
@@ -661,10 +692,20 @@
                     seguradoraInput.setAttribute('disabled', 'disabled');
                 }
             });
-
+            function toggleDamageContainer() {
+                var checkBox = document.getElementById("seguranca_checkbox");
+                var damageContainer = document.getElementById("damageContainer");
+                
+                if (checkBox.checked) {
+                    damageContainer.classList.add("visible");
+                } else {
+                    damageContainer.classList.remove("visible");
+                }
+            }
             function toggleSelected(buttonIndex) {
             const button = document.querySelector(`.damage-container .damage-button:nth-child(${buttonIndex})`);
             button.classList.toggle('selected');
+            console.log("Damage button " + buttonIndex + " clicked");
         }
         </script>
     </body>

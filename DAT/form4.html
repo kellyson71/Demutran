@@ -297,7 +297,7 @@
             </div>
             
             <div class="button-container">
-                <button class="previous">Anterior</button>
+                <button class="previous" onclick="window.location.href='form3.html'">Anterior</button>
                 <button class="next">Próximo</button>
             </div>
         </div>
@@ -313,6 +313,55 @@
                     textarea.style.backgroundColor = "#f9f9f9";
                 }
             }
+            document.addEventListener('DOMContentLoaded', function() {
+    const storedFormData = localStorage.getItem('formData');
+    const storedFormData2 = localStorage.getItem('formData2');
+    const storedFormData3 = localStorage.getItem('formData3');
+    
+    if (storedFormData) {
+        const formData = JSON.parse(storedFormData);
+        const formData2 = JSON.parse(storedFormData2);
+        const formData3 = JSON.parse(storedFormData3);
+        console.log('Primeiro Formulário:', formData);
+        console.log('Segundo Formulário:', formData2);
+        console.log('Terceiro Formulário:', formData3);
+        const narrativeDiv = document.querySelector('.narrative');
+        narrativeDiv.innerHTML = "<strong>Narrativa gerada pelo sistema:</strong><br>";
+        
+        // Adicionando os dados do primeiro formulário
+        narrativeDiv.innerHTML += "<p><strong>Dados do primeiro formulário:</strong></p>";
+        for (const key in formData) {
+            if (formData[key] !== "") {
+                const value = formData[key] === true ? "sim" : formData[key] === false ? "não" : formData[key];
+                narrativeDiv.innerHTML += `<p><strong>${key}:</strong> ${value}</p>`;
+            }
+        }
+        
+        // Adicionando os dados do segundo formulário
+        narrativeDiv.innerHTML += "<p><strong>Dados do segundo formulário:</strong></p>";
+        for (const key in formData2) {
+            if (formData2[key] !== "") {
+                const value = formData2[key] === true ? "sim" : formData2[key] === false ? "não" : formData2[key];
+                narrativeDiv.innerHTML += `<p><strong>${key}:</strong> ${value}</p>`;
+            }
+        }
+        
+        // Adicionando os dados do terceiro formulário
+        narrativeDiv.innerHTML += "<p><strong>Dados do terceiro formulário:</strong></p>";
+        formData3.forEach((data, index) => {
+            narrativeDiv.innerHTML += `<p><strong>Veículo ${index + 1}:</strong></p>`;
+            for (const key in data) {
+                if (data[key] !== "") {
+                    const value = data[key] === true ? "sim" : data[key] === false ? "não" : data[key];
+                    narrativeDiv.innerHTML += `<p><strong>${key}:</strong> ${value}</p>`;
+                }
+            }
+        });
+    } else {
+        console.log('Nenhum dado encontrado no localStorage.');
+    }
+});
+
         </script>
 </body>
 </html>
