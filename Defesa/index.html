@@ -6,7 +6,6 @@
     <title>Defesa Prévia DEMUTRAN</title>
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
 </head>
 <style>
     select {
@@ -52,8 +51,6 @@
     }
 </style>
 
-
-</style>
 <body>
     <div class="feedback" id="feedback"></div>
     <header>
@@ -63,7 +60,7 @@
                 <li><a href="https://www.facebook.com/prefeituradepaudosferros/"><img src="../assets/facebook.png" alt="Facebook"></a></li>
                 <li><a href="https://twitter.com/paudosferros"><img src="../assets/twitter.png" alt="Twitter"></a></li>
                 <li><a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros"><img src="../assets/youtube.png" alt="YouTube"></a></li>
-                <li><a href="https://wa.me/5584999440704"><img src="../assets/copy-url.png" alt="URL"></a></li>
+                <li><a href="https://wa.me/558499440704"><img src="../assets/copy-url.png" alt="URL"></a></li>
             </ul>
         </nav>
         <div class="user-options">
@@ -94,73 +91,95 @@
                 <label for="tipo_solicitacao" style="top: -20px;"><i class="fas fa-list"></i> TIPO DA SOLICITAÇÃO</label>
                 <div class="underline"></div>
             </div>
-            <div class="input-field">
-                <input type="text" id="nome" name="nome" required>
-                <label for="nome"><i class="fas fa-user"></i> Seu nome:</label>
-                <div class="underline"></div>
+            <div id="form_normal">
+                <div class="input-field">
+                    <input type="text" id="nome" name="nome" required>
+                    <label for="nome"><i class="fas fa-user"></i> Seu nome:</label>
+                    <div class="underline"></div>
+                </div>
+                <div class="input-field">
+                    <input type="tel" id="telefone" name="telefone" required>
+                    <label for="telefone"><i class="fas fa-phone"></i> Telefone Para Contato:</label>
+                    <div class="underline"></div>
+                </div>
+                <div class="input-field">
+                    <input type="email" id="email" name="email" required>
+                    <label for="email"><i class="fas fa-envelope"></i> Seu e-mail:</label>
+                    <div class="underline"></div>
+                </div>
+                <div class="input-field">
+                    <input type="text" id="assunto" name="assunto" required>
+                    <label for="assunto"><i class="fas fa-comment"></i> Assunto:</label>
+                    <div class="underline"></div>
+                </div>
+                <div>
+                    <h1 style="font-size: 15px; margin-bottom: 30px; font-family: 'Roboto', sans-serif; color: #6C757D;">apenas em pdf*</h1>            
+                </div>
+                <div class="input-field">
+                    <input type="file" id="doc_requerimento" name="doc_requerimento">
+                    <label for="doc_requerimento"><i class="far fa-file-alt"></i> Anexar formulário preenchido e assinado:</label>
+                    <div class="underline"></div>
+                </div>
+                <div class="input-field">
+                    <input type="file" id="cnh" name="cnh">
+                    <label for="cnh"><i class="fas fa-id-card"></i> Anexar CNH (Carteira Nacional de Habilitação) ou documento do proprietario:</label>
+                    <div class="underline"></div>
+                </div>
+                <div class="input-field">
+                    <input type="file" id="cnh_condutor" name="cnh_condutor">
+                    <label for="cnh_condutor"><i class="far fa-file"></i> Anexar CNH (Carteira Nacional de Habilitação) ou documento do CONDUTOR:</label>
+                    <div class="underline"></div>
+                </div>
+                <div class="input-field">
+                    <input type="file" id="notif_DEMUTRAN" name="notif_DEMUTRAN">
+                    <label for="notif_DEMUTRAN"><i class="far fa-file"></i> Anexar NOTIFICAÇÃO DEMUTRAN:</label>
+                    <div class="underline"></div>
+                </div>
+                <div class="input-field">
+                    <input type="file" id="crlv" name="crlv">
+                    <label for="crlv"><i class="fas fa-car"></i> Anexar CRLV (Certificado de Registro e Licenciamento do Veículo):</label>
+                    <div class="underline"></div>
+                </div>
+                <div class="input-field">
+                    <input type="file" id="comprovante_residencia" name="comprovante_residencia">
+                    <label for="comprovante_residencia"><i class="far fa-address-card"></i> Anexar COMPROVANTE DE RESIDÊNCIA (Caso não for proprietario):</label>
+                    <div class="underline"></div>
+                </div>
+                <div class="input-field">
+                    <input type="file" id="doc_complementares" name="doc_complementares" multiple>
+                    <label for="doc_complementares"><i class="far fa-file"></i> Adicione Documentos Complementares:</label>
+                    <div class="underline"></div>
+                </div>
+                <div class="input-field">
+                    <textarea id="descricao" name="descricao" rows="4" required></textarea>
+                    <label for="descricao"><i class="fas fa-comment-alt"></i> Descreva sua Solicitação:</label>
+                    <div class="underline"></div>
+                </div>
+                <button type="submit">Enviar</button>
             </div>
-            <div class="input-field">
-                <input type="tel" id="telefone" name="telefone" required>
-                <label for="telefone"><i class="fas fa-phone"></i> Telefone Para Contato:</label>
-                <div class="underline"></div>
-            </div>
-            <div class="input-field">
-                <input type="email" id="email" name="email" required>
-                <label for="email"><i class="fas fa-envelope"></i> Seu e-mail:</label>
-                <div class="underline"></div>
-            </div>
-            <div class="input-field">
-                <input type="text" id="assunto" name="assunto" required>
-                <label for="assunto"><i class="fas fa-comment"></i> Assunto:</label>
-                <div class="underline"></div>
-            </div>
-            <div>
-            <h1 style="font-size: 15px; margin-bottom: 30px; font-family: 'Roboto', sans-serif; color: #6C757D;">apenas em pdf*</h1>            
-            </div>
-            <div class="input-field">
-                <input type="file" id="doc_requerimento" name="doc_requerimento">
-                <label for="doc_requerimento"><i class="far fa-file-alt"></i> Anexar formulário preenchido e assinado:</label>
-                <div class="underline"></div>
-            </div>
-            <div class="input-field">
-                <input type="file" id="cnh" name="cnh">
-                <label for="cnh"><i class="fas fa-id-card"></i> Anexar CNH (Carteira Nacional de Habilitação) ou documento do proprietario:</label>
-                <div class="underline"></div>
-            </div>
-            <div class="input-field">
-                <input type="file" id="cnh_condutor" name="cnh_condutor">
-                <label for="cnh_condutor"><i class="far fa-file"></i> Anexar CNH (Carteira Nacional de Habilitação) ou documento do CONDUTOR:</label>
-                <div class="underline"></div>
-            </div>
-            <div class="input-field">
+            <div class="input-field" id="notif_DEMUTRAN_field" style="display: none;">
                 <input type="file" id="notif_DEMUTRAN" name="notif_DEMUTRAN">
-                <label for="notif_DEMUTRAN"><i class="far fa-file"></i> Anexar NOTIFICAÇÃO DEMUTRAN:</label>
+                <label for="notif_DEMUTRAN"><i class="far fa-file"></i> Anexar NOTIFICAÇÃO DEMUTRAN (preenchida e assina):</label>
                 <div class="underline"></div>
+                <button style="margin-top: 5px;" type="submit">Enviar</button>
+
             </div>
-            <div class="input-field">
-                <input type="file" id="crlv" name="crlv">
-                <label for="crlv"><i class="fas fa-car"></i> Anexar CRLV (Certificado de Registro e Licenciamento do Veículo):</label>
-                <div class="underline"></div>
-            </div>
-            <div class="input-field">
-                <input type="file" id="comprovante_residencia" name="comprovante_residencia">
-                <label for="comprovante_residencia"><i class="far fa-address-card"></i> Anexar COMPROVANTE DE RESIDÊNCIA (Caso não for proprietario):</label>
-                <div class="underline"></div>
-            </div>
-            <div class="input-field">
-                <input type="file" id="doc_complementares" name="doc_complementares" multiple>
-                <label for="doc_complementares"><i class="far fa-file"></i> Adicione Documentos Complementares:</label>
-                <div class="underline"></div>
-            </div>
-            <div class="input-field">
-                <textarea id="descricao" name="descricao" rows="4" required></textarea>
-                <label for="descricao"><i class="fas fa-comment-alt"></i> Descreva sua Solicitação:</label>
-                <div class="underline"></div>
-            </div>
-            <button type="submit">Enviar</button>
         </form>
     </div>
     <script>
+        document.getElementById('tipo_solicitacao').addEventListener('change', function() {
+            var formNormal = document.getElementById('form_normal');
+            var notifDEMUTRANField = document.getElementById('notif_DEMUTRAN_field');
+
+            if (this.value === 'apresentacao_condutor') {
+                formNormal.style.display = 'none';
+                notifDEMUTRANField.style.display = 'block';
+            } else {
+                formNormal.style.display = 'block';
+                notifDEMUTRANField.style.display = 'none';
+            }
+        });
+
         document.getElementById('solicitacaoForm').addEventListener('submit', function(event) {
             event.preventDefault(); // Impede o envio do formulário
 
