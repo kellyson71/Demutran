@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESTÁGIO</title>
+    <link rel="stylesheet" href="./css/index.css">
+    <link rel="icon" href="./assets/prefeitura-logo.png" type="image/png">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="./js/index.js"></script>
+                <style>
+        .form-files {
+            display: none; /* Oculta por padrão */
+        }
+        .footer-image {
+    max-width: 70%;
+    height: auto;
+}
+.login-btn {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.login-btn:hover {
+    background-color: #45a049; /* Darker Green */
+}
+
+            </style>
+            
+</head>
+<body>
+    <div class="feedback" id="feedback">
+        
+    </div>
+    <header>
+        <nav>
+            <ul>
+                <a>
+                    <li><a href="https://www.instagram.com/prefeituradepaudosferros/">
+                        <img src="../assets/instagram.png">
+                        </a>
+                    </li>
+                </a>
+                <a>
+                    <li><a href="https://www.facebook.com/prefeituradepaudosferros/">
+                        <img src="../assets/facebook.png">
+                        </a>
+                </a>
+                <a>
+                    <li><a href="https://twitter.com/paudosferros">
+                        <img src="../assets/twitter.png">
+                        </a>
+                </a>
+                <a>
+                    <li><a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros">
+                        <img src="../assets/youtube.png">
+                        </a>
+                </a>
+                <a>
+                    <li><a href="https://instagram.com">
+                        <img src="../assets/copy-url.png">
+                        </a>
+                </a>
+            </ul>
+        </nav>
+
+        <div class="user-options">
+            <p id="alter-font">Tamanho da fonte</p>
+            <button onclick="increaseFont()">A+</button>
+            <p>|</p>
+            <button onclick="decreaseFont()">A-</button>
+        </div>
+    </header>
+    <main>
+        <section>
+            <form id="form">
+                <div class="form-header">
+                    <img src="../assets/Secretaria Municipal de Administração - SEAD.svg" alt="prefeitura de pau dos ferros" class="footer-image">
+                    <h1>ABERTURA DE PROTOCOLO DE SERVIDORES</h1>
+                    <p>Serviços SEAD</p>
+                </div>
+    
+                <input required id="name" name="name" placeholder="Digite seu nome completo">
+                <input required type="email" id="email" name="email" placeholder="Digite seu email">
+                
+                <div class="form-part-2">
+                <input type="text" required name="matricula" id="matricula" placeholder="Digite sua matrícula" maxlength="14" >
+
+                <input type="tel" maxlength="15" onkeyup="handlePhone(event)" required name="phone" id="phone" placeholder="Digite seu Telefone">
+
+                    <input required id="endereco" name="endereco" placeholder="Seu endereço">
+
+                    <select required id="vinculo" name="vinculo" title="Vínculo">
+                        <option value="" hidden>Vinculo</option>
+                        <option value="Efetivo">Efetivo</option>
+                        <option value="Comissionado">Comissionado</option>
+                        <option value="Estagiario">Estagiário</option>
+                        <option value="Outro">Outro</option>
+
+                    </select>
+                    <select required id="lotacao" name="lotacao" title="Lotação">
+                        <option value="" hidden>Unidade de trabalho</option>
+                        <option value="Efetivo">SEINFRA - Sede da Secretaria</option>
+                        <option value="Efetivo">SEINFRA - "BNB (Almoxarifados- depósitos e garagem municipal)" </option>
+                        <option value="Efetivo">SEINFRA - Cemitério São Manoel </option>
+                        <option value="Efetivo">SEINFRA - Cemitério parque das saudades </option>
+                        <option value="Efetivo">SEINFRA - Almoxarifado da iluminação </option>
+                        <option value="Efetivo">SEINFRA - CENTRO MUNICIPAL DE EDUCAÇÃO INFANTIL Profª VERA LÚCIA DIÓGENES </option>
+                        <option value="Efetivo">SEDUC - Centro Municipal De Educação Infantil Profª Telma Batalha </option>
+                        <option value="Efetivo">SEDUC - Centro Municipal De Educação Infantil Djalma De Freitas Nobre </option>
+                        <option value="Efetivo">SEDUC - Centro Municipal De Educação Infantil Mª Das Graças Feitosa Torquato </option>
+                        <option value="Efetivo">SEDUC - Centro Municipal De Educação Infantil Profª Mª Do Socorro Queiroz Lima </option>
+                        <option value="Efetivo">SEDUC - Centro Municipal De Educação Infantil Profª Marta Batalha </option>
+                        <option value="Efetivo">SEDUC - Centro Municipal De Educação Infantil Santa Terezinha </option>
+                        <option value="Efetivo">SEDUC - Centro Municipal De Educação Infantil Severino De Freitas Rêgo </option>
+                        <option value="Efetivo">SEDUC - Escola Municipal Dr. José Torquato De Figueiredo </option>
+                        <option value="Efetivo">SEDUC - ESCOLA MUNICIPAL ELPÍDIO VIRGÍNIO CHAVES </option>
+                        <option value="Efetivo">SEDUC - Escola Municipal Francisco Aires Segundo </option>
+                        <option value="Efetivo">SEDUC - Escola Municipal Francisco Torquato Do Rêgo </option>
+                        <option value="Efetivo">SEDUC - ESCOLA MUNICIPAL PROFESSORA NILA RÊGO </option>
+                        <option value="Efetivo">SEDUC - Escola Municipal Professor Severino Bezerra </option>
+                        <option value="Efetivo">SEDUC - Escola Municipal São Benedito </option>
+                        <option value="Efetivo">SEDUC - Unidade De Ensino V Francelino Granjeiro </option>
+                        <option value="Efetivo">SEDUC - Unidade De Ensino Viii José Alves Pereira </option>
+                        <option value="Efetivo">SEDUC - Unidade De Ensino Xii Narcisia Amélia Do Nascimento </option>
+                        <option value="Efetivo">SEDUC - Biblioteca Indústria Do Conhecimento </option>
+                        <option value="Efetivo">SESAU - USF VEREADOR JOÃO QUEIROZ DE SOUZA </option>
+                        <option value="Efetivo">SESAU - USF ANTONIA BERNADETE COSMIRO </option>
+                        <option value="Efetivo">SESAU - USF CAETANO BEZERRA DO NASCIMENTO </option>
+                        <option value="Efetivo">SESAU - USF DANIEL GAMA DA SILVA </option>
+                        <option value="Efetivo">SESAU - USF DR. CLEODON CARLOS DE ANDRADE </option>
+                        <option value="Efetivo">SESAU - USF DR. PEDRO DIÓGENES JUNIOR </option>
+                        <option value="Efetivo">SESAU - USF DR. ALIATÁ CHAVES DE QUEIROZ </option>
+                        <option value="Efetivo">SESAU - USF MÃE CRISTINA </option>
+                        <option value="Efetivo">SESAU - USF MARIA FIEL DE SOUZA </option>
+                        <option value="Efetivo">SESAU - USF DR. JOSÉ EDMILSON DE HOLANDA </option>
+                        <option value="Efetivo">SESAU - USF VER. JOANA CACILDA DE BESSA </option>
+                        <option value="Efetivo">SESAU - USF MARIA LUCICLEIDE DE QUEIROZ DIAS </option>
+                        <option value="Efetivo">SESAU - LABORATÓRIO MUNICIPAL DE ANÁLISES CLÍNICAS </option>
+                        <option value="Efetivo">SESAU - CENTRAL DE ABASTECIMENTO FARMACEUTICO – CAF </option>
+                        <option value="Efetivo">SESAU - CENTRAL DE REGULAÇÃO DE SERVIÇOS DE SAÚDE </option>
+                        <option value="Efetivo">SESAU - CENTRO DE ESPECIALIDADES MÉDICA - CEM </option>
+                        <option value="Efetivo">SESAU - SEDE DA SECRETARIA MUNICIPAL DA SAÚDE </option>
+                        <option value="Efetivo">SESAU - CENTRO DE ESPECIALIDADES EM ODONTOLOGIA – CEO </option>
+                        <option value="Efetivo">SESAU - SERVIÇO DE ATENDIMENTO MÓVEL DE URGENCIA – SAMU </option>
+                        <option value="Efetivo">SESAU - VIGILÂNCIA EM SAÚDE </option>
+                        <option value="Efetivo">SESAU - POLO DE ACADEMIA </option>
+                        <option value="Efetivo">SESAU - CENTRO DE ATENÇÃO PSICOSSOCIAL (CAPS II) </option>
+                        <option value="Efetivo">SESAU - NÚCLEO DE CONTROLE AS ZOONOSES </option>
+                        <option value="Efetivo">SESAU - UNIDADE MÓVEL DE SAÚDE ANIMAL </option>
+                        <option value="Efetivo">SEDES - CRAS CENTRAL </option>
+                        <option value="Efetivo">SEDES - CRAS MANOEL DEODATO </option>
+                        <option value="Efetivo">SEDES - CRAS RIACHO DO MEIO </option>
+                        <option value="Efetivo">SEDES - CREAS </option>
+                        <option value="Efetivo">SEDES - ESCRITÓRIO SOCIAL </option>
+                        <option value="Efetivo">SEDES - CONSELHO TUTELAR </option>
+                        <option value="Efetivo">SEDES - SEDES </option>
+                    </select>
+
+
+                    <input required name="UT" id="UT"  placeholder="Digite sua de Unidade de Trabalho:">
+
+                    
+
+                </div>
+                <p id="form-requerimento">Serviços SEAD</p>
+
+                <input  required type="text" name="assunto" id="assunto" placeholder="Digite o assunto do protocolo">
+
+                <textarea id="protocolo" name="texto" id="texto" required placeholder="Digite o assunto do protocolo"></textarea>                       
+                <div class="form-part-3">
+
+                        <div class="y-n-field">
+                        <p>É preciso envio de alguma documentação??</p>
+                        <label for="def-1">
+                            <input required title="Sim" name="deficiencia" id="def-1" type="radio" value="true" onchange="mostrarDiv()">
+                            Sim
+                        </label>
+                        <label for="def-2">
+                            <input required title="Não" name="deficiencia" id="def-2" type="radio" value="false" onchange="mostrarDiv()">
+                            Não
+                        </label>
+                    </div>
+                </div>
+        
+                <div class="form-files">
+                    <div>
+                        <img src="../assets/Anexa documentos necessarios.svg">
+                        <input name="anexos" id="anexos" type="file" multiple>
+                        <p>* Apenas arquivos PDF</p>
+                    </div>
+                    <div>
+                        <input id="nome_documento" name="nome_documento" placeholder="Digite os documentos anexados">
+
+                    </div>
+                </div>
+   <script>
+        window.onload = function() {
+            mostrarDiv();
+        };
+
+        function mostrarDiv() {
+            var possuiDeficiencia = document.getElementById("def-1").checked;
+            var formFilesDiv = document.querySelector(".form-files");
+
+            if (possuiDeficiencia) {
+                formFilesDiv.style.display = "block";
+            } else {
+                formFilesDiv.style.display = "none"; 
+            }
+        }
+    </script> 
+
+                <div class="form-part-4">
+                    <div>
+                        <input required type="checkbox">
+                        <label>Declaro ter ciência das do protocolo sera enviado e avaliado pela SEAD.</label>    
+                    </div>
+                    <div>
+                        <input required type="checkbox">
+                        <label> Declaro que as informações prestadas são inteiramente verdadeiras.</label>                
+                    </div>
+                </div>
+    
+                <div class="captcha"></div>
+    
+                <button type="submit" id="botao">
+                    ENVIAR
+                </button>
+            </form>
+        </section>
+    </main>
+<footer>
+    <div>
+        <div>    
+            <img src="../assets/phone.png">
+            (84) 99858-6712
+        </div>
+        <div>
+        </div>
+        <div>
+            <img src="../assets/email.png">
+            protocolopmpf@gmail.com            
+        </div>
+    </div>
+    <div style="display: flex; align-items: center;">
+        <div>
+            <img src="../assets/Secretaria Municipal de Administração - SEAD.png" style="width: 100%; max-width: 200px; height: auto;">
+        </div>
+        <div>
+            <button class="login-btn" onclick="location.href='protocolo';">Login</button>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
+
+
+<style>
+    :root {
+    --gray-1: #CED4DA;
+    --gray-2: #6C757D;
+
+    --blue-1: #0DCAF0;
+    --blue-2: #024287;
+    --background: #013D86;
+
+    font-size: 16px;
+}
+
+.feedback {
+    color: white;
+    background-color: white;
+    
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translate(-50%);
+
+    padding: 10px;
+    border-radius: 8px;
+    display: none;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+    font-family: Roboto, sans-serif;
+    line-height: 1.5;
+}
+
+body {
+    background-color: var(--background);
+    background-image: url(../assets/background.jpg);
+    background-size: contain;
+}
+
+
+header {
+    background-color: #009640;
+    height: 48px;
+    width: 100%;
+    padding: 0 312px;
+    
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+header ul {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    gap: 10px;
+}
+
+header nav img {
+    width: 25px;
+    height: 25px;
+}
+
+header p {
+    color: White;
+    font-size: 16px;
+}
+
+header a {
+    display: inline-block;
+    font-size: 0;
+}
+
+header button {
+    color: white;
+    font-size: 20px;
+    border: none;
+    background: none;
+    font-family: Roboto, sans-serif;
+    font-weight: 700;
+    padding: 3px 10px 0 10pxF;
+}
+
+header div.user-options {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+div.form-header {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+div.form-header h1 {
+    margin-top: 20%;
+    color: white;
+    font-family: Viga, sans-serif;
+    line-height: 54px;
+    font-size: 34px;
+}
+
+div.form-header p {
+    color: white;
+    font-family: Roboto, sans-serif;
+    font-size: 24px;
+    margin: 18px 0 48px 0;
+}
+
+form {
+    width: 67.5%;
+    margin: auto;
+
+    padding: 40px 0 96px 0;
+}
+
+form input,
+select, div.multi-select {
+    width: 100%;
+    padding: 16px;
+    border: 1px solid var(--gray-1);
+    border-radius: 16px;
+    
+    background-color: white;
+
+    font-family: Montserrat, sans-serif;
+    font-size: 1rem;
+
+    outline: none;
+}
+#protocolo {
+    margin-top: 10px;
+    height: 500px;
+    width: 100%;
+    white-space: pre-wrap;
+    text-align: left; 
+    overflow-wrap: break-word;
+    padding: 6px;
+    border: 1px solid var(--gray-1);
+    border-radius: 6px;
+    
+    background-color: white;
+    background-image: linear-gradient(0deg, transparent 95%, rgba(0,0,0,0.1) 90%, rgba(0,0,0,0.1) 100%);
+    background-size: 100% 1.5em;
+
+    font-family: Montserrat, sans-serif;
+    font-size: 1rem;
+}
+#botao {
+    border-radius: 10px; /* Ajuste este valor para alterar o raio da borda */
+}
+#form-requerimento
+{
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        margin-top: 20%;
+        color: white;
+        font-family: Roboto, sans-serif;
+        font-size: 24px;
+        margin: 35px 0 12px 0;
+    }
+    
+select, option, input{
+    color: var(--blue-2);
+}
+
+select, option {
+    font-weight: 700;
+}
+
+form input::placeholder {
+    color: var(--gray-2);
+}
+
+form > input#name {
+    margin-bottom: 24px;
+}
+
+.form-part-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+}
+
+div.multi-select {
+    height: calc(1.5rem + 32px);
+
+    padding: 0;
+
+    position: relative;
+}
+
+div.multi-select > div {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    overflow-y: hidden;
+    display: flex;
+    flex-wrap: wrap;
+    border-radius: 16px;
+    padding: 0 8px;
+    gap: 8px;
+
+    background-color: white;
+}
+
+div.multi-select.open > div {
+    height: auto;
+    z-index: 10;
+    padding-top: calc(1.5rem + 16px);
+}
+
+div.multi-select span {
+    display: inline-block;
+    width: 1rem;
+    height: 100%;
+    flex: 1 0 100%;
+    order: -5;
+    display: flex;
+    align-items: center;
+    color: var(--gray-2);
+    padding: 0 0 0 8px;
+}
+
+div.multi-select.open span {
+    display: none;
+}
+
+div.multi-select label {
+    flex: 0 0 100%;
+    /* margin: 16px 0; */
+    padding: 0 8px;
+
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    color: var(--blue-2);
+}
+
+div.multi-select label input {
+    width: auto;
+    height: auto;
+}
+
+label.checked ~ span {
+    flex: 0 0 0px;
+    width: 0;
+    overflow: hidden;
+}
+
+div.multi-select:not(.open) label.checked {
+    border: 1px solid var(--blue-2);
+    flex-basis: auto;
+    height: auto;
+    align-self: center;
+    border-radius: 8px;
+
+    order: -10;
+}
+
+.form-part-3 {
+    display: flex;
+    gap: 15%;
+    color: white;
+    margin: 24px 0;
+}
+
+.form-part-3 label {
+    position: relative;
+    display: inline-block;
+    
+    padding: 8px 12px;
+    margin: 16px 6px 0 0;
+    border: 1px solid var(--blue-1);
+    border-radius: 6px;
+    color: var(--blue-1);
+}
+
+.form-part-3 label input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: auto;
+}
+
+
+div.form-files {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+div.form-files > div {    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex: 1 0 215px;
+}
+
+div.form-files p {
+    margin-top: 8px;
+    color: #DC3545;
+}
+
+div.form-files img {
+    aspect-ratio: auto;
+    height: 10rem;
+}
+
+.form-part-4 {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-part-4 input {
+    width: auto;
+    border-radius: 5px;
+    display: inline;
+}
+
+div.captcha {
+    margin-top: 88px;
+}
+
+button[type="submit"] {
+    width: 276px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #198754;
+    color: white;
+    border: none;
+    font-size: 50px;
+    margin: 24px auto 0 auto;
+    font-weight: 700;
+}
+
+footer {
+    font-size: 16px;
+}
+
+footer > div:nth-child(1) {
+    width: 100%;
+    background-color: #00A759;
+    
+    display: flex;
+    justify-content: center;
+}
+
+footer > div:nth-child(1) div {
+    height: 144px;
+    width: 440px;
+
+    background-color: #009851;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: white;
+    font-size: 20px;
+}
+
+footer > div:nth-child(1) img {
+    height: 32px;
+    aspect-ratio: auto;
+}
+
+footer > div:nth-child(1) div:nth-child(even) {
+    background-color: #008748;
+}
+
+footer > div:nth-child(2) {
+    width: 100%;
+    height: 90px;
+    background-color: white;
+    padding: 0 312px;
+    
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+footer > div:nth-child(2) img {
+    aspect-ratio: auto;
+    height: 70px;
+}
+
+
+#cpfInput,
+#verificarButton {
+    display: none;
+}
+
+@media (max-width: 1440px) {
+
+    footer > div:nth-child(2), header {
+        padding: 0 144px;
+    }
+
+    footer > div:nth-child(1) {
+        flex-direction: column;
+    }
+
+    footer > div:nth-child(1) div {
+        width: 100%;
+    }
+}
+
+@media (max-width: 1024px) {
+    footer > div:nth-child(2), header {
+        padding: 0 72px;
+    }
+
+    div.form-header h1 {
+        font-size: 48px;
+    }
+
+    div.form-header p {
+        font-size: 16px;
+    }
+
+    div.form-header img {
+        aspect-ratio: auto;
+        height: 300px;
+    }
+
+    div.form-files {
+        gap: 10px;
+    }
+
+    footer > div:nth-child(2) img {
+        height: 52px;
+    }
+
+    form {
+        width: 80%;
+    }
+}
+
+@media (max-width: 768px) {
+    footer > div:nth-child(2), header {
+        padding: 0 24px;
+    }
+
+    #alter-font {
+        display: none;
+    }
+
+    footer > div:nth-child(2) {
+        font-size: 12px;
+    }
+
+    div.form-header h1 {
+        font-size: 32px;
+    }
+
+    div.form-header p {
+        font-size: 12px;
+    }
+
+    div.form-header img {
+        height: 200px;
+    }
+
+    div.form-part-2, div.form-part-3, div.form-part-4, div.form-files {
+        display: flex;
+        flex-direction: column;
+    }
+
+    div.form-files > div {
+        width: 100%;
+        gap: 10px;
+    }
+
+    div.form-part-3 {
+        gap: 24px;
+    }
+
+    footer > div:nth-child(1) div {
+        height: 72px;
+        font-size: 14px;
+    }
+
+    footer > div:nth-child(2) img {
+        height: 44px;
+    }
+
+    button[type="submit"] {
+        width: 200px;
+        height: 90px;
+
+        font-size: 32px;
+    }
+}
+    
+</style>
