@@ -234,13 +234,13 @@
             background-color: #009640;
             color: #fff;
         }
-/* Desktop Styles (Unchanged) */
+
 .progressbar {
   counter-reset: step;
   display: flex;
   justify-content: space-between;
   margin-bottom: 60px;
-  padding: 0 20px; /* Restore original padding for desktop */
+  padding: 0 20px; 
 }
 
 .progressbar li {
@@ -252,31 +252,31 @@
   color: #555;
 }
 
-/* ... (rest of the desktop styles remain the same) ... */
 
 
-/* Mobile Styles (New/Modified) */
-@media (max-width: 767px) { /* Adjust breakpoint as needed */
+
+
+@media (max-width: 767px) { 
   .progressbar {
-    flex-direction: column; /* Stack items vertically */
-    align-items: flex-start; /* Align to the left */
+    flex-direction: column; 
+    align-items: flex-start; 
   }
 
   .progressbar li {
-    flex: none; /* Remove flex-grow so items don't stretch */
-    width: 100%; /* Make each item take full width */
+    flex: none; 
+    width: 100%; 
     margin-bottom: 20px;
-    text-align: left; /* Align text to the left */
+    text-align: left; 
   }
 
   .progressbar li:before {
-    float: left; /* Float the circle to the left */
-    margin-right: 15px; /* Add spacing between circle and text */
+    float: left; 
+    margin-right: 15px; 
   }
 
   .progressbar li:after {
-    left: 35px; /* Adjust line position to start after the circle */
-    top: 13px; /* Fine-tune vertical alignment */
+    left: 35px; 
+    top: 13px; 
   }
 }
 
@@ -470,14 +470,11 @@
             function saveFormData() {
     const allVehicleData = [];
 
-    // Iterar sobre todos os formulários de veículos
     for (let i = 1; i <= contadorVeiculos; i++) {
         const vehicleData = {};
 
-        // Extrair dados do formulário atual
         vehicleData["Veículo"] = "Veículo " + i;
 
-        // Adicionar danos do veículo de forma diferente
         const danosVeiculo = [];
         if (document.getElementsByClassName('damage-button')[i * 6 - 6].classList.contains('selected')) {
             danosVeiculo.push("dianteira direita");
@@ -499,7 +496,6 @@
         }
         vehicleData["Danos no Veículo"] = danosVeiculo.join(", ") || "Nenhum dano marcado";
 
-        // Adicionar outros dados do veículo
         vehicleData["Houve danos ao sistema de segurança, freios, direção ou de suspensão do veículo?"] = document.getElementById('seguranca_checkbox' + i).checked;
         vehicleData["Houve danos na carga do veículo?"] = document.getElementById('carga_checkbox' + i).checked;
         vehicleData["Nº das Notas Fiscais, Manifestos ou Equivalentes"] = document.getElementById('notas_fiscais' + i).value;
@@ -509,14 +505,11 @@
         vehicleData["Seguro"] = document.getElementById('seguro_checkbox' + i).checked;
         vehicleData["Seguradora"] = document.getElementById('seguradora' + i).value;
 
-        // Adicionar dados do veículo ao array
         allVehicleData.push(vehicleData);
     }
 
-    // Armazenar dados no armazenamento local
     localStorage.setItem('formData3', JSON.stringify(allVehicleData));
 
-    // Redirecionar para a próxima página
     window.location.href = 'form4.html';
 }
 

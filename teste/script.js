@@ -4,9 +4,8 @@ const inputs = document.querySelectorAll('.google-form-container .input-field in
 form.addEventListener('submit', (event) => {
   event.preventDefault();
 
-  // Lógica para validação e envio do formulário (exemplo)
   if (validateForm()) {
-    // Enviar dados do formulário (AJAX, fetch, etc.)
+
     alert('Formulário enviado com sucesso!');
     form.reset();
   }

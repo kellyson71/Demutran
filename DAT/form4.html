@@ -327,8 +327,7 @@
         console.log('Terceiro Formulário:', formData3);
         const narrativeDiv = document.querySelector('.narrative');
         narrativeDiv.innerHTML = "<strong>Narrativa gerada pelo sistema:</strong><br>";
-        
-        // Adicionando os dados do primeiro formulário
+
         narrativeDiv.innerHTML += "<p><strong>Dados do primeiro formulário:</strong></p>";
         for (const key in formData) {
             if (formData[key] !== "") {
@@ -336,8 +335,7 @@
                 narrativeDiv.innerHTML += `<p><strong>${key}:</strong> ${value}</p>`;
             }
         }
-        
-        // Adicionando os dados do segundo formulário
+
         narrativeDiv.innerHTML += "<p><strong>Dados do segundo formulário:</strong></p>";
         for (const key in formData2) {
             if (formData2[key] !== "") {
@@ -345,8 +343,7 @@
                 narrativeDiv.innerHTML += `<p><strong>${key}:</strong> ${value}</p>`;
             }
         }
-        
-        // Adicionando os dados do terceiro formulário
+
         narrativeDiv.innerHTML += "<p><strong>Dados do terceiro formulário:</strong></p>";
         formData3.forEach((data, index) => {
             narrativeDiv.innerHTML += `<p><strong>Veículo ${index + 1}:</strong></p>`;

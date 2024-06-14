@@ -16,10 +16,9 @@
     </form>
 
     <script>
-        // Cria ou recupera o objeto de dados compartilhado
+
         var formData = JSON.parse(localStorage.getItem('formData')) || {};
 
-        // Preenche os campos se houver dados no localStorage
         document.getElementById('nome').value = formData.nome || '';
         document.getElementById('email').value = formData.email || '';
 

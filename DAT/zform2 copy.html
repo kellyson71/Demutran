@@ -1,4 +1,4 @@
-<!-- Formulário de Acidente de Trânsito -->
+
 
 
 <!DOCTYPE html>
@@ -461,7 +461,7 @@
                 <option value="Virando_esquerda">Virava à esquerda</option>
             </select>
 
-            <!-- Outros campos do formulário aqui -->
+            
 
             <input id="submit-acidente" type="submit" value="Enviar">
         </form>
@@ -483,7 +483,6 @@
 
         formDeclarante.addEventListener('submit', function(event) {
             event.preventDefault();
-            // Esconder o formulário do declarante e mostrar o formulário de acidente
             formDeclarante.classList.add('hidden');
             formAcidente.classList.remove('hidden');
         });

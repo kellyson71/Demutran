@@ -16,15 +16,13 @@
     </form>
 
     <script>
-        // Recupera o objeto de dados compartilhado
+
         var formData = JSON.parse(localStorage.getItem('formData')) || null;
 
-        // Se não houver dados no localStorage, redireciona para o Formulário 1
         if (!formData || !formData.nome || !formData.email) {
             window.location.href = 'form1.html';
         }
 
-        // Preenche os campos se houver dados no localStorage
         document.getElementById('idade').value = formData.idade || '';
         document.getElementById('cidade').value = formData.cidade || '';
 

@@ -1,4 +1,4 @@
-/* Estilos gerais do corpo */
+
 body {
     font-family: 'Roboto', sans-serif;
     display: flex;
@@ -8,7 +8,7 @@ body {
     background-color: #f5f5f5;
   }
   
-  /* Estilos do container do formulário */
+  
   .google-form-container {
     background-color: #fff;
     padding: 30px;
@@ -17,17 +17,17 @@ body {
     width: 400px;
   }
   
-  /* Estilos do título */
+  
   .google-form-container h2 {
     text-align: center;
     margin-bottom: 20px;
     color: #333;
   }
   
-  /* Estilos dos campos de input */
+  
   .google-form-container .input-field {
     position: relative;
-    margin-bottom: 30px; /* Aumentamos o espaço para 30px */
+    margin-bottom: 30px; 
   }
   .google-form-container input,
   .google-form-container textarea {
@@ -74,7 +74,7 @@ body {
     transform: scaleX(1);
   }
   
-  /* Estilos do botão */
+  
   .google-form-container button {
     background-color: rgb(250, 206, 9);
     color: #fff;
@@ -90,7 +90,7 @@ body {
     background-color: rgb(220, 178, 7);
   }
   
-  /* Responsividade */
+  
   @media (max-width: 600px) {
     .google-form-container {
       width: 90%;
