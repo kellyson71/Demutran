@@ -454,8 +454,8 @@
     </script>
 <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const storedFormData = localStorage.getItem('formData');
-                const storedformData3 = localStorage.getItem('formData3');
+                const storedFormData = sessionStorage.getItem('formData');
+                const storedformData3 = sessionStorage.getItem('formData3');
                 
                 if (storedFormData) {
                     const formData = JSON.parse(storedFormData);
@@ -464,7 +464,7 @@
                     console.log('Dados do primeiro formulário:', formData);
                     console.log('Dados do segundo formulário:', formData3);
                 } else {
-                    console.log('Nenhum dado encontrado no localStorage.');
+                    console.log('Nenhum dado encontrado no sessionStorage.');
                 }
             });
             function saveFormData() {
@@ -514,7 +514,7 @@
     }
 
     // Armazenar dados no armazenamento local
-    localStorage.setItem('formData3', JSON.stringify(allVehicleData));
+    sessionStorage.setItem('formData3', JSON.stringify(allVehicleData));
 
     // Redirecionar para a próxima página
     window.location.href = 'form4.html';

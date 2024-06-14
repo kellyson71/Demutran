@@ -314,9 +314,9 @@
                 }
             }
             document.addEventListener('DOMContentLoaded', function() {
-    const storedFormData = localStorage.getItem('formData');
-    const storedFormData2 = localStorage.getItem('formData2');
-    const storedFormData3 = localStorage.getItem('formData3');
+    const storedFormData = sessionStorage.getItem('formData');
+    const storedFormData2 = sessionStorage.getItem('formData2');
+    const storedFormData3 = sessionStorage.getItem('formData3');
     
     if (storedFormData) {
         const formData = JSON.parse(storedFormData);
@@ -358,7 +358,7 @@
             }
         });
     } else {
-        console.log('Nenhum dado encontrado no localStorage.');
+        console.log('Nenhum dado encontrado no sessionStorage.');
     }
 });
 

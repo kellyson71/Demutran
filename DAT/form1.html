@@ -412,8 +412,6 @@ nav ul li a img {
     
         <script>
             function saveFormData() {
-                localStorage.clear(); 
-
                 const form = document.getElementById('accidentForm');
                 const formData = new FormData(form);
                 const formObject = {};
@@ -422,7 +420,7 @@ nav ul li a img {
                     formObject[key] = value;
                 });
 
-                localStorage.setItem('formData', JSON.stringify(formObject));
+                sessionStorage.setItem('formData', JSON.stringify(formObject));
                 window.location.href = 'form2.html';
             }
 

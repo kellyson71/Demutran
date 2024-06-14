@@ -631,14 +631,14 @@
                     documentoEstrangeiroDiv.style.display = this.checked ? 'block' : 'none';
                 });
             document.addEventListener('DOMContentLoaded', function() {
-                const storedFormData = localStorage.getItem('formData');
+                const storedFormData = sessionStorage.getItem('formData');
                 
                 if (storedFormData) {
                     const formData = JSON.parse(storedFormData);
                     
                     console.log('Dados do primeiro formulário:', formData);
                 } else {
-                    console.log('Nenhum dado encontrado no localStorage.');
+                    console.log('Nenhum dado encontrado no sessionStorage.');
                 }
             });
 
@@ -658,8 +658,9 @@
 
             formData2['selectedParts'] = selectedParts;
 
-            localStorage.setItem('formData2', JSON.stringify(formData2));
-            window.location.href = 'form3.html';
+            sessionStorage.setItem('formData2', JSON.stringify(formData2));
+            console.log('Dados do segundo formulário:', formData2);
+            // window.location.href = 'form3.html';
 
         }
 
