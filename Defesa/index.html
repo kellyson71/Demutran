@@ -1,213 +1,296 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Defesa Prévia DEMUTRAN</title>
-    <link rel="stylesheet" href="./style.css">
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Solicitação DEMUTRAN</title>
+    <!-- Inclua o Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inclua o Bootstrap para modais, se necessário -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Inclua o Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
-<style>
-    select {
-        position: relative;
-        padding-right: 30px;
-        background: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><polygon fill="%23009640" points="5,7 10,12 15,7"/></svg>') no-repeat right center;
-        background-size: 15px;
-    }
+<body class="min-h-screen bg-gray-100">
+    <!-- Topbar -->
+    <header class="bg-green-600 text-white shadow-md w-full fixed top-0 left-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <!-- Logo -->
+            <div class="text-lg font-semibold">
+                <a href="../" class="hover:text-green-300">DEMUTRAN</a>
+            </div>
 
-    select:focus {
-        border-bottom: 1px solid #00C851;
-    }
+            <!-- Links -->
+            <nav class="hidden md:flex space-x-6">
+                <a href="../PCD/index.html" class="hover:text-green-300">Cartão Vaga Especial</a>
+                <a href="../Defesa/index.html" class="hover:text-green-300">Defesa Prévia/JARI</a>
+                <a href="../DAT/index.php" class="hover:text-green-300">DAT</a>
+                <a href="../contato/index.html" class="hover:text-green-300">Contato</a>
+            </nav>
 
-    select:focus ~ .underline {
-        transform: scaleX(1);
-    }
+            <!-- Mobile menu button -->
+            <div class="md:hidden">
+                <button id="menu-btn" class="text-white focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" 
+                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" 
+                            stroke-linejoin="round" stroke-width="2" 
+                            d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
 
-    .input-field {
-        position: relative;
-    }
-
-    .input-field select {
-        background-position: calc(100% - 10px) center;
-    }
-
-    select:focus ~ label,
-    select:valid ~ label {
-        top: -20px;
-        left: 0;
-        font-size: 12px;
-        color: #00C851;
-    }
-
-    .input-field select ~ .underline {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 2px;
-        background-color: #00C851;
-        transform: scaleX(0);
-        transition: transform 0.3s ease-in-out;
-    }
-</style>
-
-<body>
-    <div class="feedback" id="feedback"></div>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="https://www.instagram.com/prefeituradepaudosferros/"><img src="../assets/instagram.png" alt="Instagram"></a></li>
-                <li><a href="https://www.facebook.com/prefeituradepaudosferros/"><img src="../assets/facebook.png" alt="Facebook"></a></li>
-                <li><a href="https://twitter.com/paudosferros"><img src="../assets/twitter.png" alt="Twitter"></a></li>
-                <li><a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros"><img src="../assets/youtube.png" alt="YouTube"></a></li>
-                <li><a href="https://wa.me/558499440704"><img src="../assets/copy-url.png" alt="URL"></a></li>
-            </ul>
-        </nav>
-        <div class="user-options">
-            <!-- <p id="alter-font">Tamanho da fonte</p>
-            <button onclick="increaseFont()">A+</button>
-            <p>|</p>
-            <button onclick="decreaseFont()">A-</button> -->
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-green-600">
+            <a href="../PCD/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Cartão Vaga Especial</a>
+            <a href="../Defesa/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Defesa Prévia/JARI</a>
+            <a href="../DAT/index.php" class="block px-4 py-2 text-white hover:bg-green-500">DAT</a>
+            <a href="../contato/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Contato</a>
         </div>
     </header>
-    <div class="topbar-secondary">
-        <div class="container_bar">
-            <a href="../index.html">Início</a> > <a href="https://paudosferros.rn.gov.br/secretaria.php?sec=19">Demutran – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</a>
-            <span class="separator"> | </span>
-            <a href="https://paudosferros.rn.gov.br/lai.php">Acesso à Informação</a> - <a href="https://paudosferros.rn.gov.br/omunicipio.php">Sobre a Prefeitura</a>
+
+    <!-- Conteúdo Principal -->
+    <div class="pt-24 flex justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">
+
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="far fa-edit"></i> Solicitação DEMUTRAN
+            </h2>
+            <p class="text-gray-600 mb-6">
+                <strong>Documentos necessários para apresentação de Defesa Prévia: 
+a) Requerimento da Defesa datada e assinada; 
+b) Cópia da CNH ou outro documento de identificação que comprove a assinatura que consta no requerimento do Recurso. Quando o requerente for representado, apresentar também a cópia do documento de identificação do representante legal. E, quando pessoa jurídica, apresentar também ato constitutivo da empresa; 
+c) Cópia do CRLV; 
+d) Cópia da Notificação da Penalidade;
+e) Procuração, quando for o caso; 
+f) Outros documentos que considerar necessários para apoiar as alegações da Defesa. 
+A Defesa prévia deverá ser preenchida, assinada, e entregue junto com os demais documentos acima relacionados, ou enviada pelos Correios para o endereço: 
+Av. Dom Pedro II nº 1121, Centro – Pau dos Ferros/RN CEP: 59900 - 000
+.</strong>
+            </p>
+
+            <form id="DefesaForm" method="post" enctype="multipart/form-data">
+                <!-- Tipo da Solicitação -->
+                <div class="mb-4">
+                    <label for="tipo_solicitacao" class="block text-gray-700 mb-2">
+                        <i class="fas fa-list"></i> Tipo da Solicitação:
+                    </label>
+                    <select id="tipo_solicitacao" name="tipo_solicitacao" 
+                        class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <option value="" disabled selected></option>
+                        <option value="defesa_previa">Defesa Prévia</option>
+                        <option value="apresentacao_condutor">Apresentação do Condutor</option>
+                        <option value="jari">JARI</option>
+                    </select>
+                </div>
+
+                <!-- Formulário Normal -->
+                <div id="form_normal">
+                    <!-- Nome -->
+                    <div class="mb-4">
+                        <label for="nome" class="block text-gray-700 mb-2">
+                            <i class="fas fa-user"></i> Seu nome:
+                        </label>
+                        <input type="text" id="nome" name="nome"
+                            class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+
+                    <!-- Telefone -->
+                    <div class="mb-4">
+                        <label for="telefone" class="block text-gray-700 mb-2">
+                            <i class="fas fa-phone"></i> Telefone Para Contato:
+                        </label>
+                        <input type="tel" id="telefone" name="telefone"
+                            class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-4">
+                        <label for="email" class="block text-gray-700 mb-2">
+                            <i class="fas fa-envelope"></i> Seu e-mail:
+                        </label>
+                        <input type="email" id="email" name="email"
+                            class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+
+                    <!-- Assunto -->
+                    <div class="mb-4">
+                        <label for="assunto" class="block text-gray-700 mb-2">
+                            <i class="fas fa-comment"></i> Assunto:
+                        </label>
+                        <input type="text" id="assunto" name="assunto"
+                            class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+
+                    <div class="mb-4">
+                        <p class="text-gray-600 mb-2">Apenas em PDF*</p>
+                    </div>
+
+                    <!-- Upload de Arquivos -->
+                    <div class="mb-4">
+                        <label for="doc_requerimento" class="block text-gray-700 mb-2">
+                            <i class="far fa-file-alt"></i> Anexar formulário preenchido e assinado:
+                        </label>
+                        <input type="file" id="doc_requerimento" name="doc_requerimento" accept=".pdf"
+                            class="w-full">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="cnh" class="block text-gray-700 mb-2">
+                            <i class="fas fa-id-card"></i> Anexar CNH, documento do proprietário ou CONDUTOR:
+                        </label>
+                        <input type="file" id="cnh" name="cnh" accept=".pdf"
+                            class="w-full">
+                    </div>
+
+                    <!--<div class="mb-4">-->
+                    <!--    <label for="cnh_condutor" class="block text-gray-700 mb-2">-->
+                    <!--        <i class="far fa-file"></i> Anexar CNH ou documento do CONDUTOR:-->
+                    <!--    </label>-->
+                    <!--    <input type="file" id="cnh_condutor" name="cnh_condutor" accept=".pdf"-->
+                    <!--        class="w-full">-->
+                    <!--</div>-->
+
+                    <div class="mb-4">
+                        <label for="notif_DEMUTRAN" class="block text-gray-700 mb-2">
+                            <i class="far fa-file"></i> Anexar NOTIFICAÇÃO DEMUTRAN:
+                        </label>
+                        <input type="file" id="notif_DEMUTRAN" name="notif_DEMUTRAN" accept=".pdf"
+                            class="w-full">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="crlv" class="block text-gray-700 mb-2">
+                            <i class="fas fa-car"></i> Anexar CRLV (Certificado de Registro e Licenciamento do Veículo):
+                        </label>
+                        <input type="file" id="crlv" name="crlv" accept=".pdf"
+                            class="w-full">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="comprovante_residencia" class="block text-gray-700 mb-2">
+                            <i class="far fa-address-card"></i> Anexar Comprovante de Residência (Caso não for proprietário):
+                        </label>
+                        <input type="file" id="comprovante_residencia" name="comprovante_residencia" accept=".pdf"
+                            class="w-full">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="doc_complementares" class="block text-gray-700 mb-2">
+                            <i class="far fa-file"></i> Adicione Documentos Complementares:
+                        </label>
+                        <input type="file" id="doc_complementares" name="doc_complementares[]" multiple accept=".pdf"
+                            class="w-full">
+                    </div>
+
+                    <!-- Descrição -->
+                    <div class="mb-4">
+                        <label for="descricao" class="block text-gray-700 mb-2">
+                            <i class="fas fa-comment-alt"></i> Descreva sua Solicitação:
+                        </label>
+                        <textarea id="descricao" name="descricao" rows="4"
+                            class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
+                    </div>
+
+                    <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                        Enviar
+                    </button>
+                </div>
+
+                <!-- Campo específico para Apresentação do Condutor -->
+                <div id="notif_DEMUTRAN_field" class="hidden">
+                    <div class="mb-4">
+                        <label for="notif_DEMUTRAN" class="block text-gray-700 mb-2">
+                            <i class="far fa-file"></i> Anexar NOTIFICAÇÃO DEMUTRAN (preenchida e assinada):
+                        </label>
+                        <input type="file" id="notif_DEMUTRAN" name="notif_DEMUTRAN" accept=".pdf"
+                            class="w-full">
+                    </div>
+            <div id="feedback" class="hidden"></div>
+                    <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                        Enviar
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-    <div class="form-container">
-        <h2><i class="far fa-edit"></i><span> Solicitação DEMUTRAN</span></h2>
-        <p style="padding-bottom: 40px;"><strong>Preencha todos os dados para podermos dar continuidade a sua solicitação.</strong></p>
-        <form id="solicitacaoForm" action="submit.php" method="post" enctype="multipart/form-data">
-            <div class="input-field">
-                <select id="tipo_solicitacao" name="tipo_solicitacao" required>
-                    <option value="" disabled selected></option>
-                    <option value="defesa_previa">Defesa Prévia</option>
-                    <option value="apresentacao_condutor">Apresentação do Condutor</option>
-                    <option value="jari">JARI</option>
-                </select>
-                <label for="tipo_solicitacao" style="top: -20px;"><i class="fas fa-list"></i> TIPO DA SOLICITAÇÃO</label>
-                <div class="underline"></div>
-            </div>
-            <div id="form_normal">
-                <div class="input-field">
-                    <input type="text" id="nome" name="nome" required>
-                    <label for="nome"><i class="fas fa-user"></i> Seu nome:</label>
-                    <div class="underline"></div>
-                </div>
-                <div class="input-field">
-                    <input type="tel" id="telefone" name="telefone" required>
-                    <label for="telefone"><i class="fas fa-phone"></i> Telefone Para Contato:</label>
-                    <div class="underline"></div>
-                </div>
-                <div class="input-field">
-                    <input type="email" id="email" name="email" required>
-                    <label for="email"><i class="fas fa-envelope"></i> Seu e-mail:</label>
-                    <div class="underline"></div>
-                </div>
-                <div class="input-field">
-                    <input type="text" id="assunto" name="assunto" required>
-                    <label for="assunto"><i class="fas fa-comment"></i> Assunto:</label>
-                    <div class="underline"></div>
-                </div>
-                <div>
-                    <h1 style="font-size: 15px; margin-bottom: 30px; font-family: 'Roboto', sans-serif; color: #6C757D;">apenas em pdf*</h1>            
-                </div>
-                <div class="input-field">
-                    <input type="file" id="doc_requerimento" name="doc_requerimento">
-                    <label for="doc_requerimento"><i class="far fa-file-alt"></i> Anexar formulário preenchido e assinado:</label>
-                    <div class="underline"></div>
-                </div>
-                <div class="input-field">
-                    <input type="file" id="cnh" name="cnh">
-                    <label for="cnh"><i class="fas fa-id-card"></i> Anexar CNH (Carteira Nacional de Habilitação) ou documento do proprietario:</label>
-                    <div class="underline"></div>
-                </div>
-                <div class="input-field">
-                    <input type="file" id="cnh_condutor" name="cnh_condutor">
-                    <label for="cnh_condutor"><i class="far fa-file"></i> Anexar CNH (Carteira Nacional de Habilitação) ou documento do CONDUTOR:</label>
-                    <div class="underline"></div>
-                </div>
-                <div class="input-field">
-                    <input type="file" id="notif_DEMUTRAN" name="notif_DEMUTRAN">
-                    <label for="notif_DEMUTRAN"><i class="far fa-file"></i> Anexar NOTIFICAÇÃO DEMUTRAN:</label>
-                    <div class="underline"></div>
-                </div>
-                <div class="input-field">
-                    <input type="file" id="crlv" name="crlv">
-                    <label for="crlv"><i class="fas fa-car"></i> Anexar CRLV (Certificado de Registro e Licenciamento do Veículo):</label>
-                    <div class="underline"></div>
-                </div>
-                <div class="input-field">
-                    <input type="file" id="comprovante_residencia" name="comprovante_residencia">
-                    <label for="comprovante_residencia"><i class="far fa-address-card"></i> Anexar COMPROVANTE DE RESIDÊNCIA (Caso não for proprietario):</label>
-                    <div class="underline"></div>
-                </div>
-                <div class="input-field">
-                    <input type="file" id="doc_complementares" name="doc_complementares" multiple>
-                    <label for="doc_complementares"><i class="far fa-file"></i> Adicione Documentos Complementares:</label>
-                    <div class="underline"></div>
-                </div>
-                <div class="input-field">
-                    <textarea id="descricao" name="descricao" rows="4" required></textarea>
-                    <label for="descricao"><i class="fas fa-comment-alt"></i> Descreva sua Solicitação:</label>
-                    <div class="underline"></div>
-                </div>
-                <button type="submit">Enviar</button>
-            </div>
-            <div class="input-field" id="notif_DEMUTRAN_field" style="display: none;">
-                <input type="file" id="notif_DEMUTRAN" name="notif_DEMUTRAN">
-                <label for="notif_DEMUTRAN"><i class="far fa-file"></i> Anexar NOTIFICAÇÃO DEMUTRAN (preenchida e assina):</label>
-                <div class="underline"></div>
-                <button style="margin-top: 5px;" type="submit">Enviar</button>
 
-            </div>
-        </form>
-    </div>
+    <!-- Scripts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inclua o Bootstrap JS para modais (se necessário) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
+        // Script para alternar o menu mobile
+        const menuBtn = document.getElementById("menu-btn");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        menuBtn.addEventListener("click", () => {
+            mobileMenu.classList.toggle("hidden");
+        });
+
+        // Mostrar ou ocultar partes do formulário com base no tipo de solicitação
         document.getElementById('tipo_solicitacao').addEventListener('change', function() {
             var formNormal = document.getElementById('form_normal');
             var notifDEMUTRANField = document.getElementById('notif_DEMUTRAN_field');
 
             if (this.value === 'apresentacao_condutor') {
-                formNormal.style.display = 'none';
-                notifDEMUTRANField.style.display = 'block';
+                formNormal.classList.add('hidden');
+                notifDEMUTRANField.classList.remove('hidden');
             } else {
-                formNormal.style.display = 'block';
-                notifDEMUTRANField.style.display = 'none';
+                formNormal.classList.remove('hidden');
+                notifDEMUTRANField.classList.add('hidden');
             }
         });
 
-        document.getElementById('solicitacaoForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Impede o envio do formulário
-
-            var formData = new FormData(this); // Cria um objeto FormData com os dados do formulário
-            var formObj = {};
-
-            formData.forEach(function(value, key) {
-                formObj[key] = value;
+        // Envio do formulário
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById("DefesaForm");
+            form.addEventListener("submit", function(event) {
+                event.preventDefault();
+                submitForm();
             });
-
-            fetch('submit.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formObj)
-            }).then(response => response.json())
-              .then(data => {
-                  if (data.status === 'success') {
-                      alert('Formulário enviado com sucesso!');
-                  } else {
-                      alert('Erro ao enviar o formulário.');
-                  }
-              }).catch(error => {
-                  console.error('Erro:', error);
-                  alert('Erro ao enviar o formulário.');
-              });
         });
+
+        function submitForm() {
+            const form = document.getElementById("DefesaForm");
+            const formData = new FormData(form);
+
+            // Verificação dos arquivos PDF
+            for (let [key, value] of formData.entries()) {
+                if (value instanceof File && value.name !== "" && value.type !== "application/pdf") {
+                    alert("Todos os arquivos devem estar no formato PDF.");
+                    return;
+                }
+            }
+
+            fetch("processa_formulario.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                const feedback = document.getElementById("feedback");
+                feedback.innerHTML = data;
+                feedback.classList.add("bg-green-100", "text-green-700", "p-4", "rounded", "mb-4");
+                feedback.classList.remove("hidden");
+
+                setTimeout(() => {
+                    feedback.classList.add("hidden");
+                }, 5000);
+            })
+            .catch(error => {
+                const feedback = document.getElementById("feedback");
+                feedback.innerHTML = "Ocorreu um erro ao enviar o formulário.";
+                feedback.classList.add("bg-red-100", "text-red-700", "p-4", "rounded", "mb-4");
+                feedback.classList.remove("hidden");
+
+                setTimeout(() => {
+                    feedback.classList.add("hidden");
+                }, 5000);
+            });
+        }
     </script>
 </body>
 </html>

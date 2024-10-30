@@ -1,90 +1,185 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Defesa Prévia DEMUTRAN</title>
-    <link rel="stylesheet" href="../pages css/style.css">
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contato DEMUTRAN</title>
+    <!-- Inclua o Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inclua o Bootstrap para modais, se necessário -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Inclua o Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
 </head>
-<body>
-    <div class="feedback" id="feedback">
-        
-    </div>
-    <header>
-        <nav>
-            <ul>
-                <a>
-                    <li><a href="https://www.instagram.com/prefeituradepaudosferros/">
-                        <img src="../assets/instagram.png">
-                        </a>
-                    </li>
-                </a>
-                <a>
-                    <li><a href="https://www.facebook.com/prefeituradepaudosferros/">
-                        <img src="../assets/facebook.png">
-                        </a>
-                </a>
-                <a>
-                    <li><a href="https://twitter.com/paudosferros">
-                        <img src="../assets/twitter.png">
-                        </a>
-                </a>
-                <a>
-                    <li><a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros">
-                        <img src="../assets/youtube.png">
-                        </a>
-                </a>
-                <a>
-                    <li><a href="https://wa.me/558499440704">
-                        <img src="../assets/copy-url.png" style="border-radius: 100%;">                        </a>
-                </a>
-            </ul>
-        </nav>
-    
-        <div class="user-options">
-            <p id="alter-font">Tamanho da fonte</p>
-            <button onclick="increaseFont()">A+</button>
-            <p>|</p>
-            <button onclick="decreaseFont()">A-</button>
-        </div>
-            
-        </header>
-        
-        
-        <div class="topbar-secondary">
-            <div class="container_bar">
-                <a href="../index.html">Início</a> > <a href="https://paudosferros.rn.gov.br/secretaria.php?sec=19">Demutran – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</a>
-                <span class="separator"> | </span>
-                <a href="https://paudosferros.rn.gov.br/lai.php">Acesso à Informação</a> - <a href="https://paudosferros.rn.gov.br/omunicipio.php">Sobre a Prefeitura</a>
+<body class="min-h-screen bg-gray-100">
+    <!-- Topbar -->
+    <header class="bg-green-600 text-white shadow-md w-full fixed top-0 left-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <!-- Logo -->
+            <div class="text-lg font-semibold">
+                <a href="../" class="hover:text-green-300">DEMUTRAN</a>
+            </div>
+
+            <!-- Links -->
+            <nav class="hidden md:flex space-x-6">
+                <a href="../PCD/index.html" class="hover:text-green-300">Cartão Vaga Especial</a>
+                <a href="../Defesa/index.html" class="hover:text-green-300">Defesa Prévia/JARI</a>
+                <a href="../DAT/index.php" class="hover:text-green-300">DAT</a>
+                <a href="../contato/index.html" class="hover:text-green-300">Contato</a>
+            </nav>
+
+            <!-- Mobile menu button -->
+            <div class="md:hidden">
+                <button id="menu-btn" class="text-white focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" 
+                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" 
+                            stroke-linejoin="round" stroke-width="2" 
+                            d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
             </div>
         </div>
-        <div class="container">
-            <h2><i class="fas fa-envelope"></i> Contatos DEMUTRAN</h2>
-            <p>Departamento Municipal de Trânsito e Transporte – DEMUTRAN</p>
-            <p><i class="fas fa-map-marker-alt"></i> Endereço: Rua Barão do Rio Branco, 17 CEP 59.500-000 – Centro – Macau-RN</p>
-            <p><i class="fas fa-phone-alt"></i> Telefone: (84) 3521-6650</p>
-            <p><i class="fab fa-whatsapp"></i> Whatsapp: (84) 9944-0704</p>
-            <p><i class="far fa-envelope"></i> E-mail: DEMUTRAN@macau.gov.rn.br</p>
-            <form action="#" method="post">
-                <label for="nome"><i class="fas fa-user"></i> Seu nome:</label>
-                <input type="text" id="nome" name="nome" required>
-    
-                <label for="telefone"><i class="fas fa-phone"></i> Telefone Para Contato:</label>
-                <input type="tel" id="telefone" name="telefone" required>
-    
-                <label for="email"><i class="fas fa-envelope"></i> Seu e-mail:</label>
-                <input type="email" id="email" name="email" required>
-    
-                <label for="assunto"><i class="fas fa-comment"></i> Assunto:</label>
-                <input type="text" id="assunto" name="assunto" required>
-    
-                <label for="mensagem"><i class="fas fa-comment"></i> Sua mensagem (opcional):</label>
-                <textarea id="mensagem" name="mensagem" placeholder="Digite sua mensagem aqui..."></textarea>
-    
-                <input type="submit" value="Enviar">
+
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-green-600">
+            <a href="../PCD/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Cartão Vaga Especial</a>
+            <a href="../Defesa/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Defesa Prévia/JARI</a>
+            <a href="../DAT/index.php" class="block px-4 py-2 text-white hover:bg-green-500">DAT</a>
+            <a href="../contato/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Contato</a>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <div class="pt-24 flex justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">
+
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-envelope"></i> Contato DEMUTRAN
+            </h2>
+
+            <p class="text-gray-600 mb-6">
+                Preencha o formulário abaixo para entrar em contato conosco.
+            </p>
+
+            <!-- Informações de Contato -->
+            <div class="mb-6">
+                <p><i class="fas fa-map-marker-alt"></i> <strong>Endereço:</strong> Rua Barão do Rio Branco, 17 CEP 59.500-000 – Centro – Pau dos Ferros-RN</p>
+                <p><i class="fas fa-phone-alt"></i> <strong>Telefone:</strong> (84) 3521-6650</p>
+                <p><i class="fab fa-whatsapp"></i> <strong>Whatsapp:</strong> (84) 9944-0704</p>
+                <p><i class="far fa-envelope"></i> <strong>E-mail:</strong> demutran@paudosferros.rn.gov.br</p>
+            </div>
+
+            <form id="contatoForm" method="post">
+                <!-- Nome -->
+                <div class="mb-4">
+                    <label for="nome" class="block text-gray-700 mb-2">
+                        <i class="fas fa-user"></i> Seu nome:
+                    </label>
+                    <input type="text" id="nome" name="nome" required
+                        class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <!-- Telefone -->
+                <div class="mb-4">
+                    <label for="telefone" class="block text-gray-700 mb-2">
+                        <i class="fas fa-phone"></i> Telefone para contato:
+                    </label>
+                    <input type="tel" id="telefone" name="telefone" required
+                        class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <!-- Email -->
+                <div class="mb-4">
+                    <label for="email" class="block text-gray-700 mb-2">
+                        <i class="fas fa-envelope"></i> Seu e-mail:
+                    </label>
+                    <input type="email" id="email" name="email" required
+                        class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <!-- Assunto -->
+                <div class="mb-4">
+                    <label for="assunto" class="block text-gray-700 mb-2">
+                        <i class="fas fa-comment"></i> Assunto:
+                    </label>
+                    <input type="text" id="assunto" name="assunto" required
+                        class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <!-- Mensagem -->
+                <div class="mb-4">
+                    <label for="mensagem" class="block text-gray-700 mb-2">
+                        <i class="fas fa-comment"></i> Sua mensagem (opcional):
+                    </label>
+                    <textarea id="mensagem" name="mensagem" rows="4"
+                        class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
+                </div>
+
+            <div id="feedback" class="hidden"></div>
+                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                    Enviar
+                </button>
             </form>
         </div>
-    </body>
-    </html>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inclua o Bootstrap JS para modais (se necessário) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Script para alternar o menu mobile
+        const menuBtn = document.getElementById("menu-btn");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        menuBtn.addEventListener("click", () => {
+            mobileMenu.classList.toggle("hidden");
+        });
+
+        // Envio do formulário
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById("contatoForm");
+            form.addEventListener("submit", function(event) {
+                event.preventDefault();
+                submitForm();
+            });
+        });
+
+        function submitForm() {
+            const form = document.getElementById("contatoForm");
+            const formData = new FormData(form);
+
+            fetch("processa_contato.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                const feedback = document.getElementById("feedback");
+                feedback.innerHTML = data;
+                feedback.classList.add("bg-green-100", "text-green-700", "p-4", "rounded", "mb-4");
+                feedback.classList.remove("hidden");
+
+                // Ocultar mensagem após 5 segundos
+                setTimeout(() => {
+                    feedback.classList.add("hidden");
+                }, 5000);
+            })
+            .catch(error => {
+                const feedback = document.getElementById("feedback");
+                feedback.innerHTML = "Ocorreu um erro ao enviar o formulário.";
+                feedback.classList.add("bg-red-100", "text-red-700", "p-4", "rounded", "mb-4");
+                feedback.classList.remove("hidden");
+
+                // Ocultar mensagem após 5 segundos
+                setTimeout(() => {
+                    feedback.classList.add("hidden");
+                }, 5000);
+
+                console.error("Erro:", error);
+            });
+        }
+    </script>
+</body>
+</html>
