@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Requerimento para Apresentação de Defesa Prévia</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Estilos Personalizados -->
+    <style>
+        body {
+            margin-top: 20px;
+        }
+        .container {
+            max-width: 800px;
+        }
+        .form-section {
+            margin-bottom: 30px;
+        }
+        h4 {
+            background-color: #e9ecef;
+            padding: 10px;
+        }
+        .required:after {
+            content:" *";
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 class="text-center">Requerimento para Apresentação de Defesa Prévia</h2>
+    <form action="gerar_formulario.php" method="post" enctype="multipart/form-data">
+        <!-- Dados do Requerente -->
+        <div class="form-section">
+            <h4>DADOS DO REQUERENTE</h4>
+            <div class="form-group">
+                <label class="required">Tipo de Requerente:</label><br>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="tipoRequerente" id="proprietario" value="Proprietário" required>
+                    <label class="form-check-label" for="proprietario">Proprietário</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="tipoRequerente" id="condutor" value="Condutor">
+                    <label class="form-check-label" for="condutor">Condutor</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="nome" class="required">Nome:</label>
+                <input type="text" class="form-control" id="nome" name="nome" required>
+            </div>
+            <div class="form-group">
+                <label for="cpf" class="required">CPF:</label>
+                <input type="text" class="form-control" id="cpf" name="cpf" required>
+            </div>
+            <div class="form-group">
+                <label for="endereco" class="required">Residente à:</label>
+                <input type="text" class="form-control" id="endereco" name="endereco" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-2">
+                    <label for="numero" class="required">Nº:</label>
+                    <input type="text" class="form-control" id="numero" name="numero" required>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="complemento">Compl.:</label>
+                    <input type="text" class="form-control" id="complemento" name="complemento">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="bairro" class="required">Bairro:</label>
+                    <input type="text" class="form-control" id="bairro" name="bairro" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="cep" class="required">CEP:</label>
+                    <input type="text" class="form-control" id="cep" name="cep" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="municipio" class="required">Município:</label>
+                    <input type="text" class="form-control" id="municipio" name="municipio" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="telefone">Telefone:</label>
+                <input type="text" class="form-control" id="telefone" name="telefone">
+            </div>
+        </div>
+
+        <!-- Dados do Veículo -->
+        <div class="form-section">
+            <h4>DADOS DO VEÍCULO</h4>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="placa" class="required">Placa:</label>
+                    <input type="text" class="form-control" id="placa" name="placa" required>
+                </div>
+                <div class="form-group col-md-8">
+                    <label for="marcaModelo" class="required">Marca/Modelo:</label>
+                    <input type="text" class="form-control" id="marcaModelo" name="marcaModelo" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="cor" class="required">Cor:</label>
+                    <input type="text" class="form-control" id="cor" name="cor" required>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="especie">Espécie:</label>
+                    <input type="text" class="form-control" id="especie" name="especie">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="categoria">Categoria:</label>
+                    <input type="text" class="form-control" id="categoria" name="categoria">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="ano">Ano:</label>
+                <input type="text" class="form-control" id="ano" name="ano">
+            </div>
+        </div>
+
+        <!-- Dados da Infração -->
+        <div class="form-section">
+            <h4>DADOS DA INFRAÇÃO</h4>
+            <div class="form-group">
+                <label for="autoInfracao" class="required">Auto de Infração nº:</label>
+                <input type="text" class="form-control" id="autoInfracao" name="autoInfracao" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="dataInfracao" class="required">Data da Infração:</label>
+                    <input type="date" class="form-control" id="dataInfracao" name="dataInfracao" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="horaInfracao" class="required">Hora da Infração:</label>
+                    <input type="time" class="form-control" id="horaInfracao" name="horaInfracao" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="localInfracao" class="required">Local da Infração:</label>
+                <input type="text" class="form-control" id="localInfracao" name="localInfracao" required>
+            </div>
+            <div class="form-group">
+                <label for="enquadramento" class="required">Correspondente ao enquadramento:</label>
+                <input type="text" class="form-control" id="enquadramento" name="enquadramento" required>
+            </div>
+        </div>
+
+        <!-- Dos Fatos -->
+        <div class="form-section">
+            <h4>DOS FATOS</h4>
+            <div class="form-group">
+                <label for="defesa" class="required">Vem interpor Defesa Prévia, solicitando:</label>
+                <textarea class="form-control" id="defesa" name="defesa" rows="6" required></textarea>
+            </div>
+        </div>
+
+        <!-- Anexar Formulário Assinado -->
+        <div class="form-section">
+            <h4>Anexar Formulário Assinado e Preenchido</h4>
+            <div class="form-group">
+                <label for="formularioAssinado" class="required">Anexar arquivo:</label>
+                <input type="file" class="form-control-file" id="formularioAssinado" name="formularioAssinado" required>
+            </div>
+        </div>
+
+        <!-- Botões -->
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Gerar Formulário para Assinatura</button>
+        </div>
+    </form>
+</div>
+
+<!-- Scripts -->
+<!-- jQuery and Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
