@@ -1,0 +1,26 @@
+.step {
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+.step.hidden {
+  opacity: 0;
+  transform: translateX(20px);
+  pointer-events: none;
+}
+
+.progress-bar {
+  transition: width 0.4s ease-in-out;
+}
+
+.progress-container {
+  overflow: hidden;
+}
+.modal-header,
+.modal-footer {
+  background-color: #16a34a;
+  color: white;
+}
+
+.modal-content {
+  border-color: #16a34a;
+}
