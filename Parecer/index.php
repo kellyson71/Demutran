@@ -9,8 +9,8 @@ if ($conn->connect_error) {
 // Inicializa as variáveis como strings vazias
 $showModal = false;
 $nomeSolicitante = $telefone = $cpfCnpj = $localEvento = $evento = $pontoReferencia = $dataHorario = "";
+$protocolo = "";
 
-// Trata o envio do formulário
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nomeSolicitante = $_POST['nome'] ?? '';
     $telefone = $_POST['telefone'] ?? '';
@@ -20,16 +20,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $pontoReferencia = $_POST['ponto_referencia'] ?? '';
     $dataHorario = $_POST['data_horario'] ?? '';
 
-    // Aqui você pode inserir os dados no banco de dados, se necessário
-    // $sql = "INSERT INTO Parecer (nome, telefone, cpf_cnpj, local, evento, ponto_referencia, data_horario)
-    //         VALUES ('$nomeSolicitante', '$telefone', '$cpfCnpj', '$localEvento', '$evento', '$pontoReferencia', '$dataHorario')";
+    // Gera um número de protocolo aleatório de 5 dígitos
+    $protocolo = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
+
+    // Aqui você pode inserir os dados no banco de dados, incluindo o protocolo
+    // $sql = "INSERT INTO Parecer (protocolo, nome, telefone, cpf_cnpj, local, evento, ponto_referencia, data_horario)
+    //         VALUES ('$protocolo', '$nomeSolicitante', '$telefone', '$cpfCnpj', '$localEvento', '$evento', '$pontoReferencia', '$dataHorario')";
     // $conn->query($sql);
 
     // Define a flag para mostrar o modal
     $showModal = true;
 
     // Formatar data para exibição
-    // Mapear os meses para português
     $meses = array(
         'January' => 'janeiro',
         'February' => 'fevereiro',
@@ -60,81 +62,49 @@ $conn->close();
     <title>Solicitação de Parecer - DEMUTRAN</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Bootstrap (se necessário para outras funcionalidades) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!-- Estilos Personalizados -->
     <style>
-    /* Estilos do formulário estilizado */
-    .container-form {
-        max-width: 800px;
-        margin: 0 auto;
+    /* Estilos personalizados */
+    .print-button {
+        display: none;
     }
 
-    .logo-container {
-        position: relative;
-        margin-bottom: 20px;
+    /* Estilos para o modal */
+    .modal-overlay {
+        background-color: rgba(0, 0, 0, 0.7);
     }
 
-    .logo {
-        position: absolute;
-        top: 10px;
-        max-width: 80px;
-        height: auto;
+    .modal-content {
+        max-width: 600px;
     }
 
-    .logo-left {
-        left: 10px;
-    }
+    /* Estilos para impressão */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
 
-    .logo-right {
-        right: 10px;
-    }
+        #print-section,
+        #print-section * {
+            visibility: visible;
+        }
 
-    .centered-title p {
-        margin: 2px 0;
-    }
+        #print-section {
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
 
-    .section-title {
-        background-color: #e9ecef;
-        padding: 10px;
-        margin-top: 20px;
-        font-weight: bold;
-    }
+        /* Remover fundos e cores */
+        body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            background: white;
+        }
 
-    .data-table {
-        width: 100%;
-        margin-top: 10px;
-        border-spacing: 4px;
-    }
-
-    .data-table td {
-        padding: 3px;
-        vertical-align: top;
-    }
-
-    .signature {
-        margin-top: 50px;
-        text-align: center;
-    }
-
-    .signature-line {
-        width: 50%;
-        border-top: 1px solid #000;
-        margin: 0 auto;
-    }
-
-    .date-location {
-        text-align: left;
-        margin-top: 20px;
-    }
-
-    /* Estilo do modal */
-    #modal {
-        max-width: 90%;
-        max-height: 90%;
-        overflow-y: auto;
+        .no-print {
+            display: none;
+        }
     }
     </style>
 </head>
@@ -258,109 +228,30 @@ $conn->close();
     <!-- Modal e Backdrop -->
     <?php if ($showModal): ?>
     <!-- Fundo do modal -->
-    <div id="modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div id="modal-backdrop" class="modal-overlay fixed inset-0 flex items-center justify-center">
         <!-- Modal -->
-        <div id="modal" class="bg-white rounded-lg shadow-lg p-6 w-11/12 md:w-3/4 lg:w-3/4 xl:w-2/3">
-            <!-- Botão de fechar -->
-            <div class="flex justify-end">
-                <button id="close-modal"
-                    class="text-gray-500 hover:text-gray-700 text-2xl leading-none focus:outline-none">&times;</button>
-            </div>
+        <div id="modal" class="modal-content bg-white rounded-lg shadow-lg p-6">
             <!-- Corpo do modal -->
-            <div class="mt-4">
-                <!-- Conteúdo do formulário estilizado -->
-                <div class="container-form">
-                    <!-- Cabeçalho com logos e títulos centrais -->
-                    <div class="logo-container">
-                        <img src="arquivo/image1.png" alt="Logo Esquerda" class="logo logo-left">
-                        <img src="arquivo/image3.png" alt="Logo Direita" class="logo logo-right">
-                        <div class="centered-title text-center">
-                            <p>Estado do Rio Grande do Norte</p>
-                            <p>Prefeitura Municipal de Pau dos Ferros</p>
-                            <p>Secretaria de Governo – SEGOV</p>
-                            <p>Departamento Municipal de Trânsito – DEMUTRAN</p>
-                        </div>
-                    </div>
-                    <h3 class="text-center mt-3">PARECER</h3>
-
-                    <!-- Conteúdo -->
-                    <div class="content">
-                        <p>
-                            Diante levantamento feito para atender solicitação do evento a ser realizado no local
-                            infracitado, esse Departamento fez estudo prévio de Trânsito no referido local e é
-                            <strong>FAVORÁVEL</strong> ao acontecimento do mesmo, no dia e horário solicitado, conforme
-                            solicitação abaixo.
-                        </p>
-                        <p>
-                            Art. 95 do CTB, § 1º A obrigação de sinalizar é do responsável pela execução ou manutenção
-                            da obra ou do evento.
-                        </p>
-
-                        <!-- Dados da Solicitação -->
-                        <div class="section-title">DADOS DA SOLICITAÇÃO</div>
-                        <table class="data-table">
-                            <tr>
-                                <td><strong>NOME DO SOLICITANTE:</strong>
-                                    <?php echo htmlspecialchars($nomeSolicitante, ENT_QUOTES, 'UTF-8'); ?></td>
-                            </tr>
-                            <tr>
-                                <td><strong>CPF/CNPJ:</strong>
-                                    <?php echo htmlspecialchars($cpfCnpj, ENT_QUOTES, 'UTF-8'); ?></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Nº TELEFONE:</strong>
-                                    <?php echo htmlspecialchars($telefone, ENT_QUOTES, 'UTF-8'); ?></td>
-                            </tr>
-                            <tr>
-                                <td><strong>LOCAL:</strong>
-                                    <?php echo htmlspecialchars($localEvento, ENT_QUOTES, 'UTF-8'); ?></td>
-                            </tr>
-                            <tr>
-                                <td><strong>EVENTO:</strong>
-                                    <?php echo htmlspecialchars($evento, ENT_QUOTES, 'UTF-8'); ?></td>
-                            </tr>
-                            <tr>
-                                <td><strong>PONTO DE REFERÊNCIA:</strong>
-                                    <?php echo htmlspecialchars($pontoReferencia, ENT_QUOTES, 'UTF-8'); ?></td>
-                            </tr>
-                            <tr>
-                                <td><strong>DATA / HORÁRIO:</strong>
-                                    <?php echo htmlspecialchars($dataHorario, ENT_QUOTES, 'UTF-8'); ?></td>
-                            </tr>
-                        </table>
-
-                        <!-- Data e Local -->
-                        <div class="date-location">
-                            <p>Pau dos Ferros – RN, <?php echo $dataAtual; ?></p>
-                        </div>
-
-                        <!-- Assinatura -->
-                        <div class="signature">
-                            <div class="signature-line"></div>
-                            <p>José Pereira de Sousa</p>
-                            <p>Gerente Executivo Port. 114/2024</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="mt-4 text-center">
+                <h3 class="text-2xl font-semibold mb-4 text-gray-800">Solicitação Enviada com Sucesso</h3>
+                <p class="mb-4 text-gray-700">Protocolo de Atendimento: <strong><?php echo $protocolo; ?></strong></p>
+                <p class="mb-4 text-gray-700">Sua solicitação foi recebida com sucesso. Anote o número do protocolo para
+                    futuras consultas.</p>
+                <p class="mb-4 text-gray-700">Em breve, entraremos em contato com informações sobre o andamento do seu
+                    pedido.</p>
             </div>
             <!-- Rodapé do modal -->
-            <div class="mt-6 text-right">
-                <button id="back-button" class="bg-gray-500 text-white px-4 py-2 rounded mr-2">Voltar</button>
-                <button onclick="printModalContent()"
-                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                    Imprimir
-                </button>
+            <div class="mt-6 text-center">
+                <button id="print-button" onclick="openPrintWindow()"
+                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Imprimir Comprovante</button>
+                <button id="close-modal"
+                    class="bg-gray-500 text-white px-4 py-2 rounded ml-2 hover:bg-gray-600">Fechar</button>
             </div>
         </div>
     </div>
     <?php endif; ?>
 
     <!-- Scripts -->
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Bootstrap JS (se necessário) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
     // Script para alternar o menu mobile
     const menuBtn = document.getElementById("menu-btn");
@@ -375,7 +266,6 @@ $conn->close();
     const modal = document.getElementById('modal');
     const backdrop = document.getElementById('modal-backdrop');
     const closeModalBtn = document.getElementById('close-modal');
-    const backButton = document.getElementById('back-button');
 
     function closeModal() {
         modal.style.display = 'none';
@@ -383,23 +273,223 @@ $conn->close();
     }
 
     closeModalBtn.addEventListener('click', closeModal);
-    backButton.addEventListener('click', closeModal);
     backdrop.addEventListener('click', (e) => {
         if (e.target === backdrop) {
             closeModal();
         }
     });
 
-    function printModalContent() {
-        var printContents = modal.innerHTML;
-        var originalContents = document.body.innerHTML;
+    // Função para abrir a janela de impressão
+    function openPrintWindow() {
+        const printWindow = window.open('', '_blank');
+        const content = `
+   
+<head>
+    <meta charset="UTF-8">
+    <title>Parecer Preenchido</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Estilos Personalizados -->
+    <style>
+    body {
+        margin-top: 20px;
+    }
 
-        document.body.innerHTML = printContents;
+    .container {
+        max-width: 800px;
+    }
 
-        window.print();
+    .header {
+        text-align: center;
+    }
 
-        document.body.innerHTML = originalContents;
-        location.reload();
+    /* Alinhamento e espaçamento do cabeçalho */
+    /* Ajuste para manter as logos fixas no topo */
+    .logo-container {
+        position: relative;
+    }
+
+    .logo {
+        position: absolute;
+        top: 10px;
+        /* Ajuste a distância do topo conforme necessário */
+        max-width: 80px;
+        height: auto;
+    }
+
+    .logo-left {
+        left: 10px;
+        /* Ajuste a distância da borda esquerda conforme necessário */
+    }
+
+    .logo-right {
+        right: 10px;
+        /* Ajuste a distância da borda direita conforme necessário */
+    }
+
+    .centered-title p {
+        margin: 2px 0;
+        /* Reduzir espaçamento entre linhas do título */
+    }
+
+    .title {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    h3 {
+        font-weight: bold;
+        margin-top: 15px;
+    }
+
+    .content {
+        margin-top: 20px;
+    }
+
+    .section-title {
+        background-color: #e9ecef;
+        padding: 10px;
+        margin-top: 20px;
+        font-weight: bold;
+    }
+
+    /* Compactar tabelas para economia de espaço */
+    .data-table {
+        width: 100%;
+        margin-top: 10px;
+        border-spacing: 4px;
+        /* Reduz espaçamento entre as células */
+    }
+
+    .data-table td {
+        padding: 3px;
+        /* Reduz a quantidade de espaço em cada célula */
+        vertical-align: top;
+    }
+
+    .signature {
+        margin-top: 50px;
+        text-align: center;
+    }
+
+    .signature-line {
+        width: 50%;
+        border-top: 1px solid #000;
+        margin: 0 auto;
+    }
+
+    .date-location {
+        text-align: left;
+        margin-top: 20px;
+    }
+
+    /* Estilo da linha de assinatura */
+    .signature-line {
+        width: 60%;
+        border-top: 1px solid #000;
+        margin: 0 auto 10px;
+        /* Reduz o espaçamento */
+    }
+
+    /* Estilização para impressão */
+    @media print {
+        body {
+            -webkit-print-color-adjust: exact;
+        }
+
+        .section-title {
+            -webkit-print-color-adjust: exact;
+            background-color: #e9ecef !important;
+        }
+    }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Cabeçalho com logos e títulos centrais -->
+        <div class="logo-container">
+            <img src="arquivo/image1.png" alt="Logo Esquerda" class="logo logo-left">
+            <img src="arquivo/image3.png" alt="Logo Direita" class="logo logo-right">
+            <div class="centered-title text-center">
+                <p>Estado do Rio Grande do Norte</p>
+                <p>Prefeitura Municipal de Pau dos Ferros</p>
+                <p>Secretaria de Governo – SEGOV</p>
+                <p>Departamento Municipal de Trânsito – DEMUTRAN</p>
+            </div>
+        </div>
+        <h3 class="text-center mt-3">PARECER</h3>
+
+        <!-- Conteúdo -->
+        <div class="content" style="margin-top: 10%">
+            <p>
+                Diante levantamento feito para atender solicitação do evento a ser realizado no local infracitado, esse
+                Departamento fez estudo prévio de Trânsito no referido local e é <strong>FAVORÁVEL</strong> ao
+                acontecimento do mesmo, no dia e horário solicitado, conforme solicitação abaixo.
+            </p>
+            <p>
+                Art. 95 do CTB, § 1º A obrigação de sinalizar é do responsável pela execução ou manutenção da obra ou do
+                evento.
+            </p>
+
+            <!-- Dados da Solicitação -->
+            <div class="section-title">DADOS DA SOLICITAÇÃO</div>
+            <table class="data-table">
+                <tr>
+                    <td><strong>NOME DO SOLICITANTE:</strong> <?php echo $nomeSolicitante; ?></td>
+                </tr>
+                <tr>
+                    <td><strong>CPF/CNPJ:</strong> <?php echo $cpfCnpj; ?></td>
+                </tr>
+                <tr>
+                    <td><strong>Nº TELEFONE:</strong> <?php echo $telefone; ?></td>
+                </tr>
+                <tr>
+                    <td><strong>LOCAL:</strong> <?php echo $localEvento; ?></td>
+                </tr>
+                <tr>
+                    <td><strong>EVENTO:</strong> <?php echo $evento; ?></td>
+                </tr>
+                <tr>
+                    <td><strong>PONTO DE REFERÊNCIA:</strong> <?php echo $pontoReferencia; ?></td>
+                </tr>
+                <tr>
+                    <td><strong>DATA / HORÁRIO:</strong> <?php echo $dataHorario; ?></td>
+                </tr>
+            </table>
+
+            <!-- Data e Local -->
+            <div class="date-location">
+                <p>Pau dos Ferros – RN, <?php echo $dataAtual; ?></p>
+            </div>
+
+            <!-- Assinatura -->
+            <div class="signature" style="margin-top: 70%;">
+                <div class="signature-line"></div>
+                <p>José Pereira de Sousa</p>
+                <p>Gerente Executivo Port. 114/2024</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
+`;
+        printWindow.document.open();
+        printWindow.document.write(content);
+        printWindow.document.close();
+
+        printWindow.onload = function() {
+            printWindow.focus();
+            printWindow.print();
+
+            // Fechar a janela automaticamente após 5 segundos
+            setTimeout(() => {
+                printWindow.close();
+            }, 2000); // 5000 milissegundos = 5 segundos
+        };
     }
     <?php endif; ?>
     </script>
