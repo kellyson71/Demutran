@@ -233,72 +233,59 @@ $conn->close();
         <section class="container mx-auto py-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                 <!-- Opção 1 -->
-                <div class="option hover:shadow-lg transition duration-300 p-4 bg-white rounded-lg">
-                    <a>
-                        <i class="fas fa-file-download text-green-600 text-4xl mb-4"></i>
-                        <div class="relative inline-block">
-                            <select id="pageSelect"
-                                class="appearance-none bg-gray-200 border border-gray-400 rounded py-2 px-4 pr-8 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
-                                <option hidden value="">Formulários</option>
-                                <option value="./formularios/formulario1.pdf">
-                                    Formulário 1
-                                </option>
-                                <option value="./formularios/formulario2.pdf">
-                                    Formulário 2
-                                </option>
-                                <option value="./formularios/formulario3.pdf">
-                                    Formulário 3
-                                </option>
-                            </select>
-                            <!-- Ícone Personalizado -->
-                            <div
-                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 20 20">
-                                    <path
-                                        d="M5.516 7.548a.533.533 0 0 1 .769-.005l3.715 3.726 3.715-3.726a.533.533 0 0 1 .769.005.547.547 0 0 1-.005.771l-4.157 4.17a.533.533 0 0 1-.769 0L5.52 8.32a.547.547 0 0 1-.005-.771z" />
-                                </svg>
-                            </div>
-                        </div>
-                    </a>
+                <div class="option hover:shadow-lg transition duration-300 p-4 bg-white rounded-lg cursor-pointer relative"
+                    onclick="toggleDropdown()">
+                    <i class="fas fa-file-download text-green-600 text-4xl mb-4"></i>
+                    <span class="block text-lg font-semibold">Formulários</span>
+
+                    <!-- Custom Dropdown Menu -->
+                    <div id="dropdownMenu"
+                        class="hidden absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded shadow-lg z-10">
+                        <a href="./assets/forms/APRESENTAÇÃO DE RECURSO A JARI.docx.pdf" target="_blank"
+                            class="block px-4 py-2 text-gray-700 hover:bg-gray-100">APRESENTAÇÃO DE RECURSO A JARI</a>
+                        <a href="./assets/forms/APRESENTAÇÃO DE DEFESA PRÉVIA.docx.pdf" target="_blank"
+                            class="block px-4 py-2 text-gray-700 hover:bg-gray-100">APRESENTAÇÃO DE DEFESA PRÉVIA</a>
+                        <a href="./assets/forms/PARECER E SOLICITAÇÃO.docx.pdf" target="_blank"
+                            class="block px-4 py-2 text-gray-700 hover:bg-gray-100">PARECER E SOLICITAÇÃO</a>
+                    </div>
                 </div>
                 <!-- Opção 2 -->
-                <div class="option hover:shadow-lg transition duration-300 p-4 bg-white rounded-lg">
-                    <a href="./Defesa/index.html">
+                <a href="./Defesa/index.html">
+                    <div class="option hover:shadow-lg transition duration-300 p-4 bg-white rounded-lg">
                         <i class="fas fa-file-alt text-green-600 text-4xl mb-4"></i>
                         <span class="block text-lg font-semibold">Faça Sua Defesa Prévia/JARI</span>
-                    </a>
-                </div>
+                    </div>
+                </a>
                 <!-- Opção 3 -->
-                <div class="option hover:shadow-lg transition duration-300 p-4 bg-white rounded-lg">
-                    <a href="./PCD/index.html">
+                <a href="./PCD/index.html">
+                    <div class="option hover:shadow-lg transition duration-300 p-4 bg-white rounded-lg">
                         <i class="fas fa-id-card text-green-600 text-4xl mb-4"></i>
                         <span class="block text-lg font-semibold">Cartão Vaga Especial PCD/Idoso</span>
-                    </a>
-                </div>
+                    </div>
+                </a>
                 <!-- Opção 4 -->
-                <div class="option hover:shadow-lg transition duration-300 p-4 bg-white rounded-lg">
-                    <a href="./contato/index.html">
+                <a href="./contato/index.html">
+                    <div class="option hover:shadow-lg transition duration-300 p-4 bg-white rounded-lg">
                         <i class="fas fa-phone text-green-600 text-4xl mb-4"></i>
                         <span class="block text-lg font-semibold">Informações de Contatos</span>
-                    </a>
-                </div>
+                    </div>
+                </a>
                 <!-- Opção 5 -->
-                <div class="option hover:shadow-lg transition duration-300 p-4 bg-white rounded-lg">
-                    <a href="./DAT/index.php">
+                <a href="./DAT/index.php">
+                    <div class="option hover:shadow-lg transition duration-300 p-4 bg-white rounded-lg">
                         <i class="fas fa-car-crash text-green-600 text-4xl mb-4"></i>
                         <span class="block text-lg font-semibold">Sistema de Declaração de Acidente de Trânsito -
                             DAT</span>
-                    </a>
-                </div>
-                <div class="option hover:shadow-lg transition duration-300 p-4 bg-white rounded-lg">
-                    <a href="./Parecer/index.php">
+                    </div>
+                </a>
+                <a href="./Parecer/index.php">
+                    <div class="option hover:shadow-lg transition duration-300 p-4 bg-white rounded-lg">
                         <i class="fas fa-clipboard-list text-green-600 text-4xl mb-4"></i>
                         <span class="block text-lg font-semibold">
                             Solicitação de Parecer - DEMUTRAN Pau dos Ferros
                         </span>
-                    </a>
-                </div>
+                    </div>
+                </a>
 
             </div>
         </section>
@@ -322,105 +309,115 @@ $conn->close();
                 <div>
                     <h2 class="text-lg font-semibold mb-2">CONTATOS</h2>
                     <p>(84) 99944-0704</p>
-                    <p>segovpmpf@gmail.com</p>
+                    <p>demutranpmpf@gmail.com</p>
                 </div>
                 <div>
                     <h2 class="text-lg font-semibold mb-2">ENDEREÇO E HORÁRIO</h2>
                     <p>
-                        Av. Getúlio Vargas, 1371 - Centro, Pau dos Ferros - RN, 59900-000
+                        Av. Dom Pedro II, 1121 Centro, CEP 59900-000
+                        Pau dos Ferros-RN
                     </p>
                     <p>SEGUNDA A SEXTA-FEIRA, DAS 7H ÀS 13H</p>
                 </div>
                 <div>
                     <h2 class="text-lg font-semibold mb-2">REDES SOCIAIS</h2>
-                    <div class="flex justify-center space-x-4 mt-2">
-                        <a href="https://www.instagram.com/prefeituradepaudosferros/"><i
-                                class="fab fa-instagram text-2xl"></i></a>
-                        <a href="https://www.facebook.com/prefeituradepaudosferros/"><i
-                                class="fab fa-facebook text-2xl"></i></a>
-                        <a href="https://twitter.com/paudosferros"><i class="fab fa-twitter text-2xl"></i></a>
-                        <a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros"><i
-                                class="fab fa-youtube text-2xl"></i></a>
-                        <a href="https://wa.me/558499440704"><i class="fab fa-whatsapp text-2xl"></i></a>
-                    </div>
+                    <a href="https://www.instagram.com/demutran_paudosferros/"><i
+                            class="fab fa-instagram text-2xl"></i></a>
+                    <a href="https://wa.me/558499440704"><i class="fab fa-whatsapp text-2xl"></i></a>
                 </div>
             </div>
+            </div>
+
         </footer>
+        <a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros"><i </footer>
 
-        <!-- Scripts -->
-        <!-- Swiper JS -->
-        <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+                <!-- Scripts -->
+                <!-- Swiper JS -->
+                <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
 
-        <!-- JavaScript do Carrossel -->
-        <script>
-        let slideIndex = 0;
-        showSlides();
+                <!-- JavaScript do Carrossel -->
+                <script>
+                let slideIndex = 0;
+                showSlides();
 
-        function showSlides() {
-            let slides = document.getElementsByClassName("slide");
-            if (slides.length === 0) return; // Verifica se há slides disponíveis
-            for (let i = 0; i < slides.length; i++) {
-                slides[i].classList.add("hidden");
-            }
-            slideIndex++;
-            if (slideIndex > slides.length) {
-                slideIndex = 1;
-            }
-            slides[slideIndex - 1].classList.remove("hidden");
-            setTimeout(showSlides, 5000); // Muda a imagem a cada 5 segundos
-        }
-
-
-        function changeSlide(n) {
-            let slides = document.getElementsByClassName("slide");
-            slideIndex += n;
-            if (slideIndex > slides.length) {
-                slideIndex = 1;
-            }
-            if (slideIndex < 1) {
-                slideIndex = slides.length;
-            }
-            for (let i = 0; i < slides.length; i++) {
-                slides[i].classList.add("hidden");
-            }
-            slides[slideIndex - 1].classList.remove("hidden");
-        }
-        // Mobile Menu Toggle
-        const menuBtn = document.getElementById("menu-btn");
-        const mobileMenu = document.getElementById("mobile-menu");
-
-        menuBtn.addEventListener("click", () => {
-            mobileMenu.classList.toggle("hidden");
-        });
-
-        // Evento para o Select de Formulários
-        document
-            .getElementById("pageSelect")
-            .addEventListener("change", function() {
-                var selectedPage = this.value;
-                if (selectedPage) {
-                    window.open(selectedPage, "_blank");
+                function showSlides() {
+                    let slides = document.getElementsByClassName("slide");
+                    if (slides.length === 0) return; // Verifica se há slides disponíveis
+                    for (let i = 0; i < slides.length; i++) {
+                        slides[i].classList.add("hidden");
+                    }
+                    slideIndex++;
+                    if (slideIndex > slides.length) {
+                        slideIndex = 1;
+                    }
+                    slides[slideIndex - 1].classList.remove("hidden");
+                    setTimeout(showSlides, 5000); // Muda a imagem a cada 5 segundos
                 }
-            });
 
-        // Swiper Initialization
-        var swiper = new Swiper(".swiper-container", {
-            loop: true,
-            autoplay: {
-                delay: 5000,
-            },
-            pagination: {
-                el: ".swiper-pagination",
-                clickable: true,
-            },
-            navigation: {
-                nextEl: ".swiper-button-next",
-                prevEl: ".swiper-button-prev",
-            },
-            slidesPerView: 1,
-            spaceBetween: 10,
-        });
-        </script>
+
+                function changeSlide(n) {
+                    let slides = document.getElementsByClassName("slide");
+                    slideIndex += n;
+                    if (slideIndex > slides.length) {
+                        slideIndex = 1;
+                    }
+                    if (slideIndex < 1) {
+                        slideIndex = slides.length;
+                    }
+                    for (let i = 0; i < slides.length; i++) {
+                        slides[i].classList.add("hidden");
+                    }
+                    slides[slideIndex - 1].classList.remove("hidden");
+                }
+                // Mobile Menu Toggle
+                const menuBtn = document.getElementById("menu-btn");
+                const mobileMenu = document.getElementById("mobile-menu");
+
+                menuBtn.addEventListener("click", () => {
+                    mobileMenu.classList.toggle("hidden");
+                });
+
+                // Evento para o Select de Formulários
+                document
+                    .getElementById("pageSelect")
+                    .addEventListener("change", function() {
+                        var selectedPage = this.value;
+                        if (selectedPage) {
+                            window.open(selectedPage, "_blank");
+                        }
+                    });
+
+                // Swiper Initialization
+                var swiper = new Swiper(".swiper-container", {
+                    loop: true,
+                    autoplay: {
+                        delay: 5000,
+                    },
+                    pagination: {
+                        el: ".swiper-pagination",
+                        clickable: true,
+                    },
+                    navigation: {
+                        nextEl: ".swiper-button-next",
+                        prevEl: ".swiper-button-prev",
+                    },
+                    slidesPerView: 1,
+                    spaceBetween: 10,
+                });
+
+                function toggleDropdown() {
+                    var dropdown = document.getElementById('dropdownMenu');
+                    dropdown.classList.toggle('hidden');
+                }
+
+                // Close dropdown when clicking outside
+                window.onclick = function(event) {
+                    var dropdown = document.getElementById('dropdownMenu');
+                    if (!event.target.closest('.option')) {
+                        dropdown.classList.add('hidden');
+                    }
+                }
+                </script>
     </body>
 
 </html>

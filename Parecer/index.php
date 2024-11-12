@@ -20,16 +20,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $pontoReferencia = $_POST['ponto_referencia'] ?? '';
     $dataHorario = $_POST['data_horario'] ?? '';
 
+    // Obter o valor da declaração
+    $declaracao = isset($_POST['declaracao']) ? 1 : 0;
+
     // Gera um número de protocolo aleatório de 5 dígitos
     $protocolo = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
 
-    // Aqui você pode inserir os dados no banco de dados, incluindo o protocolo
-    // $sql = "INSERT INTO Parecer (protocolo, nome, telefone, cpf_cnpj, local, evento, ponto_referencia, data_horario)
-    //         VALUES ('$protocolo', '$nomeSolicitante', '$telefone', '$cpfCnpj', '$localEvento', '$evento', '$pontoReferencia', '$dataHorario')";
-    // $conn->query($sql);
+    // Inserir os dados no banco de dados, incluindo o protocolo e a declaração
+    $sql = "INSERT INTO Parecer (protocolo, nome, telefone, cpf_cnpj, local, evento, ponto_referencia, data_horario, declaracao)
+            VALUES ('$protocolo', '$nomeSolicitante', '$telefone', '$cpfCnpj', '$localEvento', '$evento', '$pontoReferencia', '$dataHorario', '$declaracao')";
 
-    // Define a flag para mostrar o modal
-    $showModal = true;
+    if ($conn->query($sql) === TRUE) {
+        // Define o tipo de modal como sucesso
+        $modalType = 'success';
+    } else {
+        // Captura o erro e define o tipo de modal como erro
+        $errorMessage = "Erro ao inserir os dados: " . $conn->error;
+        $modalType = 'error';
+    }
 
     // Formatar data para exibição
     $meses = array(
@@ -218,6 +226,14 @@ $conn->close();
                         value="<?php echo htmlspecialchars($dataHorario ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                 </div>
 
+                <!-- Declaração de Veracidade -->
+                <div class="mb-4">
+                    <label for="declaracao" class="block text-gray-700 mb-2">
+                        <input type="checkbox" id="declaracao" name="declaracao" required>
+                        Declaro que todas as informações fornecidas são verdadeiras.
+                    </label>
+                </div>
+
                 <!-- Botão de Enviar -->
                 <button type="submit"
                     class="bg-green-600 text-white px-4 py-2 rounded mt-4 hover:bg-green-700">Enviar</button>
@@ -226,24 +242,32 @@ $conn->close();
     </div>
 
     <!-- Modal e Backdrop -->
-    <?php if ($showModal): ?>
+    <?php if (isset($modalType)): ?>
     <!-- Fundo do modal -->
     <div id="modal-backdrop" class="modal-overlay fixed inset-0 flex items-center justify-center">
         <!-- Modal -->
         <div id="modal" class="modal-content bg-white rounded-lg shadow-lg p-6">
             <!-- Corpo do modal -->
             <div class="mt-4 text-center">
+                <?php if ($modalType == 'success'): ?>
                 <h3 class="text-2xl font-semibold mb-4 text-gray-800">Solicitação Enviada com Sucesso</h3>
                 <p class="mb-4 text-gray-700">Protocolo de Atendimento: <strong><?php echo $protocolo; ?></strong></p>
                 <p class="mb-4 text-gray-700">Sua solicitação foi recebida com sucesso. Anote o número do protocolo para
                     futuras consultas.</p>
                 <p class="mb-4 text-gray-700">Em breve, entraremos em contato com informações sobre o andamento do seu
                     pedido.</p>
+                <?php else: ?>
+                <h3 class="text-2xl font-semibold mb-4 text-gray-800">Erro ao Enviar Solicitação</h3>
+                <p class="mb-4 text-gray-700"><?php echo $errorMessage; ?></p>
+                <p class="mb-4 text-gray-700">Por favor, tente novamente mais tarde.</p>
+                <?php endif; ?>
             </div>
             <!-- Rodapé do modal -->
             <div class="mt-6 text-center">
+                <?php if ($modalType == 'success'): ?>
                 <button id="print-button" onclick="openPrintWindow()"
                     class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Imprimir Comprovante</button>
+                <?php endif; ?>
                 <button id="close-modal"
                     class="bg-gray-500 text-white px-4 py-2 rounded ml-2 hover:bg-gray-600">Fechar</button>
             </div>
@@ -262,7 +286,7 @@ $conn->close();
     });
 
     // Script para controlar o modal
-    <?php if ($showModal): ?>
+    <?php if (isset($modalType)): ?>
     const modal = document.getElementById('modal');
     const backdrop = document.getElementById('modal-backdrop');
     const closeModalBtn = document.getElementById('close-modal');
@@ -279,6 +303,7 @@ $conn->close();
         }
     });
 
+    <?php if ($modalType == 'success'): ?>
     // Função para abrir a janela de impressão
     function openPrintWindow() {
         const printWindow = window.open('', '_blank');
@@ -491,6 +516,7 @@ $conn->close();
             }, 2000); // 5000 milissegundos = 5 segundos
         };
     }
+    <?php endif; ?>
     <?php endif; ?>
     </script>
 </body>
