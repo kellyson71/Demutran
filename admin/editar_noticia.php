@@ -2,38 +2,49 @@
 session_start();
 include 'config.php';
 
+// Verifica se o usuário está logado
 if (!isset($_SESSION['usuario_id'])) {
     header('Location: login.php');
     exit();
 }
 
-$id = $_GET['id'];
-
-// Obter dados da notícia
-$sql = "SELECT * FROM noticias WHERE id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param('i', $id);
-$stmt->execute();
-$result = $stmt->get_result();
-$noticia = $result->fetch_assoc();
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $titulo = $_POST['titulo'];
-    $resumo = $_POST['resumo'];
-    $conteudo = $_POST['conteudo'];
-    $imagem_url = $_POST['imagem_url'];
-    $data_publicacao = $_POST['data_publicacao'];
-
-    // Atualizar notícia
-    $sql = "UPDATE noticias SET titulo = ?, resumo = ?, conteudo = ?, imagem_url = ?, data_publicacao = ? WHERE id = ?";
+// Obtém o ID da notícia a ser editada
+if (isset($_GET['id'])) {
+    $id = intval($_GET['id']);
+    // Busca a notícia no banco de dados
+    $sql = "SELECT * FROM noticias WHERE id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('sssssi', $titulo, $resumo, $conteudo, $imagem_url, $data_publicacao, $id);
-    if ($stmt->execute()) {
-        header('Location: gerenciar_noticias.php');
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $resultado = $stmt->get_result();
+    $noticia = $resultado->fetch_assoc();
+
+    if (!$noticia) {
+        echo "Notícia não encontrada.";
         exit();
-    } else {
-        $error = "Erro ao atualizar a notícia!";
     }
+
+    // Atualiza a notícia
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $titulo = $_POST['titulo'];
+        $resumo = $_POST['resumo'];
+        $conteudo = $_POST['conteudo'];
+        $data_publicacao = $_POST['data_publicacao'];
+
+        $sql_update = "UPDATE noticias SET titulo = ?, resumo = ?, conteudo = ?, data_publicacao = ? WHERE id = ?";
+        $stmt_update = $conn->prepare($sql_update);
+        $stmt_update->bind_param('ssssi', $titulo, $resumo, $conteudo, $data_publicacao, $id);
+
+        if ($stmt_update->execute()) {
+            header('Location: gerenciar_noticias.php');
+            exit();
+        } else {
+            $error = "Erro ao atualizar a notícia!";
+        }
+    }
+} else {
+    echo "ID da notícia não fornecido.";
+    exit();
 }
 ?>
 

@@ -14,7 +14,8 @@
             <button @click="open = !open" class="relative focus:outline-none">
                 <span class="material-icons text-gray-700">notifications</span>
                 <?php if ($notificacoesNaoLidas > 0): ?>
-                    <span class="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 text-xs"><?php echo $notificacoesNaoLidas; ?></span>
+                <span
+                    class="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 text-xs"><?php echo $notificacoesNaoLidas; ?></span>
                 <?php endif; ?>
             </button>
             <!-- Notificações dropdown -->
@@ -26,7 +27,8 @@
             <button @click="open = !open" class="flex items-center focus:outline-none">
                 <img src="avatar.png" alt="Avatar" class="w-8 h-8 rounded-full">
             </button>
-            <div x-show="open" @click.away="open = false" x-cloak class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
+            <div x-show="open" @click.away="open = false" x-cloak
+                class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
                 <div class="p-4 border-b text-gray-700 font-bold"><?php echo $_SESSION['usuario_nome']; ?></div>
                 <ul>
                     <li class="p-4 hover:bg-gray-50">

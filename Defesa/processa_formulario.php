@@ -1,4 +1,10 @@
 <?php
+
+// Enable error reporting at the beginning of the script
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 $servername = "srv1078.hstgr.io"; 
 $username = "u492577848_protocolo";
 $password = "WRVGAxCbrJ8wdM$"; 
@@ -57,6 +63,15 @@ function uploadMultipleFiles($file_key, $upload_dir, $base_url, $id_solicitacao)
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Debug: Log received POST data and uploaded files
+    file_put_contents('debug_log.txt', "POST DATA:\n" . print_r($_POST, true), FILE_APPEND);
+    file_put_contents('debug_log.txt', "FILES DATA:\n" . print_r($_FILES, true), FILE_APPEND);
+
+    // Make sure required fields are present
+    if (empty($_POST['tipo_solicitacao'])) {
+        die("Tipo de solicitação não informado.");
+    }
+
     // Captura o tipo de solicitação
     $tipo_solicitacao = verificaTexto($_POST['tipo_solicitacao']);
 
@@ -105,7 +120,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             // Upload do arquivo notif_DEMUTRAN
-            $notif_DEMUTRAN_url = uploadFile('notif_DEMUTRAN', $upload_dir, $base_url, $id_solicitacao);
+            $notif_DEMUTRAN_url = uploadFile('notif_DEMUTRAN_condutor', $upload_dir, $base_url, $id_solicitacao);
 
             // Atualizar o registro com a URL do arquivo
             $update_sql = "UPDATE solicitacoes_demutran SET 
@@ -188,7 +203,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $doc_requerimento_url = uploadFile('doc_requerimento', $upload_dir, $base_url, $id_solicitacao);
             $cnh_url = uploadFile('cnh', $upload_dir, $base_url, $id_solicitacao);
             $cnh_condutor_url = uploadFile('cnh_condutor', $upload_dir, $base_url, $id_solicitacao);
-            $notif_DEMUTRAN_url = uploadFile('notif_DEMUTRAN', $upload_dir, $base_url, $id_solicitacao);
+            $notif_DEMUTRAN_url = uploadFile('notif_DEMUTRAN_normal', $upload_dir, $base_url, $id_solicitacao);
             $crlv_url = uploadFile('crlv', $upload_dir, $base_url, $id_solicitacao);
             $comprovante_residencia_url = uploadFile('comprovante_residencia', $upload_dir, $base_url, $id_solicitacao);
             $doc_complementares_urls = uploadMultipleFiles('doc_complementares', $upload_dir, $base_url, $id_solicitacao);

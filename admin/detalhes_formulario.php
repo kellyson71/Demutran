@@ -114,6 +114,18 @@ if ($tipo == 'DAT') {
     if (empty($dat3)) {
         $dat3[] = [];
     }
+} elseif ($tipo == 'Parecer') { // Adicionado suporte para 'Parecer'
+    $sql = "SELECT * FROM Parecer WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $formulario = $result->fetch_assoc();
+
+    if (!$formulario) {
+        echo "Formulário não encontrado.";
+        exit();
+    }
 } else {
     // Lógica para PCD, SAC e JARI
     if ($tipo == 'PCD') {
@@ -142,6 +154,7 @@ if ($tipo == 'DAT') {
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR" x-data="{ open: false }">
+
 <head>
     <meta charset="UTF-8">
     <title>Detalhes do Formulário</title>
@@ -160,41 +173,50 @@ if ($tipo == 'DAT') {
     <script src="//unpkg.com/alpinejs" defer></script>
 
     <style>
-        [x-cloak] { display: none; }
+    [x-cloak] {
+        display: none;
+    }
     </style>
 
     <script>
-        // Função para abrir o modal de edição
-        function openEditModal() {
-            document.getElementById("editModal").classList.remove("hidden");
-        }
+    // Função para abrir o modal de edição
+    function openEditModal() {
+        document.getElementById("editModal").classList.remove("hidden");
+    }
 
-        // Função para fechar o modal de edição
-        function closeEditModal() {
-            document.getElementById("editModal").classList.add("hidden");
-        }
+    // Função para fechar o modal de edição
+    function closeEditModal() {
+        document.getElementById("editModal").classList.add("hidden");
+    }
 
-        // Função para abrir o modal de exclusão
-        function openDeleteModal() {
-            document.getElementById("deleteModal").classList.remove("hidden");
-        }
+    // Função para abrir o modal de exclusão
+    function openDeleteModal() {
+        document.getElementById("deleteModal").classList.remove("hidden");
+    }
 
-        // Função para fechar o modal de exclusão
-        function closeDeleteModal() {
-            document.getElementById("deleteModal").classList.add("hidden");
-        }
+    // Função para fechar o modal de exclusão
+    function closeDeleteModal() {
+        document.getElementById("deleteModal").classList.add("hidden");
+    }
 
-        // AJAX para editar o formulário
-        function editarFormulario() {
-            var campo = document.getElementById('campo').value;
-            var novoValor = document.getElementById('novoValor').value;
-            var id = <?php echo $id; ?>;
-            var tipo = '<?php echo $tipo; ?>';
+    // AJAX para editar o formulário
+    function editarFormulario() {
+        var campo = document.getElementById('campo').value;
+        var novoValor = document.getElementById('novoValor').value;
+        var id = <?php echo $id; ?>;
+        var tipo = '<?php echo $tipo; ?>';
 
-            fetch('editar_formulario_ajax.php', {
+        fetch('editar_formulario_ajax.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, tipo, campo, novoValor })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id,
+                    tipo,
+                    campo,
+                    novoValor
+                })
             })
             .then(response => response.json())
             .then(data => {
@@ -205,17 +227,22 @@ if ($tipo == 'DAT') {
                     alert('Erro ao atualizar o formulário.');
                 }
             });
-        }
+    }
 
-        // AJAX para excluir o formulário
-        function excluirFormulario() {
-            var id = <?php echo $id; ?>;
-            var tipo = '<?php echo $tipo; ?>';
+    // AJAX para excluir o formulário
+    function excluirFormulario() {
+        var id = <?php echo $id; ?>;
+        var tipo = '<?php echo $tipo; ?>';
 
-            fetch('excluir_formulario_ajax.php', {
+        fetch('excluir_formulario_ajax.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, tipo })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id,
+                    tipo
+                })
             })
             .then(response => response.json())
             .then(data => {
@@ -226,9 +253,10 @@ if ($tipo == 'DAT') {
                     alert('Erro ao excluir o formulário.');
                 }
             });
-        }
+    }
     </script>
 </head>
+
 <body class="bg-gray-100 font-roboto min-h-screen flex flex-col">
     <!-- Loader -->
     <div x-ref="loading" class="fixed inset-0 bg-white z-50 flex items-center justify-center hidden">
@@ -238,38 +266,11 @@ if ($tipo == 'DAT') {
     <!-- Wrapper -->
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside class="w-64 bg-white shadow-md flex-shrink-0 hidden md:flex flex-col">
-            <div class="p-6 flex flex-col h-full">
-                <h1 class="text-2xl font-bold text-blue-600 mb-6">Painel Admin</h1>
-                <nav class="space-y-2 flex-1">
-                    <a href="dashboard.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
-                        <span class="material-icons">dashboard</span>
-                        <span class="ml-3">Dashboard</span>
-                    </a>
-                    <a href="formularios.php" class="flex items-center p-2 text-gray-700 bg-blue-50 rounded">
-                        <span class="material-icons">assignment</span>
-                        <span class="ml-3 font-semibold">Formulários</span>
-                    </a>
-                    <a href="gerenciar_noticias.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
-                        <span class="material-icons">article</span>
-                        <span class="ml-3">Notícias</span>
-                    </a>
-                    <a href="usuarios.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
-                        <span class="material-icons">people</span>
-                        <span class="ml-3">Usuários</span>
-                    </a>
-                </nav>
-                <div class="mt-6">
-                    <a href="logout.php" class="flex items-center p-2 text-red-600 hover:bg-red-50 rounded">
-                        <span class="material-icons">logout</span>
-                        <span class="ml-3">Sair</span>
-                    </a>
-                </div>
-            </div>
-        </aside>
+        <?php include 'sidebar.php'; ?>
 
         <!-- Mobile Sidebar -->
-        <div x-show="open" @click.away="open = false" x-cloak class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden">
+        <div x-show="open" @click.away="open = false" x-cloak
+            class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden">
             <aside class="w-64 bg-white h-full shadow-md">
                 <div class="p-6">
                     <h1 class="text-2xl font-bold text-blue-600 mb-6">Painel Admin</h1>
@@ -282,7 +283,8 @@ if ($tipo == 'DAT') {
                             <span class="material-icons">assignment</span>
                             <span class="ml-3 font-semibold">Formulários</span>
                         </a>
-                        <a href="gerenciar_noticias.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
+                        <a href="gerenciar_noticias.php"
+                            class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
                             <span class="material-icons">article</span>
                             <span class="ml-3">Notícias</span>
                         </a>
@@ -306,161 +308,89 @@ if ($tipo == 'DAT') {
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Topbar -->
-            <header class="bg-white shadow-md py-4 px-6 flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <!-- Mobile Menu Button -->
-                    <button @click="open = !open" class="md:hidden focus:outline-none">
-                        <span class="material-icons">menu</span>
-                    </button>
-                    <h2 class="text-xl font-semibold text-gray-800">Detalhes do Formulário</h2>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <!-- Notifications -->
-                    <div x-data="{ open: false }" class="relative">
-                        <button @click="open = !open" class="relative focus:outline-none">
-                            <span class="material-icons text-gray-700">notifications</span>
-                            <?php if ($notificacoesNaoLidas > 0): ?>
-                                <span class="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 text-xs"><?php echo $notificacoesNaoLidas; ?></span>
-                            <?php endif; ?>
-                        </button>
-                        <div x-show="open" @click.away="open = false" x-cloak class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
-                            <div class="p-4 border-b text-gray-700 font-bold">Últimos Formulários SAC</div>
-                            <ul>
-                                <?php while($form = $sacFormularios->fetch_assoc()): ?>
-                                    <li class="p-4 border-b hover:bg-gray-50">
-                                        <a href="detalhes_formulario.php?id=<?php echo $form['id']; ?>&tipo=SAC" class="block">
-                                            <p class="font-medium text-gray-800"><?php echo $form['nome']; ?></p>
-                                            <p class="text-sm text-gray-600"><?php echo $form['assunto']; ?></p>
-                                        </a>
-                                    </li>
-                                <?php endwhile; ?>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- User Profile -->
-                    <div x-data="{ open: false }" class="relative">
-                        <button @click="open = !open" class="flex items-center focus:outline-none">
-                            <img src="avatar.png" alt="Avatar" class="w-8 h-8 rounded-full">
-                        </button>
-                        <div x-show="open" @click.away="open = false" x-cloak class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
-                            <div class="p-4 border-b text-gray-700 font-bold"><?php echo $_SESSION['usuario_nome']; ?></div>
-                            <ul>
-                                <li class="p-4 hover:bg-gray-50">
-                                    <a href="perfil.php" class="block text-gray-700">Perfil</a>
-                                </li>
-                                <li class="p-4 hover:bg-gray-50">
-                                    <a href="logout.php" class="block text-red-600">Sair</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </header>
+            <?php include 'topbar.php'; ?>
 
             <!-- Main -->
             <main class="flex-1 overflow-y-auto p-6">
                 <div class="bg-white shadow-lg rounded-lg p-6">
                     <?php if ($tipo == 'DAT'): ?>
-                        <h2 class="text-2xl font-bold text-gray-700 mb-6">Declaração de Acidente (DAT)</h2>
+                    <h2 class="text-2xl font-bold text-gray-700 mb-6">Declaração de Acidente (DAT)</h2>
 
-                        <!-- Exibir dados de DAT1 -->
-                        <?php if ($dat1): ?>
-                            <h3 class="text-lg font-bold mb-4">Informações Gerais</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                <?php exibir_dados_formatados($dat1); ?>
-                            </div>
+                    <!-- Exibir dados de DAT1 -->
+                    <?php if ($dat1): ?>
+                    <h3 class="text-lg font-bold mb-4">Informações Gerais</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <?php exibir_dados_formatados($dat1); ?>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if ($dat2): ?>
+                    <h3 class="text-lg font-bold mb-4">Detalhes do Acidente</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <?php exibir_dados_formatados($dat2); ?>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if ($dat3): ?>
+                    <h3 class="text-lg font-bold mb-4">Veículos Envolvidos</h3>
+                    <?php foreach ($dat3 as $index => $response): ?>
+                    <div class="border p-4 mb-4 rounded-lg shadow-md">
+                        <h4 class="font-bold mb-2">Veículo #<?php echo $index + 1; ?></h4>
+                        <?php exibir_dados_formatados($response); ?>
+
+                        <!-- Exibir damaged_parts de forma organizada -->
+                        <?php if (!empty($response['damaged_parts'])): ?>
+                        <?php $damaged_parts = json_decode($response['damaged_parts'], true); // Decodifica o JSON ?>
+                        <div class="mt-4">
+                            <strong>Partes Danificadas:</strong>
+                            <ul class="list-disc ml-5">
+                                <?php foreach ($damaged_parts as $part): ?>
+                                <?php if ($part['checked']): ?>
+                                <li><?php echo ucfirst(str_replace('_', ' ', $part['name'])); ?></li>
+                                <?php endif; ?>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
                         <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
 
-                        <?php if ($dat2): ?>
-                            <h3 class="text-lg font-bold mb-4">Detalhes do Acidente</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                <?php exibir_dados_formatados($dat2); ?>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if ($dat3): ?>
-                            <h3 class="text-lg font-bold mb-4">Veículos Envolvidos</h3>
-                            <?php foreach ($dat3 as $index => $response): ?>
-                                <div class="border p-4 mb-4 rounded-lg shadow-md">
-                                    <h4 class="font-bold mb-2">Veículo #<?php echo $index + 1; ?></h4>
-                                    <?php exibir_dados_formatados($response); ?>
-
-                                    <!-- Exibir damaged_parts de forma organizada -->
-                                    <?php if (!empty($response['damaged_parts'])): ?>
-                                        <?php $damaged_parts = json_decode($response['damaged_parts'], true); // Decodifica o JSON ?>
-                                        <div class="mt-4">
-                                            <strong>Partes Danificadas:</strong>
-                                            <ul class="list-disc ml-5">
-                                                <?php foreach ($damaged_parts as $part): ?>
-                                                    <?php if ($part['checked']): ?>
-                                                        <li><?php echo ucfirst(str_replace('_', ' ', $part['name'])); ?></li>
-                                                    <?php endif; ?>
-                                                <?php endforeach; ?>
-                                            </ul>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-
-                        <?php if ($dat4): ?>
-                            <h3 class="text-lg font-bold mb-4">Observações Adicionais</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                <?php exibir_dados_formatados($dat4); ?>
-                            </div>
-                        <?php endif; ?>
+                    <?php if ($dat4): ?>
+                    <h3 class="text-lg font-bold mb-4">Observações Adicionais</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <?php exibir_dados_formatados($dat4); ?>
+                    </div>
+                    <?php endif; ?>
 
                     <?php else: ?>
-                        <h2 class="text-2xl font-bold text-gray-700 mb-6">Detalhes do Formulário</h2>
-
-                        <!-- Exibir todos os dados do formulário para PCD, SAC, ou JARI -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <?php foreach ($formulario as $coluna => $valor): ?>
-                                <?php if (strpos($coluna, 'url') !== false && !empty($valor)): ?>
-                                    <!-- Exibir os links dos documentos -->
-                                    <div><strong><?php echo ucfirst(str_replace('_', ' ', str_replace('_url', '', $coluna))); ?>:</strong>
-                                        <a href="<?php echo htmlspecialchars($valor); ?>" target="_blank" class="text-blue-500 hover:underline">Ver Documento</a>
-                                    </div>
-                                <?php else: ?>
-                                    <!-- Exibir os dados normais -->
-                                    <div><strong><?php echo ucfirst(str_replace('_', ' ', $coluna)); ?>:</strong> <?php echo !empty($valor) ? htmlspecialchars($valor) : 'Não informado';?></div>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
-                        </div>
-
-                        <!-- Seção de Documentos Enviados -->
-                        <h3 class="font-bold text-lg mt-8 mb-4">Documentos Enviados:</h3>
-                        <ul class="list-disc ml-5">
-                            <?php foreach ($formulario as $coluna => $valor): ?>
-                                <?php if (strpos($coluna, 'url') !== false && !empty($valor)): ?>
-                                    <?php
-                                    // Formatar o nome da coluna para algo mais legível
-                                    $colunaFormatada = ucfirst(str_replace('_', ' ', str_replace('_url', '', $coluna)));
-                                    ?>
-                                    <li><a href="<?php echo htmlspecialchars($valor); ?>" target="_blank" class="text-blue-500 hover:underline"><?php echo $colunaFormatada; ?></a></li>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
-                        </ul>
+                    <h2 class="text-2xl font-bold text-gray-700 mb-6">Detalhes do Formulário</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <?php foreach ($formulario as $coluna => $valor): ?>
+                        <div><strong><?php echo ucfirst(str_replace('_', ' ', $coluna)); ?>:</strong>
+                            <?php echo !empty($valor) ? htmlspecialchars($valor) : 'Não informado';?></div>
+                        <?php endforeach; ?>
+                    </div>
                     <?php endif; ?>
 
                     <!-- Botões de ação -->
                     <div class="mt-8 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
                         <div class="flex space-x-4">
-                            <a href="formularios.php" class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition">Voltar</a>
-                            <button onclick="openEditModal()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Editar</button>
+                            <a href="formularios.php"
+                                class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition">Voltar</a>
+                            <button onclick="openEditModal()"
+                                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Editar</button>
                         </div>
                         <div class="flex space-x-4">
-                            <button onclick="openDeleteModal()" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition">Excluir</button>
+                            <button onclick="openDeleteModal()"
+                                class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition">Excluir</button>
                         </div>
                     </div>
                 </div>
             </main>
 
             <!-- Footer -->
-            <footer class="bg-white shadow-md py-4 px-6">
-                <p class="text-gray-600 text-center">&copy; <?php echo date('Y'); ?> Departamento de Trânsito. Todos os direitos reservados.</p>
-            </footer>
+            <?php include 'footer.php'; ?>
         </div>
     </div>
 
@@ -473,7 +403,7 @@ if ($tipo == 'DAT') {
                 <?php
                 $dadosParaEdicao = $tipo == 'DAT' ? array_merge($dat1, $dat2, $dat4) : $formulario;
                 foreach ($dadosParaEdicao as $coluna => $valor): ?>
-                    <option value="<?php echo $coluna; ?>"><?php echo ucfirst(str_replace('_', ' ', $coluna)); ?></option>
+                <option value="<?php echo $coluna; ?>"><?php echo ucfirst(str_replace('_', ' ', $coluna)); ?></option>
                 <?php endforeach; ?>
             </select>
 
@@ -481,8 +411,10 @@ if ($tipo == 'DAT') {
             <input type="text" id="novoValor" class="w-full mb-4 p-2 border rounded" placeholder="Digite o novo valor">
 
             <div class="flex justify-end space-x-4">
-                <button onclick="closeEditModal()" class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition">Cancelar</button>
-                <button onclick="editarFormulario()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Salvar</button>
+                <button onclick="closeEditModal()"
+                    class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition">Cancelar</button>
+                <button onclick="editarFormulario()"
+                    class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Salvar</button>
             </div>
         </div>
     </div>
@@ -494,10 +426,13 @@ if ($tipo == 'DAT') {
             <p>Você tem certeza que deseja excluir este formulário?</p>
 
             <div class="flex justify-end space-x-4 mt-6">
-                <button onclick="closeDeleteModal()" class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition">Cancelar</button>
-                <button onclick="excluirFormulario()" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition">Excluir</button>
+                <button onclick="closeDeleteModal()"
+                    class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition">Cancelar</button>
+                <button onclick="excluirFormulario()"
+                    class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition">Excluir</button>
             </div>
         </div>
     </div>
 </body>
+
 </html>

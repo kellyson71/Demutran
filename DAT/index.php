@@ -514,6 +514,7 @@
                                 Condutor e Proprietário
                             </option>
                             <option value="Terceiro Atingido">Terceiro Atingido</option>
+                            <option value="Outros">Outros</option>
                         </select>
                     </div>
 
@@ -585,7 +586,8 @@
                             <option value="" disabled selected>Selecione</option>
                             <option value="Masculino">Masculino</option>
                             <option value="Feminino">Feminino</option>
-                            <option value="Outro">Outro</option>
+                            <!-- <option value="Outro">Outro</option> -->
+                            <option value="Outros">Outros</option>
                         </select>
                     </div>
 
@@ -698,6 +700,7 @@
                             <option value="SP">SP</option>
                             <option value="SE">SE</option>
                             <option value="TO">TO</option>
+                            <!-- <option value="Outros">Outros</option> -->
                         </select>
                     </div>
 
@@ -843,6 +846,7 @@
                             <option value="Tombamento">Tombamento</option>
                             <option value="Engavetamento">Engavetamento</option>
                             <option value="Danos Eventuais">Danos Eventuais</option>
+                            <option value="Outros">Outros</option>
                         </select>
                     </div>
 
@@ -951,6 +955,7 @@
                             <option value="Dispensado de Registro">
                                 Dispensado de Registro
                             </option>
+                            <option value="Outros">Outros</option>
                         </select>
                     </div>
 
@@ -982,7 +987,8 @@
                             <option value="Caminhão">Caminhão</option>
                             <option value="Van">Van</option>
                             <option value="Ônibus">Ônibus</option>
-                            <option value="Outro">Outro</option>
+                            <!-- <option value="Outro">Outro</option> -->
+                            <option value="Outros">Outros</option>
                         </select>
                     </div>
 
@@ -1029,6 +1035,7 @@
                             <option value="SP">SP</option>
                             <option value="SE">SE</option>
                             <option value="TO">TO</option>
+                            <!-- <option value="Outros">Outros</option> -->
                         </select>
                     </div>
 
@@ -1077,6 +1084,7 @@
                             <option value="Diplomático">Diplomático</option>
                             <option value="Aluguel">Aluguel</option>
                             <option value="Experiência">Experiência</option>
+                            <option value="Outros">Outros</option>
                         </select>
                     </div>
 
@@ -1090,6 +1098,7 @@
                             <option value="Sim">Sim</option>
                             <option value="Não">Não</option>
                             <option value="Não sei">Não sei</option>
+                            <!-- <option value="Outros">Outros</option> -->
                         </select>
                     </div>
 
@@ -1111,6 +1120,7 @@
                             <option value="Não">Não</option>
                             <option value="Uma">Uma</option>
                             <option value="Duas">Duas</option>
+                            <!-- <option value="Outros">Outros</option> -->
                         </select>
                     </div>
 
@@ -1145,6 +1155,7 @@
                             </option>
                             <option value="Virava à direita">Virava à direita</option>
                             <option value="Virava à esquerda">Virava à esquerda</option>
+                            <option value="Outros">Outros</option>
                         </select>
                     </div>
 
@@ -1204,6 +1215,7 @@
                                 <option value="SP">SP</option>
                                 <option value="SE">SE</option>
                                 <option value="TO">TO</option>
+                                <!-- <option value="Outros">Outros</option> -->
                             </select>
                         </div>
 
@@ -1250,7 +1262,8 @@
                                 class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
                                 <option value="" disabled selected>Selecione</option>
                                 <option value="Passaporte">Passaporte</option>
-                                <option value="Outro">Outro</option>
+                                <!-- <option value="Outro">Outro</option> -->
+                                <option value="Outros">Outro</option>
                             </select>
                         </div>
 
@@ -1296,7 +1309,8 @@
                             <option value="" disabled selected>Selecione</option>
                             <option value="Masculino">Masculino</option>
                             <option value="Feminino">Feminino</option>
-                            <option value="Outro">Outro</option>
+                            <!-- <option value="Outro">Outro</option> -->
+                            <option value="Outros">Outro</option>
                         </select>
                     </div>
 
@@ -1407,6 +1421,7 @@
                             <option value="SP">SP</option>
                             <option value="SE">SE</option>
                             <option value="TO">TO</option>
+                            <!-- <option value="Outros">Outros</option> -->
                         </select>
                     </div>
 

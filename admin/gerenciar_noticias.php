@@ -8,7 +8,7 @@ if (!isset($_SESSION['usuario_id'])) {
     exit();
 }
 
-// Obter notícias
+// Obtém todas as notícias
 $sql = "SELECT * FROM noticias ORDER BY data_publicacao DESC";
 $result = $conn->query($sql);
 $noticias = [];

@@ -18,8 +18,9 @@ if (!isset($_SESSION['usuario_id'])) {
 // Obter os dados enviados na requisição
 $data = json_decode(file_get_contents('php://input'), true);
 
-if (!isset($data['id'])) {
-    echo json_encode(['success' => false, 'message' => 'ID do usuário não fornecido.']);
+// Sanitizar o ID do usuário
+if (!isset($data['id']) || !filter_var($data['id'], FILTER_VALIDATE_INT)) {
+    echo json_encode(['success' => false, 'message' => 'ID do usuário inválido.']);
     exit();
 }
 

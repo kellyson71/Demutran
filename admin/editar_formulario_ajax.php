@@ -24,6 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $tabela = 'solicitacao_cartao';
         } elseif ($tipo == 'DAT') {
             $tabela = 'DAT1';
+        } elseif ($tipo == 'Parecer') {   // Adicionado suporte para 'Parecer'
+            $tabela = 'Parecer';
         } else {
             echo json_encode(['success' => false, 'message' => 'Tipo de formulário inválido.']);
             exit();

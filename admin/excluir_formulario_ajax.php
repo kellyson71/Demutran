@@ -24,6 +24,8 @@ if ($tipo == 'SAC') {
     $tabela = 'DAT1';
 } elseif ($tipo == 'noticias') {   // Certifique-se de que 'noticias' está correto
     $tabela = 'noticias';
+} elseif ($tipo == 'Parecer') {   // Adicionado suporte para 'Parecer'
+    $tabela = 'Parecer';
 } else {
     echo json_encode(['success' => false, 'message' => 'Tipo de formulário inválido.']);
     exit();
