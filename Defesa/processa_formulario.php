@@ -62,22 +62,46 @@ function uploadMultipleFiles($file_key, $upload_dir, $base_url, $id_solicitacao)
     return implode(';', $urls); // Armazena as URLs separadas por ponto e vírgula
 }
 
+// Function to check if a column exists in a table
+function columnExists($conn, $table, $column) {
+    $result = $conn->query("SHOW COLUMNS FROM `$table` LIKE '$column'");
+    return $result && $result->num_rows > 0;
+}
+
+// Ensure necessary columns exist
+$columns = [
+    'doc_requerimento_url',
+    'cnh_url',
+    'cnh_condutor_url',
+    'notif_DEMUTRAN_url',
+    'crlv_url',
+    'comprovante_residencia_url',
+    'doc_complementares_urls',
+    'signed_document_url' // New column for the signed document URL
+];
+
+foreach ($columns as $column) {
+    if (!columnExists($conn, 'solicitacoes_demutran', $column)) {
+        $conn->query("ALTER TABLE solicitacoes_demutran ADD COLUMN `$column` VARCHAR(255) DEFAULT NULL");
+    }
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Debug: Log received POST data and uploaded files
     file_put_contents('debug_log.txt', "POST DATA:\n" . print_r($_POST, true), FILE_APPEND);
     file_put_contents('debug_log.txt', "FILES DATA:\n" . print_r($_FILES, true), FILE_APPEND);
 
     // Make sure required fields are present
-    if (empty($_POST['tipo_solicitacao'])) {
+    if (empty($_POST['tipoRequerente'])) {
         die("Tipo de solicitação não informado.");
     }
 
     // Captura o tipo de solicitação
-    $tipo_solicitacao = verificaTexto($_POST['tipo_solicitacao']);
+    $tipo_solicitacao = verificaTexto($_POST['tipoRequerente']);
 
     // Diretório base para upload
     $upload_dir = 'midia/';
-    $base_url = "https://seusite.com/"; // Atualize com a URL base correta
+    $base_url = "https://seusite.com/Defesa/midia/"; // Atualize com a URL base correta
 
     // Inicialmente, os URLs de arquivo serão nulos
     $doc_requerimento_url = null;
@@ -87,169 +111,154 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $crlv_url = null;
     $comprovante_residencia_url = null;
     $doc_complementares_urls = null;
+    $signed_document_url = null;
     $descricao = null;
 
-    // Se for "Apresentação do Condutor", processar apenas o campo notif_DEMUTRAN
-    if ($tipo_solicitacao === 'apresentacao_condutor') {
-        // Inserir registro com dados mínimos
-        $sql = "INSERT INTO solicitacoes_demutran (
-            tipo_solicitacao, notif_DEMUTRAN_url
-        ) VALUES (?, ?)";
+    // Captura os dados do formulário
+    $nome = verificaTexto($_POST['nome']);
+    $cpf = verificaTexto($_POST['cpf']);
+    $endereco = verificaTexto($_POST['endereco']);
+    $numero = verificaTexto($_POST['numero']);
+    $complemento = verificaTexto($_POST['complemento']);
+    $bairro = verificaTexto($_POST['bairro']);
+    $cep = verificaTexto($_POST['cep']);
+    $municipio = verificaTexto($_POST['municipio']);
+    $telefone = verificaTexto($_POST['telefone']);
+    $placa = verificaTexto($_POST['placa']);
+    $marcaModelo = verificaTexto($_POST['marcaModelo']);
+    $cor = verificaTexto($_POST['cor']);
+    $especie = verificaTexto($_POST['especie']);
+    $categoria = verificaTexto($_POST['categoria']);
+    $ano = verificaTexto($_POST['ano']);
+    $autoInfracao = verificaTexto($_POST['autoInfracao']);
+    $dataInfracao = verificaTexto($_POST['dataInfracao']);
+    $horaInfracao = verificaTexto($_POST['horaInfracao']);
+    $localInfracao = verificaTexto($_POST['localInfracao']);
+    $enquadramento = verificaTexto($_POST['enquadramento']);
+    $defesa = verificaTexto($_POST['defesa']);
 
-        $stmt = $conn->prepare($sql);
+    // Inserir registro com os dados
+    $sql = "INSERT INTO solicitacoes_demutran (
+        tipo_solicitacao, nome, cpf, endereco, numero, complemento, bairro, cep, municipio, telefone, placa, marcaModelo, cor, especie, categoria, ano, autoInfracao, dataInfracao, horaInfracao, localInfracao, enquadramento, defesa,
+        doc_requerimento_url, cnh_url, cnh_condutor_url, notif_DEMUTRAN_url, crlv_url, comprovante_residencia_url, doc_complementares_urls, signed_document_url
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        if (!$stmt) {
-            die("Erro na preparação da declaração: " . $conn->error);
+    $stmt = $conn->prepare($sql);
+
+    if (!$stmt) {
+        die("Erro na preparação da declaração: " . $conn->error);
+    }
+
+    // Inserimos valores temporários; as URLs serão atualizadas após o upload
+    $stmt->bind_param(
+        "ssssssssssssssssssssssssssssss",
+        $tipo_solicitacao,
+        $nome,
+        $cpf,
+        $endereco,
+        $numero,
+        $complemento,
+        $bairro,
+        $cep,
+        $municipio,
+        $telefone,
+        $placa,
+        $marcaModelo,
+        $cor,
+        $especie,
+        $categoria,
+        $ano,
+        $autoInfracao,
+        $dataInfracao,
+        $horaInfracao,
+        $localInfracao,
+        $enquadramento,
+        $defesa,
+        $doc_requerimento_url,
+        $cnh_url,
+        $cnh_condutor_url,
+        $notif_DEMUTRAN_url,
+        $crlv_url,
+        $comprovante_residencia_url,
+        $doc_complementares_urls,
+        $signed_document_url
+    );
+
+    if ($stmt->execute()) {
+        // Obter o ID inserido
+        $id_solicitacao = $conn->insert_id;
+
+        // Criar pasta com o ID da solicitação
+        $dir_with_id = $upload_dir . $id_solicitacao . '/';
+        if (!is_dir($dir_with_id)) {
+            mkdir($dir_with_id, 0777, true);
         }
 
-        // Inserimos valores temporários; as URLs serão atualizadas após o upload
-        $stmt->bind_param(
-            "ss",
-            $tipo_solicitacao,
-            $notif_DEMUTRAN_url
-        );
+        // Agora processar os arquivos e salvar nas novas pastas
+        $doc_requerimento_url = uploadFile('doc_requerimento', $upload_dir, $base_url, $id_solicitacao);
+        $cnh_url = uploadFile('cnh', $upload_dir, $base_url, $id_solicitacao);
+        $cnh_condutor_url = uploadFile('cnh_condutor', $upload_dir, $base_url, $id_solicitacao);
+        $notif_DEMUTRAN_url = uploadFile('notif_DEMUTRAN', $upload_dir, $base_url, $id_solicitacao);
+        $crlv_url = uploadFile('crlv', $upload_dir, $base_url, $id_solicitacao);
+        $comprovante_residencia_url = uploadFile('comprovante_residencia', $upload_dir, $base_url, $id_solicitacao);
+        $doc_complementares_urls = uploadMultipleFiles('doc_complementares', $upload_dir, $base_url, $id_solicitacao);
 
-        if ($stmt->execute()) {
-            // Obter o ID inserido
-            $id_solicitacao = $conn->insert_id;
-
-            // Criar pasta com o ID da solicitação
-            $dir_with_id = $upload_dir . $id_solicitacao . '/';
-            if (!is_dir($dir_with_id)) {
-                mkdir($dir_with_id, 0777, true);
-            }
-
-            // Upload do arquivo notif_DEMUTRAN
-            $notif_DEMUTRAN_url = uploadFile('notif_DEMUTRAN_condutor', $upload_dir, $base_url, $id_solicitacao);
-
-            // Atualizar o registro com a URL do arquivo
-            $update_sql = "UPDATE solicitacoes_demutran SET 
-                notif_DEMUTRAN_url = ?
-                WHERE id = ?";
-
-            $update_stmt = $conn->prepare($update_sql);
-            if (!$update_stmt) {
-                die("Erro na preparação da atualização: " . $conn->error);
-            }
-
-            $update_stmt->bind_param(
-                "si",
-                $notif_DEMUTRAN_url,
-                $id_solicitacao
-            );
-
-            if ($update_stmt->execute()) {
-                echo "Dados inseridos com sucesso!";
+        // Handle file upload for signed document
+        if (isset($_FILES['signedDocument']) && $_FILES['signedDocument']['error'] === UPLOAD_ERR_OK) {
+            $file_name = basename($_FILES['signedDocument']['name']);
+            $file_name = preg_replace('/[^A-Za-z0-9\-_\.]/', '_', $file_name);
+            $target_path = $dir_with_id . $file_name;
+            if (move_uploaded_file($_FILES['signedDocument']['tmp_name'], $target_path)) {
+                $signed_document_url = $base_url . $id_solicitacao . '/' . $file_name;
             } else {
-                echo "Erro ao atualizar os arquivos: " . $update_stmt->error;
+                echo "Erro ao enviar o arquivo.";
             }
-
-            $update_stmt->close();
         } else {
-            echo "Erro: " . $stmt->error;
+            echo "Nenhum arquivo enviado ou erro no upload.";
         }
 
-        $stmt->close();
+        // Atualizar os campos de URLs no banco de dados
+        $update_sql = "UPDATE solicitacoes_demutran SET 
+            doc_requerimento_url = ?, 
+            cnh_url = ?, 
+            cnh_condutor_url = ?,
+            notif_DEMUTRAN_url = ?, 
+            crlv_url = ?, 
+            comprovante_residencia_url = ?,
+            doc_complementares_urls = ?,
+            signed_document_url = ?
+            WHERE id = ?";
 
-    } else {
-        // Captura os dados do formulário
-        $nome = verificaTexto($_POST['nome']);
-        $telefone = verificaTexto($_POST['telefone']);
-        $email = verificaTexto($_POST['email']);
-        $assunto = verificaTexto($_POST['assunto']);
-        $descricao = verificaTexto($_POST['descricao']);
-
-        // Inserir registro com os dados
-        $sql = "INSERT INTO solicitacoes_demutran (
-            tipo_solicitacao, nome, telefone, email, assunto, descricao,
-            doc_requerimento_url, cnh_url, cnh_condutor_url, notif_DEMUTRAN_url, crlv_url, comprovante_residencia_url, doc_complementares_urls
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        $stmt = $conn->prepare($sql);
-
-        if (!$stmt) {
-            die("Erro na preparação da declaração: " . $conn->error);
+        $update_stmt = $conn->prepare($update_sql);
+        if (!$update_stmt) {
+            die("Erro na preparação da atualização: " . $conn->error);
         }
 
-        // Inserimos valores temporários; as URLs serão atualizadas após o upload
-        $stmt->bind_param(
-            "sssssssssssss",
-            $tipo_solicitacao,
-            $nome,
-            $telefone,
-            $email,
-            $assunto,
-            $descricao,
+        $update_stmt->bind_param(
+            "ssssssssi",
             $doc_requerimento_url,
             $cnh_url,
             $cnh_condutor_url,
             $notif_DEMUTRAN_url,
             $crlv_url,
             $comprovante_residencia_url,
-            $doc_complementares_urls
+            $doc_complementares_urls,
+            $signed_document_url,
+            $id_solicitacao
         );
 
-        if ($stmt->execute()) {
-            // Obter o ID inserido
-            $id_solicitacao = $conn->insert_id;
-
-            // Criar pasta com o ID da solicitação
-            $dir_with_id = $upload_dir . $id_solicitacao . '/';
-            if (!is_dir($dir_with_id)) {
-                mkdir($dir_with_id, 0777, true);
-            }
-
-            // Agora processar os arquivos e salvar nas novas pastas
-            $doc_requerimento_url = uploadFile('doc_requerimento', $upload_dir, $base_url, $id_solicitacao);
-            $cnh_url = uploadFile('cnh', $upload_dir, $base_url, $id_solicitacao);
-            $cnh_condutor_url = uploadFile('cnh_condutor', $upload_dir, $base_url, $id_solicitacao);
-            $notif_DEMUTRAN_url = uploadFile('notif_DEMUTRAN_normal', $upload_dir, $base_url, $id_solicitacao);
-            $crlv_url = uploadFile('crlv', $upload_dir, $base_url, $id_solicitacao);
-            $comprovante_residencia_url = uploadFile('comprovante_residencia', $upload_dir, $base_url, $id_solicitacao);
-            $doc_complementares_urls = uploadMultipleFiles('doc_complementares', $upload_dir, $base_url, $id_solicitacao);
-
-            // Atualizar os campos de URLs no banco de dados
-            $update_sql = "UPDATE solicitacoes_demutran SET 
-                doc_requerimento_url = ?, 
-                cnh_url = ?, 
-                cnh_condutor_url = ?,
-                notif_DEMUTRAN_url = ?, 
-                crlv_url = ?, 
-                comprovante_residencia_url = ?,
-                doc_complementares_urls = ?
-                WHERE id = ?";
-
-            $update_stmt = $conn->prepare($update_sql);
-            if (!$update_stmt) {
-                die("Erro na preparação da atualização: " . $conn->error);
-            }
-
-            $update_stmt->bind_param(
-                "sssssssi",
-                $doc_requerimento_url,
-                $cnh_url,
-                $cnh_condutor_url,
-                $notif_DEMUTRAN_url,
-                $crlv_url,
-                $comprovante_residencia_url,
-                $doc_complementares_urls,
-                $id_solicitacao
-            );
-
-            if ($update_stmt->execute()) {
-                echo "Dados inseridos com sucesso!";
-            } else {
-                echo "Erro ao atualizar os arquivos: " . $update_stmt->error;
-            }
-
-            $update_stmt->close();
+        if ($update_stmt->execute()) {
+            echo "Dados inseridos com sucesso!";
         } else {
-            echo "Erro: " . $stmt->error;
+            echo "Erro ao atualizar os arquivos: " . $update_stmt->error;
         }
 
-        $stmt->close();
+        $update_stmt->close();
+    } else {
+        echo "Erro ao inserir os dados: " . $stmt->error;
     }
 
+    $stmt->close();
     $conn->close();
 }
 ?>

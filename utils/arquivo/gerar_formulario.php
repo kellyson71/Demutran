@@ -1,34 +1,40 @@
 <?php
+session_start();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $_SESSION['form_data'] = $_POST;
+    header('Location: gerar_formulario.php');
+    exit;
+}
 // Verifica se o formulário foi enviado
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Processar os dados do formulário
-    $tipoRequerente = $_POST['tipoRequerente'];
-    $nome = $_POST['nome'];
-    $cpf = $_POST['cpf'];
-    $endereco = $_POST['endereco'];
-    $numero = $_POST['numero'];
-    $complemento = $_POST['complemento'];
-    $bairro = $_POST['bairro'];
-    $cep = $_POST['cep'];
-    $municipio = $_POST['municipio'];
-    $telefone = $_POST['telefone'];
-    $placa = $_POST['placa'];
-    $marcaModelo = $_POST['marcaModelo'];
-    $cor = $_POST['cor'];
-    $especie = $_POST['especie'];
-    $categoria = $_POST['categoria'];
-    $ano = $_POST['ano'];
-    $autoInfracao = $_POST['autoInfracao'];
-    $dataInfracao = $_POST['dataInfracao'];
-    $horaInfracao = $_POST['horaInfracao'];
-    $localInfracao = $_POST['localInfracao'];
-    $enquadramento = $_POST['enquadramento'];
-    $defesa = $_POST['defesa'];
+if (isset($_SESSION['form_data'])) {
+    $formData = $_SESSION['form_data'];
+    $tipoRequerente = $formData['tipoRequerente'] ?? '';
+    $nome = $formData['nome'] ?? '';
+    $cpf = $formData['cpf'] ?? '';
+    $endereco = $formData['endereco'] ?? '';
+    $numero = $formData['numero'] ?? '';
+    $complemento = $formData['complemento'] ?? '';
+    $bairro = $formData['bairro'] ?? '';
+    $cep = $formData['cep'] ?? '';
+    $municipio = $formData['municipio'] ?? '';
+    $telefone = $formData['telefone'] ?? '';
+    $placa = $formData['placa'] ?? '';
+    $marcaModelo = $formData['marcaModelo'] ?? '';
+    $cor = $formData['cor'] ?? '';
+    $especie = $formData['especie'] ?? '';
+    $categoria = $formData['categoria'] ?? '';
+    $ano = $formData['ano'] ?? '';
+    $autoInfracao = $formData['autoInfracao'] ?? '';
+    $dataInfracao = $formData['dataInfracao'] ?? '';
+    $horaInfracao = $formData['horaInfracao'] ?? '';
+    $localInfracao = $formData['localInfracao'] ?? '';
+    $enquadramento = $formData['enquadramento'] ?? '';
+    $defesa = $formData['defesa'] ?? '';
 
     // Processar o arquivo enviado
-    if (isset($_FILES['formularioAssinado'])) {
-        $arquivoTmp = $_FILES['formularioAssinado']['tmp_name'];
-        $nomeArquivo = $_FILES['formularioAssinado']['name'];
+    if (isset($_FILES['signedDocument'])) {
+        $arquivoTmp = $_FILES['signedDocument']['tmp_name'];
+        $nomeArquivo = $_FILES['signedDocument']['name'];
         $destino = 'uploads/' . $nomeArquivo;
 
         // Verifica se o diretório existe, senão cria
@@ -61,6 +67,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $mesIngles = date('F');
     $mesPortugues = $meses[$mesIngles];
     $dataAtual = date('d') . ' de ' . $mesPortugues . ' de ' . date('Y');
+} else {
+    echo 'Dados do formulário não encontrados na sessão.';
+    exit;
 }
 ?>
 

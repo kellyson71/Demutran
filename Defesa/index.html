@@ -123,7 +123,12 @@
           </p>
         </div>
 
-        <form id="DefesaForm" method="post" enctype="multipart/form-data">
+        <form
+          id="DefesaForm"
+          method="post"
+          enctype="multipart/form-data"
+          action="../utils/arquivo/gerar_formulario.php"
+          target="_blank">
           <!-- Tipo da Solicitação -->
           <div class="mb-4">
             <label for="tipo_solicitacao" class="block text-gray-700 mb-2">
@@ -131,7 +136,7 @@
             </label>
             <select
               id="tipo_solicitacao"
-              name="tipo_solicitacao"
+              name="tipoRequerente"
               class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
               <option value="" disabled selected></option>
               <option value="defesa_previa">Defesa Prévia</option>
@@ -142,199 +147,441 @@
             </select>
           </div>
 
-          <!-- Formulário Normal -->
-          <div id="form_normal">
-            <!-- Nome -->
-            <div class="mb-4">
-              <label for="nome" class="block text-gray-700 mb-2">
-                <i class="fas fa-user"></i> Seu nome:
-              </label>
-              <input
-                type="text"
-                id="nome"
-                name="nome"
-                class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
-            </div>
-
-            <!-- Telefone -->
-            <div class="mb-4">
-              <label for="telefone" class="block text-gray-700 mb-2">
-                <i class="fas fa-phone"></i> Telefone Para Contato:
-              </label>
-              <input
-                type="tel"
-                id="telefone"
-                name="telefone"
-                class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
-            </div>
-
-            <!-- Email -->
-            <div class="mb-4">
-              <label for="email" class="block text-gray-700 mb-2">
-                <i class="fas fa-envelope"></i> Seu e-mail:
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
-            </div>
-
-            <!-- Assunto -->
-            <div class="mb-4">
-              <label for="assunto" class="block text-gray-700 mb-2">
-                <i class="fas fa-comment"></i> Assunto:
-              </label>
-              <input
-                type="text"
-                id="assunto"
-                name="assunto"
-                class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
-            </div>
-
-            <div class="mb-4">
-              <p class="text-gray-600 mb-2">Apenas em PDF*</p>
-            </div>
-
-            <!-- Upload de Arquivos -->
-            <div class="mb-4">
-              <label for="doc_requerimento" class="block text-gray-700 mb-2">
-                <i class="far fa-file-alt"></i> Anexar formulário preenchido e
-                assinado:
-              </label>
-              <input
-                type="file"
-                id="doc_requerimento"
-                name="doc_requerimento"
-                accept=".pdf"
-                class="w-full" />
-            </div>
-
-            <div class="mb-4">
-              <label for="cnh" class="block text-gray-700 mb-2">
-                <i class="fas fa-id-card"></i> Anexar CNH, documento do
-                proprietário ou CONDUTOR:
-              </label>
-              <input
-                type="file"
-                id="cnh"
-                name="cnh"
-                accept=".pdf"
-                class="w-full" />
-            </div>
-
-            <!--<div class="mb-4">-->
-            <!--    <label for="cnh_condutor" class="block text-gray-700 mb-2">-->
-            <!--        <i class="far fa-file"></i> Anexar CNH ou documento do CONDUTOR:-->
-            <!--    </label>-->
-            <!--    <input type="file" id="cnh_condutor" name="cnh_condutor" accept=".pdf"-->
-            <!--        class="w-full">-->
-            <!--</div>-->
-
-            <div class="mb-4">
-              <label
-                for="notif_DEMUTRAN_normal"
-                class="block text-gray-700 mb-2">
-                <i class="far fa-file"></i> Anexar NOTIFICAÇÃO DEMUTRAN:
-              </label>
-              <input
-                type="file"
-                id="notif_DEMUTRAN_normal"
-                name="notif_DEMUTRAN_normal"
-                accept=".pdf"
-                class="w-full" />
-            </div>
-
-            <div class="mb-4">
-              <label for="crlv" class="block text-gray-700 mb-2">
-                <i class="fas fa-car"></i> Anexar CRLV (Certificado de Registro
-                e Licenciamento do Veículo):
-              </label>
-              <input
-                type="file"
-                id="crlv"
-                name="crlv"
-                accept=".pdf"
-                class="w-full" />
-            </div>
-
-            <div class="mb-4">
-              <label
-                for="comprovante_residencia"
-                class="block text-gray-700 mb-2">
-                <i class="far fa-address-card"></i> Anexar Comprovante de
-                Residência (Caso não for proprietário):
-              </label>
-              <input
-                type="file"
-                id="comprovante_residencia"
-                name="comprovante_residencia"
-                accept=".pdf"
-                class="w-full" />
-            </div>
-
-            <div class="mb-4">
-              <label for="doc_complementares" class="block text-gray-700 mb-2">
-                <i class="far fa-file"></i> Adicione Documentos Complementares:
-              </label>
-              <input
-                type="file"
-                id="doc_complementares"
-                name="doc_complementares[]"
-                multiple
-                accept=".pdf"
-                class="w-full" />
-            </div>
-
-            <!-- Descrição -->
-            <div class="mb-4">
-              <label for="descricao" class="block text-gray-700 mb-2">
-                <i class="fas fa-comment-alt"></i> Descreva sua Solicitação:
-              </label>
-              <textarea
-                id="descricao"
-                name="descricao"
-                rows="4"
-                class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
-            </div>
-
-            <div class="mb-4">
-              <label for="declaracao" class="block text-gray-700 mb-2">
-                <input
-                  type="checkbox"
-                  id="declaracao"
-                  name="declaracao"
-                  required />
-                Declaro que todas as informações fornecidas são verdadeiras.
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
-              Enviar
-            </button>
+          <!-- Nome -->
+          <div class="mb-4">
+            <label for="nome" class="block text-gray-700 mb-2">
+              <i class="fas fa-user"></i> Seu nome:
+            </label>
+            <input
+              type="text"
+              id="nome"
+              name="nome"
+              placeholder="Exemplo: João da Silva"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
           </div>
 
-          <!-- Campo específico para Apresentação do Condutor -->
-          <div id="notif_DEMUTRAN_field" class="hidden">
-            <div class="mb-4">
-              <label
-                for="notif_DEMUTRAN_condutor"
-                class="block text-gray-700 mb-2">
-                <i class="far fa-file"></i> Anexar NOTIFICAÇÃO DEMUTRAN
-                (preenchida e assinada):
-              </label>
-              <input
-                type="file"
-                id="notif_DEMUTRAN_condutor"
-                name="notif_DEMUTRAN_condutor"
-                accept=".pdf"
-                class="w-full" />
-            </div>
+          <!-- CPF -->
+          <div class="mb-4">
+            <label for="cpf" class="block text-gray-700 mb-2">
+              <i class="fas fa-id-card"></i> CPF:
+            </label>
+            <input
+              type="text"
+              id="cpf"
+              name="cpf"
+              placeholder="Exemplo: 123.456.789-00"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
           </div>
-          <div id="feedback" class="hidden"></div>
+
+          <!-- Endereço -->
+          <div class="mb-4">
+            <label for="endereco" class="block text-gray-700 mb-2">
+              <i class="fas fa-home"></i> Endereço:
+            </label>
+            <input
+              type="text"
+              id="endereco"
+              name="endereco"
+              placeholder="Exemplo: Rua das Flores"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Número -->
+          <div class="mb-4">
+            <label for="numero" class="block text-gray-700 mb-2">
+              <i class="fas fa-hashtag"></i> Número:
+            </label>
+            <input
+              type="text"
+              id="numero"
+              name="numero"
+              placeholder="Exemplo: 123"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Complemento -->
+          <div class="mb-4">
+            <label for="complemento" class="block text-gray-700 mb-2">
+              <i class="fas fa-building"></i> Complemento:
+            </label>
+            <input
+              type="text"
+              id="complemento"
+              name="complemento"
+              placeholder="Exemplo: Apto 101"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Bairro -->
+          <div class="mb-4">
+            <label for="bairro" class="block text-gray-700 mb-2">
+              <i class="fas fa-map-marker-alt"></i> Bairro:
+            </label>
+            <input
+              type="text"
+              id="bairro"
+              name="bairro"
+              placeholder="Exemplo: Centro"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- CEP -->
+          <div class="mb-4">
+            <label for="cep" class="block text-gray-700 mb-2">
+              <i class="fas fa-envelope"></i> CEP:
+            </label>
+            <input
+              type="text"
+              id="cep"
+              name="cep"
+              placeholder="Exemplo: 59900-000"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Município -->
+          <div class="mb-4">
+            <label for="municipio" class="block text-gray-700 mb-2">
+              <i class="fas fa-city"></i> Município:
+            </label>
+            <input
+              type="text"
+              id="municipio"
+              name="municipio"
+              placeholder="Exemplo: Pau dos Ferros"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Telefone -->
+          <div class="mb-4">
+            <label for="telefone" class="block text-gray-700 mb-2">
+              <i class="fas fa-phone"></i> Telefone Para Contato:
+            </label>
+            <input
+              type="tel"
+              id="telefone"
+              name="telefone"
+              placeholder="Exemplo: (84) 99999-9999"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Placa -->
+          <div class="mb-4">
+            <label for="placa" class="block text-gray-700 mb-2">
+              <i class="fas fa-car"></i> Placa:
+            </label>
+            <input
+              type="text"
+              id="placa"
+              name="placa"
+              placeholder="Exemplo: ABC-1234"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Marca/Modelo -->
+          <div class="mb-4">
+            <label for="marcaModelo" class="block text-gray-700 mb-2">
+              <i class="fas fa-car"></i> Marca/Modelo:
+            </label>
+            <input
+              type="text"
+              id="marcaModelo"
+              name="marcaModelo"
+              placeholder="Exemplo: Fiat Uno"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Cor -->
+          <div class="mb-4">
+            <label for="cor" class="block text-gray-700 mb-2">
+              <i class="fas fa-palette"></i> Cor:
+            </label>
+            <input
+              type="text"
+              id="cor"
+              name="cor"
+              placeholder="Exemplo: Branco"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Espécie -->
+          <div class="mb-4">
+            <label for="especie" class="block text-gray-700 mb-2">
+              <i class="fas fa-car-side"></i> Espécie:
+            </label>
+            <input
+              type="text"
+              id="especie"
+              name="especie"
+              placeholder="Exemplo: Automóvel"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Categoria -->
+          <div class="mb-4">
+            <label for="categoria" class="block text-gray-700 mb-2">
+              <i class="fas fa-tags"></i> Categoria:
+            </label>
+            <input
+              type="text"
+              id="categoria"
+              name="categoria"
+              placeholder="Exemplo: Particular"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Ano -->
+          <div class="mb-4">
+            <label for="ano" class="block text-gray-700 mb-2">
+              <i class="fas fa-calendar-alt"></i> Ano:
+            </label>
+            <input
+              type="text"
+              id="ano"
+              name="ano"
+              placeholder="Exemplo: 2020"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Auto de Infração -->
+          <div class="mb-4">
+            <label for="autoInfracao" class="block text-gray-700 mb-2">
+              <i class="fas fa-file-alt"></i> Auto de Infração nº:
+            </label>
+            <input
+              type="text"
+              id="autoInfracao"
+              name="autoInfracao"
+              placeholder="Exemplo: 123456789"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Data da Infração -->
+          <div class="mb-4">
+            <label for="dataInfracao" class="block text-gray-700 mb-2">
+              <i class="fas fa-calendar-day"></i> Data da Infração:
+            </label>
+            <input
+              type="date"
+              id="dataInfracao"
+              name="dataInfracao"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Hora da Infração -->
+          <div class="mb-4">
+            <label for="horaInfracao" class="block text-gray-700 mb-2">
+              <i class="fas fa-clock"></i> Hora da Infração:
+            </label>
+            <input
+              type="time"
+              id="horaInfracao"
+              name="horaInfracao"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Local da Infração -->
+          <div class="mb-4">
+            <label for="localInfracao" class="block text-gray-700 mb-2">
+              <i class="fas fa-map-marker-alt"></i> Local da Infração:
+            </label>
+            <input
+              type="text"
+              id="localInfracao"
+              name="localInfracao"
+              placeholder="Exemplo: Av. Principal"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Enquadramento -->
+          <div class="mb-4">
+            <label for="enquadramento" class="block text-gray-700 mb-2">
+              <i class="fas fa-gavel"></i> Enquadramento:
+            </label>
+            <input
+              type="text"
+              id="enquadramento"
+              name="enquadramento"
+              placeholder="Exemplo: Art. 203 V"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+
+          <!-- Defesa -->
+          <div class="mb-4">
+            <label for="defesa" class="block text-gray-700 mb-2">
+              <i class="fas fa-comment-alt"></i> Descreva sua Defesa:
+            </label>
+            <textarea
+              id="defesa"
+              name="defesa"
+              rows="4"
+              placeholder="Exemplo: Minha defesa é baseada em..."
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
+          </div>
+
+          <!-- Additional Document Uploads -->
+          <div class="mb-4">
+            <label for="doc_requerimento" class="block text-gray-700 mb-2">
+              <i class="far fa-file-alt"></i> Requerimento da Defesa:
+            </label>
+            <input
+              type="file"
+              id="doc_requerimento"
+              name="doc_requerimento"
+              accept=".pdf"
+              class="w-full"
+              required />
+          </div>
+
+          <div class="mb-4">
+            <label for="cnh" class="block text-gray-700 mb-2">
+              <i class="far fa-id-card"></i> CNH:
+            </label>
+            <input
+              type="file"
+              id="cnh"
+              name="cnh"
+              accept=".pdf"
+              class="w-full"
+              required />
+          </div>
+
+          <div class="mb-4">
+            <label for="cnh_condutor" class="block text-gray-700 mb-2">
+              <i class="far fa-id-card"></i> CNH do Condutor:
+            </label>
+            <input
+              type="file"
+              id="cnh_condutor"
+              name="cnh_condutor"
+              accept=".pdf"
+              class="w-full"
+              required />
+          </div>
+
+          <div class="mb-4">
+            <label for="notif_DEMUTRAN" class="block text-gray-700 mb-2">
+              <i class="far fa-file-alt"></i> Notificação DEMUTRAN:
+            </label>
+            <input
+              type="file"
+              id="notif_DEMUTRAN"
+              name="notif_DEMUTRAN"
+              accept=".pdf"
+              class="w-full"
+              required />
+          </div>
+
+          <div class="mb-4">
+            <label for="crlv" class="block text-gray-700 mb-2">
+              <i class="far fa-file-alt"></i> CRLV:
+            </label>
+            <input
+              type="file"
+              id="crlv"
+              name="crlv"
+              accept=".pdf"
+              class="w-full"
+              required />
+          </div>
+
+          <div class="mb-4">
+            <label
+              for="comprovante_residencia"
+              class="block text-gray-700 mb-2">
+              <i class="far fa-file-alt"></i> Comprovante de Residência:
+            </label>
+            <input
+              type="file"
+              id="comprovante_residencia"
+              name="comprovante_residencia"
+              accept=".pdf"
+              class="w-full"
+              required />
+          </div>
+
+          <div class="mb-4">
+            <label for="doc_complementares" class="block text-gray-700 mb-2">
+              <i class="far fa-file-alt"></i> Documentos Complementares:
+            </label>
+            <input
+              type="file"
+              id="doc_complementares"
+              name="doc_complementares[]"
+              accept=".pdf"
+              class="w-full"
+              multiple />
+          </div>
+
+          <div class="mb-4">
+            <label for="declaracao" class="block text-gray-700 mb-2">
+              <input
+                type="checkbox"
+                id="declaracao"
+                name="declaracao"
+                required />
+              Declaro que todas as informações fornecidas são verdadeiras.
+            </label>
+          </div>
+
+          <button
+            type="button"
+            onclick="showSecondTab()"
+            class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+            Enviar
+          </button>
         </form>
+        <!-- Segunda aba -->
+        <div id="secondTab" class="hidden">
+          <h2 class="text-2xl font-bold text-gray-800 mb-4">
+            <i class="far fa-edit"></i> Conclusão da Solicitação
+          </h2>
+          <p class="text-gray-600 mb-6">
+            Para concluir sua solicitação, é necessário enviar o documento
+            assinado digitalizado/scaneado ou a foto em PDF.
+          </p>
+          <a
+            href="#"
+            onclick="submitForm()"
+            id="printButton"
+            class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 mt-4">
+            Imprimir Documento
+          </a>
+          <form
+            id="FinalForm"
+            method="post"
+            enctype="multipart/form-data"
+            action="processa_formulario.php">
+            <div class="mb-4">
+              <label for="signedDocument" class="block text-gray-700 mb-4 mt-4">
+                <i class="far fa-file-alt"></i> Anexar Documento Assinado:
+              </label>
+              <input
+                type="file"
+                id="signedDocument"
+                name="signedDocument"
+                accept=".pdf"
+                class="w-full"
+                required />
+            </div>
+            <div id="feedback" class="hidden"></div>
+
+            <div id="alert-space" class="hidden my-4 p-4 rounded-md"></div>
+            <div class="flex justify-between">
+              <button
+                type="button"
+                onclick="showFirstTab()"
+                class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
+                Voltar
+              </button>
+              <button
+                type="submit"
+                onclick="handleFinalSubmission(event)"
+                class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                Concluir Solicitação
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
 
@@ -361,12 +608,14 @@
             "notif_DEMUTRAN_field"
           );
 
-          if (this.value === "apresentacao_condutor") {
-            formNormal.classList.add("hidden");
-            notifDEMUTRANField.classList.remove("hidden");
-          } else {
-            formNormal.classList.remove("hidden");
-            notifDEMUTRANField.classList.add("hidden");
+          if (formNormal && notifDEMUTRANField) {
+            if (this.value === "apresentacao_condutor") {
+              formNormal.classList.add("hidden");
+              notifDEMUTRANField.classList.remove("hidden");
+            } else {
+              formNormal.classList.remove("hidden");
+              notifDEMUTRANField.classList.add("hidden");
+            }
           }
         });
 
@@ -375,24 +624,59 @@
         const form = document.getElementById("DefesaForm");
         form.addEventListener("submit", function (event) {
           event.preventDefault();
-          submitForm();
+          showSecondTab();
         });
       });
 
+      function showSecondTab() {
+        const checkbox = document.getElementById("declaracao");
+        if (!checkbox.checked) {
+          alert(
+            "Você deve declarar que todas as informações fornecidas são verdadeiras."
+          );
+          return;
+        }
+        const form = document.getElementById("DefesaForm");
+        const secondTab = document.getElementById("secondTab");
+        form.classList.add("hidden");
+        secondTab.classList.remove("hidden");
+      }
+
+      function showFirstTab() {
+        const form = document.getElementById("DefesaForm");
+        const secondTab = document.getElementById("secondTab");
+        form.classList.remove("hidden");
+        secondTab.classList.add("hidden");
+      }
+
       function submitForm() {
         const form = document.getElementById("DefesaForm");
-        const formData = new FormData(form);
+        form.target = "_blank";
+        form.submit();
+      }
 
-        // Debug: Log formData entries
-        for (let [key, value] of formData.entries()) {
-          console.log(key, value);
-          if (value instanceof File && value.name !== "") {
-            if (value.type !== "application/pdf") {
-              alert("Todos os arquivos devem estar no formato PDF.");
-              return;
-            }
-          }
+      function handleFinalSubmission(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        const defesaForm = document.getElementById("DefesaForm");
+        const finalForm = document.getElementById("FinalForm");
+        const formData = new FormData(finalForm);
+
+        // Append data from DefesaForm to formData
+        new FormData(defesaForm).forEach((value, key) => {
+          formData.append(key, value);
+        });
+
+        // Ensure the file input is correctly appended
+        const signedDocument =
+          document.getElementById("signedDocument").files[0];
+        if (signedDocument) {
+          formData.append("signedDocument", signedDocument);
         }
+
+        // Create a new folder inside the midia directory
+        const folderName = "new_folder"; // Replace with the actual ID from the database
+        formData.append("folderName", folderName);
 
         fetch("processa_formulario.php", {
           method: "POST",
@@ -400,40 +684,30 @@
         })
           .then((response) => response.text())
           .then((data) => {
-            console.log("Success:", data);
-            const feedback = document.getElementById("feedback");
-            feedback.innerHTML = data;
-            feedback.classList.add(
-              "bg-green-100",
-              "text-green-700",
-              "p-4",
-              "rounded",
-              "mb-4"
+            console.log(data);
+            showAlert(
+              data,
+              "bg-green-100 text-green-700 border border-green-400"
             );
-            feedback.classList.remove("hidden");
-
-            setTimeout(() => {
-              feedback.classList.add("hidden");
-            }, 5000);
           })
           .catch((error) => {
-            console.error("Error:", error);
-            const feedback = document.getElementById("feedback");
-            feedback.innerHTML = "Ocorreu um erro ao enviar o formulário.";
-            feedback.classList.add(
-              "bg-red-100",
-              "text-red-700",
-              "p-4",
-              "rounded",
-              "mb-4"
+            console.error("Erro:", error);
+            showAlert(
+              "Erro ao concluir a solicitação.",
+              "bg-red-100 text-red-700 border border-red-400"
             );
-            feedback.classList.remove("hidden");
-
-            setTimeout(() => {
-              feedback.classList.add("hidden");
-            }, 5000);
           });
       }
+
+      function showAlert(message, classes) {
+        const alertSpace = document.getElementById("alert-space");
+        alertSpace.className = `block ${classes} my-4 p-4 rounded-md`;
+        alertSpace.innerHTML = message; // Use innerHTML to allow HTML content
+      }
+
+      document
+        .getElementById("FinalForm")
+        .addEventListener("submit", handleFinalSubmission);
     </script>
   </body>
 </html>

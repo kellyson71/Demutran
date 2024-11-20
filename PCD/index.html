@@ -466,7 +466,8 @@
           .then((response) => response.text())
           .then((data) => {
             const feedback = document.getElementById("feedback");
-            feedback.innerHTML = data;
+            feedback.innerHTML =
+              "Sua solicitação foi enviada com sucesso. Você receberá um comprovante da solicitação por e-mail em breve.";
             feedback.classList.add(
               "bg-green-100",
               "text-green-700",

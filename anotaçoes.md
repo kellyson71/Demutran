@@ -18,6 +18,11 @@
 
 - [x] **Geração de Comprovante**: Gerar comprovante individual para cada formulário preenchido. -->
 
+### 4. Modificações no Parecer
+
+- [] **Envio por E-mail**: Todas as informações do parecer foram enviadas por e-mail.
+- [x] **Alerta com Mensagem**: Adicionar alerta com mensagem informativa.
+
 <!-- ### 4. Novo Formulário para Parecer
 
 - [x] **Novo Campo - Parecer para Eventos**: Criar campo para menção de parecer em eventos específicos.
