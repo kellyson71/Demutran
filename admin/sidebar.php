@@ -1,4 +1,5 @@
 <aside class="w-64 bg-white shadow-md flex-shrink-0 hidden md:flex flex-col">
+    <?php include '../env/config.php'; ?>
     <div class="p-6 flex flex-col h-full">
         <h1 class="text-2xl font-bold text-blue-600 mb-6">Painel Admin</h1>
         <nav class="space-y-2 flex-1">

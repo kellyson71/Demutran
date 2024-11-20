@@ -5,3 +5,6 @@ fpdf
 PCD/midia/
 admin/config.php
 sandbox/
+utils/vendor/
+assets/
+lib/

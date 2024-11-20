@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'config.php';
+include '../env/config.php';
 
 // Habilitar exibição de erros para depuração
 error_reporting(E_ALL);

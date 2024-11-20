@@ -1,8 +1,5 @@
 <?php
-$servername = "srv1078.hstgr.io"; 
-$username = "u492577848_protocolo";
-$password = "WRVGAxCbrJ8wdM$"; 
-$dbname = "u492577848_demutran";
+include '../env/config.php';
 
 // Cria a conexão com o banco de dados
 $conn = new mysqli($servername, $username, $password, $dbname);

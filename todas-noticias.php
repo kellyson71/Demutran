@@ -37,6 +37,7 @@ $conn->close();
 
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <!-- Cabeçalho padrão com meta tags, links de estilo, etc. -->
     <meta charset="UTF-8">
@@ -54,16 +55,11 @@ $conn->close();
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <!-- Google Fonts -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
-        rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
 </head>
+
 <body class="font-roboto bg-gray-100">
     <!-- Início da Página -->
     <div id="top"></div>
@@ -87,10 +83,9 @@ $conn->close();
             <!-- Mobile menu button -->
             <div class="md:hidden">
                 <button id="menu-btn" class="text-white focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" 
-                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" 
-                            stroke-linejoin="round" stroke-width="2" 
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
                 </button>
@@ -109,61 +104,58 @@ $conn->close();
     <!-- Topbar Secundária -->
     <div class="bg-gray-200 border-b border-gray-300 mt-16">
         <div class="container mx-auto py-2 text-center">
-            <a
-                href="https://paudosferros.rn.gov.br/secretaria.php?sec=19"
-                class="text-gray-800 hover:text-gray-600"
-                >Demutran – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</a
-            >
+            <a href="https://paudosferros.rn.gov.br/secretaria.php?sec=19"
+                class="text-gray-800 hover:text-gray-600">Demutran – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</a>
             <span class="text-gray-600 mx-2">|</span>
-            <a
-                href="https://paudosferros.rn.gov.br/lai.php"
-                class="text-gray-800 hover:text-gray-600"
-                >Acesso à Informação</a
-            >
+            <a href="https://paudosferros.rn.gov.br/lai.php" class="text-gray-800 hover:text-gray-600">Acesso à
+                Informação</a>
             <span class="text-gray-600 mx-2">-</span>
-            <a
-                href="https://paudosferros.rn.gov.br/omunicipio.php"
-                class="text-gray-800 hover:text-gray-600"
-                >Sobre a Prefeitura</a
-            >
+            <a href="https://paudosferros.rn.gov.br/omunicipio.php" class="text-gray-800 hover:text-gray-600">Sobre a
+                Prefeitura</a>
         </div>
     </div>
 
     <!-- Conteúdo Principal -->
     <main class="container mx-auto py-8">
-    <div class="text-left mb-4">
-        <a href="index.php" class="inline-block bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700">
-            &larr; Voltar para a Página Inicial
-        </a>
-    </div>
+        <div class="text-left mb-4">
+            <a href="index.php" class="inline-block bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700">
+                &larr; Voltar para a Página Inicial
+            </a>
+        </div>
 
-    <h1 class="text-4xl font-bold text-center text-gray-800 mb-6">
-        Todas as Notícias
-    </h1>
-    <p class="text-gray-600 text-center max-w-4xl mx-auto mb-8">
-        Confira abaixo todas as notícias e atualizações do DEMUTRAN Pau dos Ferros.
-    </p>
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-6">
+            Todas as Notícias
+        </h1>
+        <p class="text-gray-600 text-center max-w-4xl mx-auto mb-8">
+            Confira abaixo todas as notícias e atualizações do DEMUTRAN Pau dos Ferros.
+        </p>
 
         <!-- Grid de Notícias -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <?php foreach ($noticias as $noticia): ?>
-                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-                    <div class="h-48">
-                        <img src="<?php echo $noticia['imagem_url']; ?>" alt="<?php echo htmlspecialchars($noticia['titulo'], ENT_QUOTES, 'UTF-8'); ?>" class="object-cover w-full h-full">
-                    </div>
-                    <div class="p-4">
-                        <h3 class="text-gray-900 font-bold text-xl mb-2"><?php echo htmlspecialchars($noticia['titulo'], ENT_QUOTES, 'UTF-8'); ?></h3>
-                        <p class="text-gray-600 text-sm mb-4"><?php echo htmlspecialchars($noticia['resumo'], ENT_QUOTES, 'UTF-8'); ?></p>
-                        <a href="noticia.php?id=<?php echo $noticia['id']; ?>" class="text-green-600 hover:underline">Leia mais</a>
-                    </div>
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div class="h-48">
+                    <img src="<?php echo $noticia['imagem_url']; ?>"
+                        alt="<?php echo htmlspecialchars($noticia['titulo'], ENT_QUOTES, 'UTF-8'); ?>"
+                        class="object-cover w-full h-full">
                 </div>
+                <div class="p-4">
+                    <h3 class="text-gray-900 font-bold text-xl mb-2">
+                        <?php echo htmlspecialchars($noticia['titulo'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                    <p class="text-gray-600 text-sm mb-4">
+                        <?php echo htmlspecialchars($noticia['resumo'], ENT_QUOTES, 'UTF-8'); ?></p>
+                    <a href="noticia.php?id=<?php echo $noticia['id']; ?>" class="text-green-600 hover:underline">Leia
+                        mais</a>
+                </div>
+            </div>
             <?php endforeach; ?>
         </div>
 
         <!-- Paginação -->
         <div class="mt-8 flex justify-center">
             <?php if ($pagina_atual > 1): ?>
-                <a href="?pagina=<?php echo $pagina_atual - 1; ?>" class="px-4 py-2 mx-1 bg-green-600 text-white rounded hover:bg-green-700">Anterior</a>
+            <a href="?pagina=<?php echo $pagina_atual - 1; ?>"
+                class="px-4 py-2 mx-1 bg-green-600 text-white rounded hover:bg-green-700">Anterior</a>
             <?php endif; ?>
 
             <?php
@@ -171,25 +163,24 @@ $conn->close();
             for ($i = 1; $i <= $total_paginas; $i++): 
                 if ($i == $pagina_atual):
             ?>
-                <span class="px-4 py-2 mx-1 bg-green-600 text-white rounded"><?php echo $i; ?></span>
+            <span class="px-4 py-2 mx-1 bg-green-600 text-white rounded"><?php echo $i; ?></span>
             <?php else: ?>
-                <a href="?pagina=<?php echo $i; ?>" class="px-4 py-2 mx-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"><?php echo $i; ?></a>
+            <a href="?pagina=<?php echo $i; ?>"
+                class="px-4 py-2 mx-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"><?php echo $i; ?></a>
             <?php 
                 endif;
             endfor; 
             ?>
 
             <?php if ($pagina_atual < $total_paginas): ?>
-                <a href="?pagina=<?php echo $pagina_atual + 1; ?>" class="px-4 py-2 mx-1 bg-green-600 text-white rounded hover:bg-green-700">Próxima</a>
+            <a href="?pagina=<?php echo $pagina_atual + 1; ?>"
+                class="px-4 py-2 mx-1 bg-green-600 text-white rounded hover:bg-green-700">Próxima</a>
             <?php endif; ?>
         </div>
 
         <!-- Botão Voltar ao Topo -->
         <div class="text-center mt-8">
-            <a
-                href="#top"
-                class="inline-flex items-center text-green-600 hover:text-green-800"
-            >
+            <a href="#top" class="inline-flex items-center text-green-600 hover:text-green-800">
                 <i class="fas fa-arrow-up mr-2"></i>
                 <span>Voltar ao Topo</span>
             </a>
@@ -198,9 +189,7 @@ $conn->close();
 
     <!-- Footer (mesmo código do seu footer) -->
     <footer class="bg-gray-800 text-white py-8 mt-8">
-        <div
-            class="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-center"
-        >
+        <div class="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
                 <h2 class="text-lg font-semibold mb-2">INSTITUCIONAL</h2>
                 <p>PREFEITO(A): MARIANNA ALMEIDA</p>
@@ -221,22 +210,14 @@ $conn->close();
             <div>
                 <h2 class="text-lg font-semibold mb-2">REDES SOCIAIS</h2>
                 <div class="flex justify-center space-x-4 mt-2">
-                    <a href="https://www.instagram.com/prefeituradepaudosferros/"
-                        ><i class="fab fa-instagram text-2xl"></i
-                    ></a>
-                    <a href="https://www.facebook.com/prefeituradepaudosferros/"
-                        ><i class="fab fa-facebook text-2xl"></i
-                    ></a>
-                    <a href="https://twitter.com/paudosferros"
-                        ><i class="fab fa-twitter text-2xl"></i
-                    ></a>
-                    <a
-                        href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros"
-                        ><i class="fab fa-youtube text-2xl"></i
-                    ></a>
-                    <a href="https://wa.me/558499440704"
-                        ><i class="fab fa-whatsapp text-2xl"></i
-                    ></a>
+                    <a href="https://www.instagram.com/prefeituradepaudosferros/"><i
+                            class="fab fa-instagram text-2xl"></i></a>
+                    <a href="https://www.facebook.com/prefeituradepaudosferros/"><i
+                            class="fab fa-facebook text-2xl"></i></a>
+                    <a href="https://twitter.com/paudosferros"><i class="fab fa-twitter text-2xl"></i></a>
+                    <a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros"><i
+                            class="fab fa-youtube text-2xl"></i></a>
+                    <a href="https://wa.me/558499440704"><i class="fab fa-whatsapp text-2xl"></i></a>
                 </div>
             </div>
         </div>
@@ -244,13 +225,14 @@ $conn->close();
 
     <!-- Scripts -->
     <script>
-        // Mobile Menu Toggle
-        const menuBtn = document.getElementById("menu-btn");
-        const mobileMenu = document.getElementById("mobile-menu");
+    // Mobile Menu Toggle
+    const menuBtn = document.getElementById("menu-btn");
+    const mobileMenu = document.getElementById("mobile-menu");
 
-        menuBtn.addEventListener("click", () => {
-            mobileMenu.classList.toggle("hidden");
-        });
+    menuBtn.addEventListener("click", () => {
+        mobileMenu.classList.toggle("hidden");
+    });
     </script>
 </body>
+
 </html>

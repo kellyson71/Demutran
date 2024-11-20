@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'config.php';
+include '../env/config.php';
 
 // Verifica se o usuário está logado
 if (!isset($_SESSION['usuario_id'])) {
@@ -35,6 +35,7 @@ $usuario = obterInformacoesUsuario($conn, $_SESSION['usuario_id']);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR" x-data="{ open: false }">
+
 <head>
     <meta charset="UTF-8">
     <title>Perfil de Usuário</title>
@@ -53,9 +54,12 @@ $usuario = obterInformacoesUsuario($conn, $_SESSION['usuario_id']);
     <script src="//unpkg.com/alpinejs" defer></script>
 
     <style>
-        [x-cloak] { display: none; }
+    [x-cloak] {
+        display: none;
+    }
     </style>
 </head>
+
 <body class="bg-gray-100 font-roboto min-h-screen flex flex-col">
     <!-- Loader -->
     <div x-ref="loading" class="fixed inset-0 bg-white z-50 flex items-center justify-center hidden">
@@ -77,7 +81,8 @@ $usuario = obterInformacoesUsuario($conn, $_SESSION['usuario_id']);
                         <span class="material-icons">assignment</span>
                         <span class="ml-3">Formulários</span>
                     </a>
-                    <a href="gerenciar_noticias.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
+                    <a href="gerenciar_noticias.php"
+                        class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
                         <span class="material-icons">article</span>
                         <span class="ml-3">Notícias</span>
                     </a>
@@ -100,7 +105,8 @@ $usuario = obterInformacoesUsuario($conn, $_SESSION['usuario_id']);
         </aside>
 
         <!-- Mobile Sidebar -->
-        <div x-show="open" @click.away="open = false" x-cloak class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden">
+        <div x-show="open" @click.away="open = false" x-cloak
+            class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden">
             <aside class="w-64 bg-white h-full shadow-md">
                 <div class="p-6">
                     <h1 class="text-2xl font-bold text-blue-600 mb-6">Painel Admin</h1>
@@ -113,7 +119,8 @@ $usuario = obterInformacoesUsuario($conn, $_SESSION['usuario_id']);
                             <span class="material-icons">assignment</span>
                             <span class="ml-3">Formulários</span>
                         </a>
-                        <a href="gerenciar_noticias.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
+                        <a href="gerenciar_noticias.php"
+                            class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
                             <span class="material-icons">article</span>
                             <span class="ml-3">Notícias</span>
                         </a>
@@ -151,20 +158,23 @@ $usuario = obterInformacoesUsuario($conn, $_SESSION['usuario_id']);
                         <button @click="open = !open" class="relative focus:outline-none">
                             <span class="material-icons text-gray-700">notifications</span>
                             <?php if ($notificacoesNaoLidas > 0): ?>
-                                <span class="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 text-xs"><?php echo $notificacoesNaoLidas; ?></span>
+                            <span
+                                class="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 text-xs"><?php echo $notificacoesNaoLidas; ?></span>
                             <?php endif; ?>
                         </button>
                         <!-- Dropdown de Notificações -->
-                        <div x-show="open" @click.away="open = false" x-cloak class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
+                        <div x-show="open" @click.away="open = false" x-cloak
+                            class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
                             <div class="p-4 border-b text-gray-700 font-bold">Últimos Formulários SAC</div>
                             <ul>
                                 <?php while($formulario = $sacFormularios->fetch_assoc()): ?>
-                                    <li class="p-4 border-b hover:bg-gray-50">
-                                        <a href="detalhes_formulario.php?id=<?php echo $formulario['id']; ?>&tipo=SAC" class="block">
-                                            <p class="font-medium text-gray-800"><?php echo $formulario['nome']; ?></p>
-                                            <p class="text-sm text-gray-600"><?php echo $formulario['assunto']; ?></p>
-                                        </a>
-                                    </li>
+                                <li class="p-4 border-b hover:bg-gray-50">
+                                    <a href="detalhes_formulario.php?id=<?php echo $formulario['id']; ?>&tipo=SAC"
+                                        class="block">
+                                        <p class="font-medium text-gray-800"><?php echo $formulario['nome']; ?></p>
+                                        <p class="text-sm text-gray-600"><?php echo $formulario['assunto']; ?></p>
+                                    </a>
+                                </li>
                                 <?php endwhile; ?>
                             </ul>
                         </div>
@@ -175,8 +185,10 @@ $usuario = obterInformacoesUsuario($conn, $_SESSION['usuario_id']);
                         <button @click="open = !open" class="flex items-center focus:outline-none">
                             <img src="avatar.png" alt="Avatar" class="w-8 h-8 rounded-full">
                         </button>
-                        <div x-show="open" @click.away="open = false" x-cloak class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
-                            <div class="p-4 border-b text-gray-700 font-bold"><?php echo $_SESSION['usuario_nome']; ?></div>
+                        <div x-show="open" @click.away="open = false" x-cloak
+                            class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
+                            <div class="p-4 border-b text-gray-700 font-bold"><?php echo $_SESSION['usuario_nome']; ?>
+                            </div>
                             <ul>
                                 <li class="p-4 hover:bg-gray-50">
                                     <a href="perfil.php" class="block text-gray-700">Perfil</a>
@@ -198,10 +210,15 @@ $usuario = obterInformacoesUsuario($conn, $_SESSION['usuario_id']);
                         <img src="avatar.png" alt="Avatar" class="w-24 h-24 rounded-full mb-4">
                         <h2 class="text-2xl font-bold text-gray-800 mb-2"><?php echo $usuario['nome']; ?></h2>
                         <p class="text-gray-600 mb-4"><strong>Email:</strong> <?php echo $usuario['email']; ?></p>
-                        <p class="text-gray-600 mb-4"><strong>Data de Criação:</strong> <?php echo date('d/m/Y', strtotime($usuario['data_registro'])); ?></p>
+                        <p class="text-gray-600 mb-4"><strong>Data de Criação:</strong>
+                            <?php echo date('d/m/Y', strtotime($usuario['data_registro'])); ?></p>
                         <div class="flex space-x-4 mt-4">
-                            <a href="editar_perfil.php" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Editar Perfil</a>
-                            <a href="alterar_senha.php" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">Alterar Senha</a>
+                            <a href="editar_perfil.php"
+                                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Editar
+                                Perfil</a>
+                            <a href="alterar_senha.php"
+                                class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">Alterar
+                                Senha</a>
                         </div>
                     </div>
                 </div>
@@ -209,9 +226,11 @@ $usuario = obterInformacoesUsuario($conn, $_SESSION['usuario_id']);
 
             <!-- Footer -->
             <footer class="bg-white shadow-md py-4 px-6">
-                <p class="text-gray-600 text-center">&copy; <?php echo date('Y'); ?> Departamento de Trânsito. Todos os direitos reservados.</p>
+                <p class="text-gray-600 text-center">&copy; <?php echo date('Y'); ?> Departamento de Trânsito. Todos os
+                    direitos reservados.</p>
             </footer>
         </div>
     </div>
 </body>
+
 </html>

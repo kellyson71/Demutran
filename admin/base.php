@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-include 'config.php';
+include '../env/config.php';
 
 // Verificação de login do usuário
 if (!isset($_SESSION['usuario_id'])) {
@@ -26,12 +26,14 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR" x-data="{ open: false }" x-init="$refs.loading.classList.add('hidden')">
+
 <head>
     <!-- Cabeçalho -->
     <meta charset="UTF-8">
     <title><?php echo isset($titulo_pagina) ? $titulo_pagina : 'Painel Administrativo'; ?></title>
     <!-- ... demais tags ... -->
 </head>
+
 <body class="bg-gray-100 font-roboto">
     <!-- Loader -->
     <!-- ... -->
@@ -58,4 +60,5 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
         </div>
     </div>
 </body>
+
 </html>

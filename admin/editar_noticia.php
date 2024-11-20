@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'config.php';
+include '../env/config.php';
 
 // Verifica se o usuário está logado
 if (!isset($_SESSION['usuario_id'])) {
@@ -50,6 +50,7 @@ if (isset($_GET['id'])) {
 
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -59,16 +60,18 @@ if (isset($_GET['id'])) {
     <!-- Google Font - Roboto -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-        }
-        .input-focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
-        }
+    body {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .input-focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    }
     </style>
 </head>
+
 <body class="bg-gray-100 min-h-screen">
 
     <!-- Navbar -->
@@ -93,39 +96,50 @@ if (isset($_GET['id'])) {
             <!-- Formulário de Edição -->
             <form method="POST" action="">
                 <?php if (isset($error)): ?>
-                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
-                        <p><?php echo $error; ?></p>
-                    </div>
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+                    <p><?php echo $error; ?></p>
+                </div>
                 <?php endif; ?>
-                
+
                 <div class="mb-6">
                     <label for="titulo" class="block text-gray-700">Título</label>
-                    <input type="text" id="titulo" name="titulo" class="w-full p-3 border rounded-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 input-focus" value="<?php echo $noticia['titulo']; ?>" required>
+                    <input type="text" id="titulo" name="titulo"
+                        class="w-full p-3 border rounded-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 input-focus"
+                        value="<?php echo $noticia['titulo']; ?>" required>
                 </div>
 
                 <div class="mb-6">
                     <label for="resumo" class="block text-gray-700">Resumo</label>
-                    <textarea id="resumo" name="resumo" class="w-full p-3 border rounded-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 input-focus" rows="4" required><?php echo $noticia['resumo']; ?></textarea>
+                    <textarea id="resumo" name="resumo"
+                        class="w-full p-3 border rounded-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 input-focus"
+                        rows="4" required><?php echo $noticia['resumo']; ?></textarea>
                 </div>
 
                 <div class="mb-6">
                     <label for="conteudo" class="block text-gray-700">Conteúdo</label>
-                    <textarea id="conteudo" name="conteudo" class="w-full p-3 border rounded-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 input-focus" rows="8" required><?php echo $noticia['conteudo']; ?></textarea>
+                    <textarea id="conteudo" name="conteudo"
+                        class="w-full p-3 border rounded-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 input-focus"
+                        rows="8" required><?php echo $noticia['conteudo']; ?></textarea>
                 </div>
 
                 <div class="mb-6">
                     <label for="imagem_url" class="block text-gray-700">URL da Imagem</label>
-                    <input type="text" id="imagem_url" name="imagem_url" class="w-full p-3 border rounded-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 input-focus" value="<?php echo $noticia['imagem_url']; ?>" required>
+                    <input type="text" id="imagem_url" name="imagem_url"
+                        class="w-full p-3 border rounded-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 input-focus"
+                        value="<?php echo $noticia['imagem_url']; ?>" required>
                 </div>
 
                 <div class="mb-6">
                     <label for="data_publicacao" class="block text-gray-700">Data de Publicação</label>
-                    <input type="date" id="data_publicacao" name="data_publicacao" class="w-full p-3 border rounded-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 input-focus" value="<?php echo $noticia['data_publicacao']; ?>" required>
+                    <input type="date" id="data_publicacao" name="data_publicacao"
+                        class="w-full p-3 border rounded-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500 input-focus"
+                        value="<?php echo $noticia['data_publicacao']; ?>" required>
                 </div>
 
                 <!-- Botão Salvar -->
                 <div class="flex justify-end">
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                    <button type="submit"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
                         Salvar
                     </button>
                 </div>
@@ -134,4 +148,5 @@ if (isset($_GET['id'])) {
     </div>
 
 </body>
+
 </html>

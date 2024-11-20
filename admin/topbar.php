@@ -1,4 +1,5 @@
 <header class="bg-white shadow-md py-4 px-6 flex justify-between items-center">
+    <?php include '../env/config.php'; ?>
     <div class="flex items-center space-x-3">
         <!-- Mobile Menu Button -->
         <button @click="open = !open" class="md:hidden focus:outline-none">

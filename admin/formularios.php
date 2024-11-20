@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'config.php';
+include '../env/config.php';
 
 if (!isset($_SESSION['usuario_id'])) {
     header('Location: login.php');
@@ -98,7 +98,7 @@ $fetch_limit = 100;
 // Obter submissões com base na pesquisa e filtros
 foreach ($tipos as $tipo => $tabela) {
     if (empty($tipo_filter) || $tipo_filter == $tipo) {
-        $result = obterSubmissoesPaginadas($conn, $tabela, $fetch_limit, 0, $search, $tipo);
+        $result = obterSubmissoesPaginadas($conn, $tabela, $fetch_limit, 0);
         while ($row = $result->fetch_assoc()) {
             $row['tipo'] = $tipo;
 

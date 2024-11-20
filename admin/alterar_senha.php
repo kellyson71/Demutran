@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'config.php';
+include '../env/config.php';
 
 // Verifica se o usuário está logado
 if (!isset($_SESSION['usuario_id'])) {
@@ -66,6 +66,7 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR" x-data="{ open: false }">
+
 <head>
     <meta charset="UTF-8">
     <title>Alterar Senha</title>
@@ -84,9 +85,12 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
     <script src="//unpkg.com/alpinejs" defer></script>
 
     <style>
-        [x-cloak] { display: none; }
+    [x-cloak] {
+        display: none;
+    }
     </style>
 </head>
+
 <body class="bg-gray-100 font-roboto">
     <!-- Loader -->
     <div x-ref="loading" class="fixed inset-0 bg-white z-50 flex items-center justify-center hidden">
@@ -107,31 +111,41 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                 <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6">Alterar Senha</h2>
                     <?php if (isset($erro)): ?>
-                        <div class="bg-red-100 text-red-700 p-4 rounded mb-6">
-                            <?php echo $erro; ?>
-                        </div>
+                    <div class="bg-red-100 text-red-700 p-4 rounded mb-6">
+                        <?php echo $erro; ?>
+                    </div>
                     <?php endif; ?>
                     <?php if (isset($sucesso)): ?>
-                        <div class="bg-green-100 text-green-700 p-4 rounded mb-6">
-                            <?php echo $sucesso; ?>
-                        </div>
+                    <div class="bg-green-100 text-green-700 p-4 rounded mb-6">
+                        <?php echo $sucesso; ?>
+                    </div>
                     <?php endif; ?>
                     <form action="" method="POST">
                         <div class="mb-4">
                             <label for="senha_atual" class="block text-gray-700 font-medium mb-2">Senha Atual</label>
-                            <input type="password" name="senha_atual" id="senha_atual" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                            <input type="password" name="senha_atual" id="senha_atual"
+                                class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                required>
                         </div>
                         <div class="mb-4">
                             <label for="nova_senha" class="block text-gray-700 font-medium mb-2">Nova Senha</label>
-                            <input type="password" name="nova_senha" id="nova_senha" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                            <input type="password" name="nova_senha" id="nova_senha"
+                                class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                required>
                         </div>
                         <div class="mb-6">
-                            <label for="confirmar_senha" class="block text-gray-700 font-medium mb-2">Confirmar Nova Senha</label>
-                            <input type="password" name="confirmar_senha" id="confirmar_senha" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                            <label for="confirmar_senha" class="block text-gray-700 font-medium mb-2">Confirmar Nova
+                                Senha</label>
+                            <input type="password" name="confirmar_senha" id="confirmar_senha"
+                                class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                required>
                         </div>
                         <div class="flex space-x-4">
-                            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Alterar Senha</button>
-                            <a href="perfil.php" class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition">Cancelar</a>
+                            <button type="submit"
+                                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Alterar
+                                Senha</button>
+                            <a href="perfil.php"
+                                class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition">Cancelar</a>
                         </div>
                     </form>
                 </div>
@@ -142,4 +156,5 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
         </div>
     </div>
 </body>
+
 </html>

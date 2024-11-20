@@ -1,4 +1,5 @@
 <?php
+include '../env/config.php';
 
 // Enable error reporting at the beginning of the script
 ini_set('display_errors', 1);

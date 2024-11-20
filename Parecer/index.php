@@ -1,5 +1,5 @@
 <?php
-include '../admin/config.php';
+include '../env/config.php';
 
 // Verifica a conexão
 if ($conn->connect_error) {
