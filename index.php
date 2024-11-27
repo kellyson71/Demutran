@@ -1,6 +1,6 @@
 <?php
 // index.php
-include 'admin/config.php';
+include 'env/config.php';
 
 // Buscar todas as notícias para o carrossel
 $sql_carousel = "SELECT * FROM noticias ORDER BY data_publicacao DESC";
@@ -213,7 +213,7 @@ $conn->close();
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="/Demutran/noticia"
+                <a href="./todas-noticias.php"
                     class="inline-block bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700">
                     Ver todas as notícias
                 </a>

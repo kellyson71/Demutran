@@ -9,7 +9,7 @@ def load_gitignore(path):
         'Defesa/midia/',
         'fpdf',
         'PCD/midia/',
-        'admin/config.php',
+        'env/config.php',
         'sandbox/',
         'utils/vendor/'
     ]

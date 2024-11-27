@@ -1,0 +1,327 @@
+POST DATA:
+Array
+(
+    [tipoRequerente] => defesa_previa
+    [nome] => Lorem illo quia et s
+    [cpf] => Vel commodi recusand
+    [endereco] => Ad blanditiis quis c
+    [numero] => Exercitationem moles
+    [complemento] => Quo quas perferendis
+    [bairro] => Id quis dolor in qu
+    [cep] => Deserunt ipsa quasi
+    [municipio] => Ut necessitatibus la
+    [telefone] => +1 (216) 289-6739
+    [placa] => Dolore dolor ut magn
+    [marcaModelo] => Voluptate laudantium
+    [cor] => Tempore ea tempor e
+    [especie] => Cum rerum enim do au
+    [categoria] => Et dolores provident
+    [ano] => Autem eveniet corpo
+    [autoInfracao] => Sint molestias dolo
+    [dataInfracao] => 2012-12-01
+    [horaInfracao] => 12:59
+    [localInfracao] => Sint est et deleniti
+    [enquadramento] => Ipsam dolor illo rec
+    [defesa] => Ut omnis sapiente et
+    [declaracao] => on
+    [folderName] => new_folder
+)
+FILES DATA:
+Array
+(
+    [signedDocument] => Array
+        (
+            [name] => Trabalho Biologia 25_11 (1).pdf
+            [full_path] => Trabalho Biologia 25_11 (1).pdf
+            [type] => application/pdf
+            [tmp_name] => C:\wamp64\tmp\phpBE90.tmp
+            [error] => 0
+            [size] => 850080
+        )
+
+    [doc_requerimento] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [cnh] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [cnh_condutor] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [notif_DEMUTRAN] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [crlv] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [comprovante_residencia] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [doc_complementares] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+POST DATA:
+Array
+(
+)
+FILES DATA:
+Array
+(
+)
+POST DATA:
+Array
+(
+)
+FILES DATA:
+Array
+(
+)
+POST DATA:
+Array
+(
+)
+FILES DATA:
+Array
+(
+)
+POST DATA:
+Array
+(
+)
+FILES DATA:
+Array
+(
+)
+POST DATA:
+Array
+(
+)
+FILES DATA:
+Array
+(
+)
+POST DATA:
+Array
+(
+)
+FILES DATA:
+Array
+(
+)
+POST DATA:
+Array
+(
+)
+FILES DATA:
+Array
+(
+)
+POST DATA:
+Array
+(
+    [tipo_solicitacao] => jari
+    [nome] => Dolores consequatur 
+    [cpf] => Magni eum quis magna
+    [endereco] => Molestias amet qui 
+    [numero] => Velit at enim dolore
+    [complemento] => Deserunt doloremque 
+    [bairro] => Dolores nihil irure 
+    [cep] => Non asperiores nostr
+    [municipio] => Ea voluptatem Sunt
+    [telefone] => +1 (197) 539-8278
+    [placa] => Dolor ab beatae offi
+    [marcaModelo] => Et consequatur sed 
+    [cor] => Eaque autem tenetur 
+    [especie] => Fugiat animi rem a
+    [categoria] => Officia dolore conse
+    [ano] => Id iusto labore sequ
+    [autoInfracao] => Consequatur dolor es
+    [dataInfracao] => 2024-10-27
+    [horaInfracao] => 07:46
+    [localInfracao] => Lorem commodo maiore
+    [enquadramento] => Aut perferendis sit 
+    [defesa] => Porro numquam in lau
+    [declaracao] => on
+)
+FILES DATA:
+Array
+(
+    [doc_requerimento] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [cnh] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [cnh_condutor] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [notif_DEMUTRAN] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [crlv] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [comprovante_residencia] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [doc_complementares] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+    [signedDocument] => Array
+        (
+            [name] => Trabalho Biologia 25_11 (1).pdf
+            [full_path] => Trabalho Biologia 25_11 (1).pdf
+            [type] => application/pdf
+            [tmp_name] => C:\wamp64\tmp\php45.tmp
+            [error] => 0
+            [size] => 850080
+        )
+
+)

@@ -93,7 +93,7 @@
         <h2 class="text-2xl font-bold text-gray-800 mb-4">
           <i class="far fa-edit"></i> Solicitação DEMUTRAN
         </h2>
-        <div class="text-gray-600 mb-6">
+        <div id="documentosNecessarios" class="text-gray-600 mb-6">
           <strong
             >Documentos necessários para apresentação de Defesa Prévia:</strong
           >
@@ -123,11 +123,65 @@
           </p>
         </div>
 
+        <!-- Progress Stepper -->
+        <div class="mb-8">
+          <ol class="flex items-center w-full mb-4 sm:mb-5">
+            <li
+              id="step1"
+              class="flex w-full items-center text-green-600 after:content-[''] after:w-full after:h-1 after:border-b after:border-green-100 after:border-4 after:inline-block">
+              <span
+                class="flex items-center justify-center w-10 h-10 bg-green-100 rounded-full lg:h-12 lg:w-12 shrink-0">
+                <svg
+                  class="w-3.5 h-3.5 text-green-600 lg:w-4 lg:h-4"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 16 12">
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M1 5.917 5.724 10.5 15 1.5" />
+                </svg>
+              </span>
+            </li>
+            <li
+              id="step2"
+              class="flex w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-100 after:border-4 after:inline-block">
+              <span
+                class="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full lg:h-12 lg:w-12 shrink-0">
+                <svg
+                  class="w-4 h-4 text-gray-500 lg:w-5 lg:h-5"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 18 20">
+                  <path
+                    d="M16 1h-3.278A1.992 1.992 0 0 0 11 0H7a1.993 1.993 0 0 0-1.722 1H2a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2ZM7 2h4v3H7V2Zm5.7 8.289-3.975 3.857a1 1 0 0 1-1.393 0L5.3 12.182a1.002 1.002 0 1 1 1.4-1.436l1.328 1.289 3.28-3.181a1 1 0 1 1 1.392 1.435Z" />
+                </svg>
+              </span>
+            </li>
+          </ol>
+          <div class="flex justify-between">
+            <div class="text-center flex-1">
+              <span class="text-green-600 font-medium" id="step1Text"
+                >Formulário</span
+              >
+            </div>
+            <div class="text-center flex-1">
+              <span class="text-gray-500 font-medium" id="step2Text"
+                >Conclusão</span
+              >
+            </div>
+          </div>
+        </div>
+        <!-- Rest of the form content -->
         <form
           id="DefesaForm"
           method="post"
           enctype="multipart/form-data"
-          action="../lib/arquivo/gerar_formulario.php"
+          action="../utils/form/gerar_formulario.php"
           target="_blank">
           <!-- Tipo da Solicitação -->
           <div class="mb-4">
@@ -136,9 +190,9 @@
             </label>
             <select
               id="tipo_solicitacao"
-              name="tipoRequerente"
+              name="tipo_solicitacao"
               class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
-              <option value="" disabled selected></option>
+              <option value="">Selecione o tipo de solicitação</option>
               <option value="defesa_previa">Defesa Prévia</option>
               <option value="apresentacao_condutor">
                 Apresentação do Condutor
@@ -418,7 +472,35 @@
               class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
           </div>
 
-          <!-- Additional Document Uploads -->
+          <!-- Campo Gmail -->
+          <div class="mb-4">
+            <label for="gmail" class="block text-gray-700 mb-2">
+              <i class="fas fa-envelope"></i> Gmail:
+            </label>
+            <input
+              type="email"
+              id="gmail"
+              name="gmail"
+              placeholder="Seu endereço Gmail"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+              required />
+          </div>
+
+          <!-- Campo Confirmar Gmail -->
+          <div class="mb-4">
+            <label for="confirm_gmail" class="block text-gray-700 mb-2">
+              <i class="fas fa-envelope"></i> Confirme seu Gmail:
+            </label>
+            <input
+              type="email"
+              id="confirm_gmail"
+              name="confirm_gmail"
+              placeholder="Confirme seu endereço Gmail"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+              required />
+          </div>
+
+          <!-- Document Upload Section -->
           <div class="mb-4">
             <label for="doc_requerimento" class="block text-gray-700 mb-2">
               <i class="far fa-file-alt"></i> Requerimento da Defesa:
@@ -428,8 +510,7 @@
               id="doc_requerimento"
               name="doc_requerimento"
               accept=".pdf"
-              class="w-full"
-              required />
+              class="w-full text-gray-600 border rounded-md file:border-0 file:border-r border-gray-300 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 hover:file:bg-gray-100 file:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" />
           </div>
 
           <div class="mb-4">
@@ -441,8 +522,7 @@
               id="cnh"
               name="cnh"
               accept=".pdf"
-              class="w-full"
-              required />
+              class="w-full text-gray-600 border rounded-md file:border-0 file:border-r border-gray-300 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 hover:file:bg-gray-100 file:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" />
           </div>
 
           <div class="mb-4">
@@ -454,8 +534,7 @@
               id="cnh_condutor"
               name="cnh_condutor"
               accept=".pdf"
-              class="w-full"
-              required />
+              class="w-full text-gray-600 border rounded-md file:border-0 file:border-r border-gray-300 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 hover:file:bg-gray-100 file:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" />
           </div>
 
           <div class="mb-4">
@@ -467,8 +546,7 @@
               id="notif_DEMUTRAN"
               name="notif_DEMUTRAN"
               accept=".pdf"
-              class="w-full"
-              required />
+              class="w-full text-gray-600 border rounded-md file:border-0 file:border-r border-gray-300 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 hover:file:bg-gray-100 file:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" />
           </div>
 
           <div class="mb-4">
@@ -480,8 +558,7 @@
               id="crlv"
               name="crlv"
               accept=".pdf"
-              class="w-full"
-              required />
+              class="w-full text-gray-600 border rounded-md file:border-0 file:border-r border-gray-300 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 hover:file:bg-gray-100 file:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" />
           </div>
 
           <div class="mb-4">
@@ -495,8 +572,7 @@
               id="comprovante_residencia"
               name="comprovante_residencia"
               accept=".pdf"
-              class="w-full"
-              required />
+              class="w-full text-gray-600 border rounded-md file:border-0 file:border-r border-gray-300 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 hover:file:bg-gray-100 file:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" />
           </div>
 
           <div class="mb-4">
@@ -508,79 +584,137 @@
               id="doc_complementares"
               name="doc_complementares[]"
               accept=".pdf"
-              class="w-full"
+              class="w-full text-gray-600 border rounded-md file:border-0 file:border-r border-gray-300 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 hover:file:bg-gray-100 file:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
               multiple />
           </div>
 
           <div class="mb-4">
             <label for="declaracao" class="block text-gray-700 mb-2">
-              <input
-                type="checkbox"
-                id="declaracao"
-                name="declaracao"
-                required />
+              <input type="checkbox" id="declaracao" name="declaracao" />
               Declaro que todas as informações fornecidas são verdadeiras.
             </label>
           </div>
 
           <button
             type="button"
-            onclick="showSecondTab()"
+            onclick="validateAndProceed()"
             class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
             Enviar
           </button>
         </form>
         <!-- Segunda aba -->
         <div id="secondTab" class="hidden">
-          <h2 class="text-2xl font-bold text-gray-800 mb-4">
-            <i class="far fa-edit"></i> Conclusão da Solicitação
-          </h2>
-          <p class="text-gray-600 mb-6">
-            Para concluir sua solicitação, é necessário enviar o documento
-            assinado digitalizado/scaneado ou a foto em PDF.
-          </p>
-          <a
-            href="#"
-            onclick="submitForm()"
-            id="printButton"
-            class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 mt-4">
-            Imprimir Documento
-          </a>
-          <form
-            id="FinalForm"
-            method="post"
-            enctype="multipart/form-data"
-            action="processa_formulario.php">
-            <div class="mb-4">
-              <label for="signedDocument" class="block text-gray-700 mb-4 mt-4">
-                <i class="far fa-file-alt"></i> Anexar Documento Assinado:
-              </label>
-              <input
-                type="file"
-                id="signedDocument"
-                name="signedDocument"
-                accept=".pdf"
-                class="w-full"
-                required />
-            </div>
-            <div id="feedback" class="hidden"></div>
+          <!-- Header Section -->
+          <div class="border-b pb-4 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">
+              <i class="far fa-check-circle text-green-500 mr-2"></i>
+              Conclusão da Solicitação
+            </h2>
+            <p class="text-gray-600 mt-2">
+              Estamos quase lá! Siga os passos abaixo para finalizar sua
+              solicitação.
+            </p>
+          </div>
 
-            <div id="alert-space" class="hidden my-4 p-4 rounded-md"></div>
-            <div class="flex justify-between">
-              <button
-                type="button"
-                onclick="showFirstTab()"
-                class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
-                Voltar
-              </button>
-              <button
-                type="submit"
-                onclick="handleFinalSubmission(event)"
-                class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
-                Concluir Solicitação
-              </button>
+          <!-- Steps Section -->
+          <div class="space-y-6">
+            <!-- Step 1 -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <h3 class="font-semibold text-gray-700 mb-3">
+                <span
+                  class="bg-green-500 text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2"
+                  >1</span
+                >
+                Imprimir Documento
+              </h3>
+              <p class="text-gray-600 ml-8 mb-3">
+                Clique no botão abaixo para gerar e imprimir o documento que
+                precisa ser assinado.
+              </p>
+              <div class="ml-8">
+                <button
+                  onclick="submitForm()"
+                  class="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition-colors flex items-center">
+                  <i class="fas fa-print mr-2"></i>
+                  Imprimir Documento
+                </button>
+              </div>
             </div>
-          </form>
+
+            <!-- Step 2 -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <h3 class="font-semibold text-gray-700 mb-3">
+                <span
+                  class="bg-green-500 text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2"
+                  >2</span
+                >
+                Enviar Documento Assinado
+              </h3>
+              <form
+                id="FinalForm"
+                method="post"
+                enctype="multipart/form-data"
+                action="processa_formulario.php">
+                <div class="ml-8">
+                  <div class="mb-4">
+                    <p class="text-gray-600 mb-3">
+                      Após assinar, digitalize ou fotografe o documento e anexe
+                      aqui em formato PDF.
+                    </p>
+                    <div class="flex items-center space-x-3">
+                      <label
+                        for="signedDocument"
+                        class="relative bg-white border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:border-green-500 transition-colors w-full group">
+                        <div class="flex flex-col items-center">
+                          <i
+                            class="far fa-file-pdf text-2xl text-gray-400 mb-2 group-hover:text-green-500"></i>
+                          <span
+                            class="text-gray-600 group-hover:text-green-500"
+                            id="fileLabel"
+                            >Clique para selecionar ou arraste o arquivo
+                            PDF</span
+                          >
+                          <span
+                            class="text-sm text-green-500 mt-2 hidden"
+                            id="selectedFileName"></span>
+                        </div>
+                        <input
+                          type="file"
+                          id="signedDocument"
+                          name="signedDocument"
+                          accept=".pdf"
+                          class="hidden"
+                          onchange="updateFileName(this)" />
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Alert Space -->
+                  <div
+                    id="alert-space"
+                    class="hidden my-4 p-4 rounded-md"></div>
+
+                  <!-- Action Buttons -->
+                  <div class="flex justify-between mt-6">
+                    <button
+                      type="button"
+                      onclick="showFirstTab()"
+                      class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-colors flex items-center">
+                      <i class="fas fa-arrow-left mr-2"></i>
+                      Voltar
+                    </button>
+                    <button
+                      type="submit"
+                      onclick="handleFinalSubmission(event)"
+                      class="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition-colors flex items-center">
+                      <i class="fas fa-check mr-2"></i>
+                      Finalizar Solicitação
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -629,13 +763,37 @@
       });
 
       function showSecondTab() {
-        const checkbox = document.getElementById("declaracao");
-        if (!checkbox.checked) {
-          alert(
-            "Você deve declarar que todas as informações fornecidas são verdadeiras."
-          );
-          return;
-        }
+        // Valida o formulário primeiro
+        if (!validateForm()) return;
+
+        // Se passou na validação, salva os dados do formulário
+        window.savedFormData = new FormData(
+          document.getElementById("DefesaForm")
+        );
+
+        // Hide documentos necessários section
+        document
+          .getElementById("documentosNecessarios")
+          .classList.add("hidden");
+
+        // Update stepper styles
+        document.getElementById("step1").classList.remove("text-green-600");
+        document.getElementById("step1").classList.add("text-gray-500");
+        document.getElementById("step2").classList.remove("text-gray-500");
+        document.getElementById("step2").classList.add("text-green-600");
+
+        document.getElementById("step1Text").classList.remove("text-green-600");
+        document.getElementById("step1Text").classList.add("text-gray-500");
+        document.getElementById("step2Text").classList.remove("text-gray-500");
+        document.getElementById("step2Text").classList.add("text-green-600");
+
+        // Update background colors
+        document.querySelector("#step1 span").classList.remove("bg-green-100");
+        document.querySelector("#step1 span").classList.add("bg-gray-100");
+        document.querySelector("#step2 span").classList.remove("bg-gray-100");
+        document.querySelector("#step2 span").classList.add("bg-green-100");
+
+        // Hide/show forms
         const form = document.getElementById("DefesaForm");
         const secondTab = document.getElementById("secondTab");
         form.classList.add("hidden");
@@ -643,6 +801,45 @@
       }
 
       function showFirstTab() {
+        // Recupera os dados salvos ao voltar para primeira aba
+        if (window.savedFormData) {
+          const form = document.getElementById("DefesaForm");
+          window.savedFormData.forEach((value, key) => {
+            const input = form.querySelector(`[name="${key}"]`);
+            if (input) {
+              if (input.type === "file") {
+                // Não podemos restaurar arquivos por segurança
+                // mas podemos manter uma referência
+              } else {
+                input.value = value;
+              }
+            }
+          });
+        }
+
+        // Show documentos necessários section
+        document
+          .getElementById("documentosNecessarios")
+          .classList.remove("hidden");
+
+        // Update stepper styles
+        document.getElementById("step1").classList.add("text-green-600");
+        document.getElementById("step1").classList.remove("text-gray-500");
+        document.getElementById("step2").classList.remove("text-green-600");
+        document.getElementById("step2").classList.add("text-gray-500");
+
+        document.getElementById("step1Text").classList.add("text-green-600");
+        document.getElementById("step1Text").classList.remove("text-gray-500");
+        document.getElementById("step2Text").classList.add("text-gray-500");
+        document.getElementById("step2Text").classList.remove("text-green-600");
+
+        // Update background colors
+        document.querySelector("#step1 span").classList.add("bg-green-100");
+        document.querySelector("#step1 span").classList.remove("bg-gray-100");
+        document.querySelector("#step2 span").classList.add("bg-gray-100");
+        document.querySelector("#step2 span").classList.remove("bg-green-100");
+
+        // Hide/show forms
         const form = document.getElementById("DefesaForm");
         const secondTab = document.getElementById("secondTab");
         form.classList.remove("hidden");
@@ -651,49 +848,81 @@
 
       function submitForm() {
         const form = document.getElementById("DefesaForm");
+        const tipoSolicitacao =
+          document.getElementById("tipo_solicitacao").value;
+
+        // Garante que o tipo de solicitação seja incluído no formulário
+        if (!form.querySelector('input[name="tipo_solicitacao"]')) {
+          const hiddenInput = document.createElement("input");
+          hiddenInput.type = "hidden";
+          hiddenInput.name = "tipo_solicitacao";
+          hiddenInput.value = tipoSolicitacao;
+          form.appendChild(hiddenInput);
+        }
+
         form.target = "_blank";
         form.submit();
       }
 
       function handleFinalSubmission(event) {
-        event.preventDefault(); // Prevent the default form submission
+        event.preventDefault();
 
+        // Create FormData from the original form first
         const defesaForm = document.getElementById("DefesaForm");
-        const finalForm = document.getElementById("FinalForm");
-        const formData = new FormData(finalForm);
+        const formData = new FormData(defesaForm);
 
-        // Append data from DefesaForm to formData
-        new FormData(defesaForm).forEach((value, key) => {
-          formData.append(key, value);
-        });
-
-        // Ensure the file input is correctly appended
-        const signedDocument =
-          document.getElementById("signedDocument").files[0];
-        if (signedDocument) {
-          formData.append("signedDocument", signedDocument);
+        // Add the signed document
+        const signedDoc = document.querySelector("#signedDocument");
+        if (signedDoc.files[0]) {
+          formData.append("signedDocument", signedDoc.files[0]);
         }
 
-        // Create a new folder inside the midia directory
-        const folderName = "new_folder"; // Replace with the actual ID from the database
-        formData.append("folderName", folderName);
-
+        // Send the form data
         fetch("processa_formulario.php", {
           method: "POST",
           body: formData,
         })
-          .then((response) => response.text())
+          .then((response) => {
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+              return response.json();
+            } else {
+              return response.text().then((text) => {
+                try {
+                  return JSON.parse(text);
+                } catch (e) {
+                  return { success: false, message: text };
+                }
+              });
+            }
+          })
           .then((data) => {
-            console.log(data);
-            showAlert(
-              data,
-              "bg-green-100 text-green-700 border border-green-400"
-            );
+            let message, className;
+
+            if (typeof data === "string") {
+              try {
+                data = JSON.parse(data);
+              } catch (e) {
+                data = { success: false, message: data };
+              }
+            }
+
+            if (data.success) {
+              message = data.message;
+              className = "bg-green-100 text-green-700 border border-green-400";
+            } else {
+              message = data.error
+                ? data.message
+                : "Erro ao processar a solicitação";
+              className = "bg-red-100 text-red-700 border border-red-400";
+            }
+
+            showAlert(message, className);
           })
           .catch((error) => {
             console.error("Erro:", error);
             showAlert(
-              "Erro ao concluir a solicitação.",
+              "Erro ao concluir a solicitação",
               "bg-red-100 text-red-700 border border-red-400"
             );
           });
@@ -708,6 +937,104 @@
       document
         .getElementById("FinalForm")
         .addEventListener("submit", handleFinalSubmission);
+
+      function updateFileName(input) {
+        const fileName = input.files[0]?.name;
+        const fileLabel = document.getElementById("fileLabel");
+        const selectedFileName = document.getElementById("selectedFileName");
+
+        if (fileName) {
+          fileLabel.textContent = "Arquivo selecionado:";
+          selectedFileName.textContent = fileName;
+          selectedFileName.classList.remove("hidden");
+        } else {
+          fileLabel.textContent =
+            "Clique para selecionar ou arraste o arquivo PDF";
+          selectedFileName.classList.add("hidden");
+        }
+      }
+
+      function updateFileNameGeneral(input) {
+        const fileName = input.files[0]?.name;
+        const parentLabel = input.closest("label");
+        const fileNameSpan = parentLabel.querySelector(".file-name");
+        const textSpan = parentLabel.querySelector(".text-gray-600");
+
+        if (fileName) {
+          textSpan.textContent = "Arquivo selecionado:";
+          fileNameSpan.textContent = fileName;
+          fileNameSpan.classList.remove("hidden");
+        } else {
+          textSpan.textContent =
+            "Clique para selecionar ou arraste o arquivo PDF";
+          fileNameSpan.classList.add("hidden");
+        }
+      }
+
+      function validateForm() {
+        const form = document.getElementById("DefesaForm");
+        const tipoSolicitacao =
+          document.getElementById("tipo_solicitacao").value;
+
+        // Verifica se o tipo de solicitação foi selecionado
+        if (!tipoSolicitacao) {
+          showCustomAlert("Por favor, selecione o tipo de solicitação.");
+          return false;
+        }
+
+        // Verifica se todos os campos obrigatórios estão preenchidos
+        const requiredFields = form.querySelectorAll("[required]");
+        let isValid = true;
+        let firstInvalidField = null;
+
+        requiredFields.forEach((field) => {
+          if (!field.value) {
+            isValid = false;
+            if (!firstInvalidField) firstInvalidField = field;
+            field.classList.add("border-red-500");
+          } else {
+            field.classList.remove("border-red-500");
+          }
+        });
+
+        if (!isValid) {
+          showCustomAlert("Por favor, preencha todos os campos obrigatórios.");
+          firstInvalidField.focus();
+          return false;
+        }
+
+        // Verifica se a declaração foi marcada
+        const checkbox = document.getElementById("declaracao");
+        if (!checkbox.checked) {
+          showCustomAlert(
+            "Você deve declarar que todas as informações fornecidas são verdadeiras."
+          );
+          return false;
+        }
+
+        // Validação dos emails
+        const gmail = document.getElementById("gmail").value.trim();
+        const confirmGmail = document
+          .getElementById("confirm_gmail")
+          .value.trim();
+
+        if (gmail === "" || confirmGmail === "") {
+          showCustomAlert("Por favor, preencha ambos os campos de email.");
+          return false;
+        }
+
+        if (gmail !== confirmGmail) {
+          showCustomAlert("Os emails informados não são iguais.");
+          return false;
+        }
+
+        return true;
+      }
+
+      // Removemos a validação de validateAndProceed e apenas chamamos showSecondTab
+      function validateAndProceed() {
+        showSecondTab();
+      }
     </script>
   </body>
 </html>

@@ -1,6 +1,6 @@
 <?php
 // todas-noticias.php
-include 'admin/config.php';
+include 'env/config.php';
 
 // Definir o número de notícias por página
 $noticias_por_pagina = 6;

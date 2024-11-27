@@ -1,20 +1,51 @@
 <?php
 include '../env/config.php';
 
-// Enable error reporting at the beginning of the script
+// Enable error reporting and increase memory limit
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+ini_set('memory_limit', '256M');
 
-$servername = "srv1078.hstgr.io"; 
-$username = "u492577848_protocolo";
-$password = "WRVGAxCbrJ8wdM$"; 
-$dbname = "u492577848_demutran";
+header('Content-Type: application/json');
+
+// Debug logging
+error_log("Raw POST data: " . file_get_contents("php://input"));
+error_log("POST array: " . print_r($_POST, true));
+error_log("FILES array: " . print_r($_FILES, true));
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
-    die("Conexão falhou: " . $conn->connect_error);
+    die(json_encode([
+        'error' => true,
+        'message' => "Conexão falhou: " . $conn->connect_error
+    ]));
 }
+
+// Get tipo_solicitacao from POST data
+$tipo_solicitacao = null;
+if (isset($_POST['tipo_solicitacao'])) {
+    $tipo_solicitacao = trim($_POST['tipo_solicitacao']);
+} else {
+    // Try to get from raw input if not in $_POST
+    $input = json_decode(file_get_contents("php://input"), true);
+    if (isset($input['tipo_solicitacao'])) {
+        $tipo_solicitacao = trim($input['tipo_solicitacao']);
+    }
+}
+
+if (empty($tipo_solicitacao)) {
+    http_response_code(400);
+    die(json_encode([
+        'error' => true,
+        'message' => 'Tipo de solicitação não informado.',
+        'debug' => [
+            'post' => $_POST,
+            'raw' => file_get_contents("php://input")
+        ]
+    ]));
+}
+
 // Função para verificar campos de texto e atribuir "não informado" se não receber valor
 function verificaTexto($valor) {
     return isset($valor) && !empty($valor) ? $valor : "não informado";
@@ -88,17 +119,16 @@ foreach ($columns as $column) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Debug: Log received POST data and uploaded files
-    file_put_contents('debug_log.txt', "POST DATA:\n" . print_r($_POST, true), FILE_APPEND);
-    file_put_contents('debug_log.txt', "FILES DATA:\n" . print_r($_FILES, true), FILE_APPEND);
+    // Captura o tipo de solicitação
+    $tipo_solicitacao = isset($_POST['tipo_solicitacao']) ? $_POST['tipo_solicitacao'] : null;
 
-    // Make sure required fields are present
-    if (empty($_POST['tipoRequerente'])) {
+    // Verifica se está vazio
+    if (empty($tipo_solicitacao)) {
         die("Tipo de solicitação não informado.");
     }
 
-    // Captura o tipo de solicitação
-    $tipo_solicitacao = verificaTexto($_POST['tipoRequerente']);
+    // Se chegou aqui, temos um tipo de solicitação válido
+    $tipo_solicitacao = verificaTexto($tipo_solicitacao);
 
     // Diretório base para upload
     $upload_dir = 'midia/';
@@ -114,6 +144,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $doc_complementares_urls = null;
     $signed_document_url = null;
     $descricao = null;
+
+    // Captura os emails
+    $gmail = isset($_POST['gmail']) ? $_POST['gmail'] : null;
+    $confirm_gmail = isset($_POST['confirm_gmail']) ? $_POST['confirm_gmail'] : null;
+
+    // Verificar se ambos os campos foram preenchidos
+    if (empty($gmail) || empty($confirm_gmail)) {
+        die("Por favor, preencha ambos os campos de email.");
+    }
+
+    // Verificar se os emails são iguais
+    if ($gmail !== $confirm_gmail) {
+        die("Os emails informados não são iguais.");
+    }
+
+    // Sanitizar o email
+    $gmail = verificaTexto($gmail);
 
     // Captura os dados do formulário
     $nome = verificaTexto($_POST['nome']);
@@ -141,8 +188,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Inserir registro com os dados
     $sql = "INSERT INTO solicitacoes_demutran (
         tipo_solicitacao, nome, cpf, endereco, numero, complemento, bairro, cep, municipio, telefone, placa, marcaModelo, cor, especie, categoria, ano, autoInfracao, dataInfracao, horaInfracao, localInfracao, enquadramento, defesa,
-        doc_requerimento_url, cnh_url, cnh_condutor_url, notif_DEMUTRAN_url, crlv_url, comprovante_residencia_url, doc_complementares_urls, signed_document_url
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        doc_requerimento_url, cnh_url, cnh_condutor_url, notif_DEMUTRAN_url, crlv_url, comprovante_residencia_url, doc_complementares_urls, signed_document_url, gmail
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
 
@@ -152,7 +199,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Inserimos valores temporários; as URLs serão atualizadas após o upload
     $stmt->bind_param(
-        "ssssssssssssssssssssssssssssss",
+        "sssssssssssssssssssssssssssssss",
         $tipo_solicitacao,
         $nome,
         $cpf,
@@ -182,7 +229,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $crlv_url,
         $comprovante_residencia_url,
         $doc_complementares_urls,
-        $signed_document_url
+        $signed_document_url,
+        $gmail
     );
 
     if ($stmt->execute()) {
@@ -249,9 +297,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         );
 
         if ($update_stmt->execute()) {
-            echo "Dados inseridos com sucesso!";
+            // Preservar os valores POST originais
+            $original_post = $_POST;
+
+            // Configurar os dados específicos para o envio de email
+            $_POST = array(
+                'email' => $gmail,
+                'nome' => $nome,
+                'assunto' => mb_convert_encoding("Confirmação de Abertura de Defesa Prévia", 'ISO-8859-1', 'UTF-8'),
+                'mensagem' => mb_convert_encoding("Prezado(a) {$nome},\n\nSua defesa prévia foi recebida com sucesso.\nNúmero da Solicitação: {$id_solicitacao}\n\nAtenciosamente,\nEquipe DEMUTRAN", 'ISO-8859-1', 'UTF-8')
+            );
+
+            // Incluir e executar o envio de email
+            require_once '../utils/mail.php';
+
+            // Restaurar os valores POST originais
+            $_POST = $original_post;
+
+            // Retornar mensagem de sucesso com codificação correta
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => true,
+                'message' => 'Dados inseridos com sucesso! Um email de confirmação foi enviado.'
+            ], JSON_UNESCAPED_UNICODE);
         } else {
-            echo "Erro ao atualizar os arquivos: " . $update_stmt->error;
+            echo json_encode([
+                'error' => true,
+                'message' => "Erro ao atualizar os arquivos: " . $update_stmt->error
+            ]);
         }
 
         $update_stmt->close();

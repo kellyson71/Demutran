@@ -1,6 +1,6 @@
 <?php
 // noticia.php
-include 'admin/config.php';
+include 'env/config.php';
 
 // Verificar se o parâmetro 'id' foi passado na URL
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
@@ -34,6 +34,7 @@ $conn->close();
 
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <!-- Metadados -->
     <meta charset="UTF-8">
@@ -60,15 +61,9 @@ $conn->close();
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <!-- Google Fonts -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
-        rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
 </head>
 
 <body class="font-roboto bg-gray-100">
@@ -94,10 +89,9 @@ $conn->close();
             <!-- Mobile menu button -->
             <div class="md:hidden">
                 <button id="menu-btn" class="text-white focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" 
-                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" 
-                            stroke-linejoin="round" stroke-width="2" 
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
                 </button>
@@ -116,23 +110,14 @@ $conn->close();
     <!-- Topbar Secundária -->
     <div class="bg-gray-200 border-b border-gray-300 mt-16">
         <div class="container mx-auto py-2 text-center">
-            <a
-                href="https://paudosferros.rn.gov.br/secretaria.php?sec=19"
-                class="text-gray-800 hover:text-gray-600"
-                >Demutran – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</a
-            >
+            <a href="https://paudosferros.rn.gov.br/secretaria.php?sec=19"
+                class="text-gray-800 hover:text-gray-600">Demutran – DEPARTAMENTO MUNICIPAL DE TRÂNSITO</a>
             <span class="text-gray-600 mx-2">|</span>
-            <a
-                href="https://paudosferros.rn.gov.br/lai.php"
-                class="text-gray-800 hover:text-gray-600"
-                >Acesso à Informação</a
-            >
+            <a href="https://paudosferros.rn.gov.br/lai.php" class="text-gray-800 hover:text-gray-600">Acesso à
+                Informação</a>
             <span class="text-gray-600 mx-2">-</span>
-            <a
-                href="https://paudosferros.rn.gov.br/omunicipio.php"
-                class="text-gray-800 hover:text-gray-600"
-                >Sobre a Prefeitura</a
-            >
+            <a href="https://paudosferros.rn.gov.br/omunicipio.php" class="text-gray-800 hover:text-gray-600">Sobre a
+                Prefeitura</a>
         </div>
     </div>
 
@@ -150,7 +135,9 @@ $conn->close();
 
         <!-- Imagem Principal -->
         <div class="flex justify-center mb-8">
-            <img src="<?php echo $news['imagem_url']; ?>" alt="<?php echo htmlspecialchars($news['titulo'], ENT_QUOTES, 'UTF-8'); ?>" class="w-full md:w-2/3 rounded-lg shadow-lg">
+            <img src="<?php echo $news['imagem_url']; ?>"
+                alt="<?php echo htmlspecialchars($news['titulo'], ENT_QUOTES, 'UTF-8'); ?>"
+                class="w-full md:w-2/3 rounded-lg shadow-lg">
         </div>
 
         <!-- Conteúdo da Notícia -->
@@ -169,9 +156,7 @@ $conn->close();
 
     <!-- Footer -->
     <footer class="bg-gray-800 text-white py-8 mt-8">
-        <div
-            class="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-center"
-        >
+        <div class="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
                 <h2 class="text-lg font-semibold mb-2">INSTITUCIONAL</h2>
                 <p>PREFEITO(A): MARIANNA ALMEIDA</p>
@@ -192,22 +177,14 @@ $conn->close();
             <div>
                 <h2 class="text-lg font-semibold mb-2">REDES SOCIAIS</h2>
                 <div class="flex justify-center space-x-4 mt-2">
-                    <a href="https://www.instagram.com/prefeituradepaudosferros/"
-                        ><i class="fab fa-instagram text-2xl"></i
-                    ></a>
-                    <a href="https://www.facebook.com/prefeituradepaudosferros/"
-                        ><i class="fab fa-facebook text-2xl"></i
-                    ></a>
-                    <a href="https://twitter.com/paudosferros"
-                        ><i class="fab fa-twitter text-2xl"></i
-                    ></a>
-                    <a
-                        href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros"
-                        ><i class="fab fa-youtube text-2xl"></i
-                    ></a>
-                    <a href="https://wa.me/558499440704"
-                        ><i class="fab fa-whatsapp text-2xl"></i
-                    ></a>
+                    <a href="https://www.instagram.com/prefeituradepaudosferros/"><i
+                            class="fab fa-instagram text-2xl"></i></a>
+                    <a href="https://www.facebook.com/prefeituradepaudosferros/"><i
+                            class="fab fa-facebook text-2xl"></i></a>
+                    <a href="https://twitter.com/paudosferros"><i class="fab fa-twitter text-2xl"></i></a>
+                    <a href="https://www.youtube.com/c/prefeituramunicipaldepaudosferros"><i
+                            class="fab fa-youtube text-2xl"></i></a>
+                    <a href="https://wa.me/558499440704"><i class="fab fa-whatsapp text-2xl"></i></a>
                 </div>
             </div>
         </div>
@@ -216,13 +193,14 @@ $conn->close();
     <!-- Scripts -->
     <!-- JavaScript -->
     <script>
-        // Mobile Menu Toggle
-        const menuBtn = document.getElementById("menu-btn");
-        const mobileMenu = document.getElementById("mobile-menu");
+    // Mobile Menu Toggle
+    const menuBtn = document.getElementById("menu-btn");
+    const mobileMenu = document.getElementById("mobile-menu");
 
-        menuBtn.addEventListener("click", () => {
-            mobileMenu.classList.toggle("hidden");
-        });
+    menuBtn.addEventListener("click", () => {
+        mobileMenu.classList.toggle("hidden");
+    });
     </script>
 </body>
+
 </html>

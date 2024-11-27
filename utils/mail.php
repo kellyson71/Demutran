@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->Host = 'smtp.hostinger.com';
             $mail->SMTPAuth = true;
             $mail->SMTPSecure = "ssl";
+            $mail->CharSet = 'ISO-8859-1'; // Mudar para ISO-8859-1 para compatibilidade com acentos
             
             $mail->Username = 'test@potocolo.estagiopaudosferros.com';
             $mail->setFrom('test@potocolo.estagiopaudosferros.com', 'Prefeitura de Pau dos Ferros');
@@ -35,13 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->Body    = $mensagem;
             
             if (!$mail->send()) {
-                echo 'O e-mail não foi enviado.';
-                echo 'Erro: ' . $mail->ErrorInfo;
-            } else {
-                echo 'O e-mail foi enviado com sucesso.';
+                echo json_encode(['error' => true, 'message' => 'Erro ao enviar email: ' . $mail->ErrorInfo]);
             }
+            // Não retornar nada em caso de sucesso para não interferir com a mensagem principal
         } catch (Exception $e) {
-            echo $e->getMessage();
+            echo json_encode(['error' => true, 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
             exit;
         }
     }
