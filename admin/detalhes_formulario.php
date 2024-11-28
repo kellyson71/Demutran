@@ -26,35 +26,49 @@ function contarNotificacoesNaoLidas($conn) {
 $sacFormularios = obterUltimosFormulariosSAC($conn);
 $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 
+// Atualizar a função exibir_dados_formatados para tratar URLs
 function exibir_dados_formatados($dados) {
-    // Definir os rótulos personalizados dentro da função
     $colunas_personalizadas = [
         'created_at' => 'Criado em',
         'damage_system' => 'Sistema de danos',
         'damaged_parts' => 'Partes danificadas',
-        // ... (adicione todos os rótulos personalizados aqui)
+        'arquivo_anexo' => 'Arquivo Anexado',
+        'documento' => 'Documento',
+        'comprovante' => 'Comprovante',
+        'midia' => 'Mídia',
     ];
-    // Definir as colunas que devem ser ocultadas
+    
     $colunas_ocultas = ['token', 'id', 'damaged_parts'];
+    $colunas_arquivo = ['arquivo_anexo', 'documento', 'comprovante', 'midia'];
 
-    // Se $dados estiver vazio, exibir "Dados não disponíveis."
     if (empty($dados)) {
         echo "<div><strong>Dados não disponíveis.</strong></div>";
         return;
     }
 
     foreach ($dados as $coluna => $valor) {
-        // Verificar se a coluna deve ser ocultada
         if (!in_array($coluna, $colunas_ocultas)) {
-            // Substituir nome da coluna por um personalizado, se existir
             $nome_coluna = isset($colunas_personalizadas[$coluna]) ? $colunas_personalizadas[$coluna] : ucfirst(str_replace('_', ' ', $coluna));
 
-            // Exibir a coluna e o valor, ou 'Não informado' se estiver vazio
-            echo "<div><strong>" . $nome_coluna . ":</strong> " . (!empty($valor) ? htmlspecialchars($valor) : 'Não informado') . "</div>";
+            // Verifica se é uma coluna de arquivo ou contém URL
+            if (in_array($coluna, $colunas_arquivo) || filter_var($valor, FILTER_VALIDATE_URL)) {
+                echo "<div class='flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg'>";
+                echo "<strong class='text-gray-700'>" . $nome_coluna . ":</strong>";
+                echo "<a href='" . htmlspecialchars($valor) . "' target='_blank' 
+                     class='flex items-center gap-2 text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors'>
+                     <i class='bx bx-file'></i>
+                     <span>Visualizar arquivo</span>
+                     </a>";
+                echo "</div>";
+            } else {
+                echo "<div class='p-2 hover:bg-gray-50 rounded-lg'>";
+                echo "<strong class='text-gray-700'>" . $nome_coluna . ":</strong> ";
+                echo "<span class='text-gray-600'>" . (!empty($valor) ? htmlspecialchars($valor) : 'Não informado') . "</span>";
+                echo "</div>";
+            }
         }
     }
 }
-
 
 // Lógica específica para cada tipo de formulário
 if ($tipo == 'DAT') {
@@ -172,9 +186,45 @@ if ($tipo == 'DAT') {
     <!-- Alpine.js -->
     <script src="//unpkg.com/alpinejs" defer></script>
 
+    <!-- Boxicons (ícones mais modernos) -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
     <style>
     [x-cloak] {
         display: none;
+    }
+
+    .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .card-hover {
+        transition: transform 0.2s ease;
+    }
+
+    .card-hover:hover {
+        transform: translateY(-2px);
+    }
+
+    .title-animation {
+        animation: slideDown 0.6s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .glass-effect {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(5px);
     }
     </style>
 
@@ -199,6 +249,38 @@ if ($tipo == 'DAT') {
         document.getElementById("deleteModal").classList.add("hidden");
     }
 
+    // Função para mostrar o alerta de sucesso
+    function showSuccessAlert(message) {
+        const alert = document.getElementById('successAlert');
+        document.getElementById('alertMessage').textContent = message;
+        alert.classList.remove('hidden');
+        // Esconde o alerta após 3 segundos
+        setTimeout(() => {
+            closeAlert();
+        }, 3000);
+    }
+
+    // Função para fechar o alerta
+    function closeAlert() {
+        document.getElementById('successAlert').classList.add('hidden');
+    }
+
+    // Função para mostrar o alerta de exclusão
+    function showDeleteSuccessAlert(message) {
+        const alert = document.getElementById('deleteSuccessAlert');
+        document.getElementById('deleteAlertMessage').textContent = message;
+        alert.classList.remove('hidden');
+        // Esconde o alerta após 3 segundos
+        setTimeout(() => {
+            closeDeleteAlert();
+        }, 3000);
+    }
+
+    // Função para fechar o alerta de exclusão
+    function closeDeleteAlert() {
+        document.getElementById('deleteSuccessAlert').classList.add('hidden');
+    }
+
     // AJAX para editar o formulário
     function editarFormulario() {
         var campo = document.getElementById('campo').value;
@@ -221,8 +303,11 @@ if ($tipo == 'DAT') {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Formulário atualizado com sucesso!');
-                    location.reload(); // Recarrega a página para ver as mudanças
+                    closeEditModal();
+                    showSuccessAlert('Formulário atualizado com sucesso!');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
                 } else {
                     alert('Erro ao atualizar o formulário.');
                 }
@@ -247,10 +332,13 @@ if ($tipo == 'DAT') {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Formulário excluído com sucesso!');
-                    window.location.href = 'formularios.php'; // Redireciona para a lista de formulários
+                    closeDeleteModal();
+                    showDeleteSuccessAlert('Formulário excluído com sucesso!');
+                    setTimeout(() => {
+                        window.location.href = 'formularios.php';
+                    }, 2000);
                 } else {
-                    alert('Erro ao excluir o formulário.');
+                    showDeleteSuccessAlert('Erro ao excluir o formulário.');
                 }
             });
     }
@@ -258,6 +346,28 @@ if ($tipo == 'DAT') {
 </head>
 
 <body class="bg-gray-100 font-roboto min-h-screen flex flex-col">
+    <!-- Success Alert -->
+    <div id="successAlert" class="hidden fixed top-4 right-4 z-50">
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-lg flex items-center">
+            <i class='bx bx-check text-2xl mr-2'></i>
+            <span id="alertMessage">Formulário atualizado com sucesso!</span>
+            <button onclick="closeAlert()" class="ml-4 text-green-700 hover:text-green-900">
+                <i class='bx bx-x text-xl'></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Delete Success Alert -->
+    <div id="deleteSuccessAlert" class="hidden fixed top-4 right-4 z-50">
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg flex items-center">
+            <i class='bx bx-trash text-2xl mr-2'></i>
+            <span id="deleteAlertMessage">Formulário excluído com sucesso!</span>
+            <button onclick="closeDeleteAlert()" class="ml-4 text-red-700 hover:text-red-900">
+                <i class='bx bx-x text-xl'></i>
+            </button>
+        </div>
+    </div>
+
     <!-- Loader -->
     <div x-ref="loading" class="fixed inset-0 bg-white z-50 flex items-center justify-center hidden">
         <span class="material-icons animate-spin text-4xl text-blue-600">autorenew</span>
@@ -266,131 +376,244 @@ if ($tipo == 'DAT') {
     <!-- Wrapper -->
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <?php include 'sidebar.php'; ?>
-
-        <!-- Mobile Sidebar -->
-        <div x-show="open" @click.away="open = false" x-cloak
-            class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden">
-            <aside class="w-64 bg-white h-full shadow-md">
-                <div class="p-6">
-                    <h1 class="text-2xl font-bold text-blue-600 mb-6">Painel Admin</h1>
-                    <nav class="space-y-2">
-                        <a href="dashboard.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
-                            <span class="material-icons">dashboard</span>
-                            <span class="ml-3">Dashboard</span>
-                        </a>
-                        <a href="formularios.php" class="flex items-center p-2 text-gray-700 bg-blue-50 rounded">
-                            <span class="material-icons">assignment</span>
-                            <span class="ml-3 font-semibold">Formulários</span>
-                        </a>
-                        <a href="gerenciar_noticias.php"
-                            class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
-                            <span class="material-icons">article</span>
-                            <span class="ml-3">Notícias</span>
-                        </a>
-                        <a href="usuarios.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
-                            <span class="material-icons">people</span>
-                            <span class="ml-3">Usuários</span>
-                        </a>
-                        <a href="perfil.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
-                            <span class="material-icons">person</span>
-                            <span class="ml-3">Perfil</span>
-                        </a>
-                        <a href="logout.php" class="flex items-center p-2 text-red-600 hover:bg-red-50 rounded">
-                            <span class="material-icons">logout</span>
-                            <span class="ml-3">Sair</span>
-                        </a>
-                    </nav>
+        <aside class="w-64 bg-white shadow-md flex-shrink-0 hidden md:flex flex-col">
+            <div class="p-6 flex flex-col h-full">
+                <h1 class="text-2xl font-bold text-blue-600 mb-6">Painel Admin</h1>
+                <nav class="space-y-2 flex-1">
+                    <a href="dashboard.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
+                        <span class="material-icons">dashboard</span>
+                        <span class="ml-3">Dashboard</span>
+                    </a>
+                    <a href="formularios.php" class="flex items-center p-2 text-gray-700 bg-blue-50 rounded">
+                        <span class="material-icons">assignment</span>
+                        <span class="ml-3 font-semibold">Formulários</span>
+                    </a>
+                    <a href="gerenciar_noticias.php"
+                        class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
+                        <span class="material-icons">article</span>
+                        <span class="ml-3">Notícias</span>
+                    </a>
+                    <a href="usuarios.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
+                        <span class="material-icons">people</span>
+                        <span class="ml-3">Usuários</span>
+                    </a>
+                </nav>
+                <div class="mt-6">
+                    <a href="logout.php" class="flex items-center p-2 text-red-600 hover:bg-red-50 rounded">
+                        <span class="material-icons">logout</span>
+                        <span class="ml-3">Sair</span>
+                    </a>
                 </div>
-            </aside>
-        </div>
+            </div>
+        </aside>
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Topbar -->
-            <?php include 'topbar.php'; ?>
-
-            <!-- Main -->
-            <main class="flex-1 overflow-y-auto p-6">
-                <div class="bg-white shadow-lg rounded-lg p-6">
-                    <?php if ($tipo == 'DAT'): ?>
-                    <h2 class="text-2xl font-bold text-gray-700 mb-6">Declaração de Acidente (DAT)</h2>
-
-                    <!-- Exibir dados de DAT1 -->
-                    <?php if ($dat1): ?>
-                    <h3 class="text-lg font-bold mb-4">Informações Gerais</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <?php exibir_dados_formatados($dat1); ?>
+            <header class="bg-white shadow-md py-4 px-6 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <button @click="open = !open" class="md:hidden focus:outline-none">
+                        <span class="material-icons">menu</span>
+                    </button>
+                    <h2 class="text-xl font-semibold text-gray-800">Detalhes do Formulário</h2>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Notifications -->
+                    <div x-data="{ open: false }" class="relative">
+                        <button @click="open = !open" class="relative focus:outline-none">
+                            <span class="material-icons text-gray-700">notifications</span>
+                            <?php if ($notificacoesNaoLidas > 0): ?>
+                            <span class="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 text-xs">
+                                <?php echo $notificacoesNaoLidas; ?>
+                            </span>
+                            <?php endif; ?>
+                        </button>
+                        <!-- Notification dropdown content -->
+                        <div x-show="open" @click.away="open = false" x-cloak
+                            class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
+                            <!-- ... notification content ... -->
+                        </div>
                     </div>
-                    <?php endif; ?>
 
-                    <?php if ($dat2): ?>
-                    <h3 class="text-lg font-bold mb-4">Detalhes do Acidente</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <?php exibir_dados_formatados($dat2); ?>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if ($dat3): ?>
-                    <h3 class="text-lg font-bold mb-4">Veículos Envolvidos</h3>
-                    <?php foreach ($dat3 as $index => $response): ?>
-                    <div class="border p-4 mb-4 rounded-lg shadow-md">
-                        <h4 class="font-bold mb-2">Veículo #<?php echo $index + 1; ?></h4>
-                        <?php exibir_dados_formatados($response); ?>
-
-                        <!-- Exibir damaged_parts de forma organizada -->
-                        <?php if (!empty($response['damaged_parts'])): ?>
-                        <?php $damaged_parts = json_decode($response['damaged_parts'], true); // Decodifica o JSON ?>
-                        <div class="mt-4">
-                            <strong>Partes Danificadas:</strong>
-                            <ul class="list-disc ml-5">
-                                <?php foreach ($damaged_parts as $part): ?>
-                                <?php if ($part['checked']): ?>
-                                <li><?php echo ucfirst(str_replace('_', ' ', $part['name'])); ?></li>
-                                <?php endif; ?>
-                                <?php endforeach; ?>
+                    <!-- User Profile -->
+                    <div x-data="{ open: false }" class="relative">
+                        <button @click="open = !open" class="flex items-center focus:outline-none">
+                            <img src="avatar.png" alt="Avatar" class="w-8 h-8 rounded-full">
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-cloak
+                            class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
+                            <div class="p-4 border-b text-gray-700 font-bold">
+                                <?php echo $_SESSION['usuario_nome']; ?>
+                            </div>
+                            <ul>
+                                <li class="p-4 hover:bg-gray-50">
+                                    <a href="perfil.php" class="block text-gray-700">Perfil</a>
+                                </li>
+                                <li class="p-4 hover:bg-gray-50">
+                                    <a href="logout.php" class="block text-red-600">Sair</a>
+                                </li>
                             </ul>
                         </div>
-                        <?php endif; ?>
                     </div>
-                    <?php endforeach; ?>
+                </div>
+            </header>
+
+            <!-- Main -->
+            <main class="flex-1 overflow-y-auto p-6 bg-gradient-to-br from-gray-50 to-gray-100">
+                <!-- Cabeçalho do formulário -->
+                <div class="mb-8 title-animation">
+                    <div class="gradient-bg rounded-2xl p-6 text-white">
+                        <h2 class="text-4xl font-bold mb-2">
+                            <?php
+                            $tipoFormatado = [
+                                'DAT' => 'Declaração de Acidente de Trânsito',
+                                'PCD' => 'Solicitação de Cartão PCD',
+                                'SAC' => 'Atendimento ao Cidadão',
+                                'JARI' => 'Recurso JARI',
+                                'Parecer' => 'Parecer Técnico'
+                            ][$tipo] ?? $tipo;
+                            echo $tipoFormatado;
+                            ?>
+                        </h2>
+                        <p class="text-white/80 flex items-center">
+                            <i class='bx bx-file mr-2'></i>
+                            Protocolo: #<?php echo $id; ?>
+                        </p>
+                    </div>
+                </div>
+
+                <?php if ($tipo == 'DAT'): ?>
+                <!-- Seção DAT -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Informações Gerais -->
+                    <?php if ($dat1): ?>
+                    <div class="glass-effect rounded-2xl shadow-lg p-6 card-hover">
+                        <div class="flex items-center mb-6">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                                <i class='bx bx-info-circle text-blue-600 text-2xl'></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800">Informações Gerais</h3>
+                        </div>
+                        <div class="space-y-4 divide-y divide-gray-100">
+                            <?php exibir_dados_formatados($dat1); ?>
+                        </div>
+                    </div>
                     <?php endif; ?>
 
-                    <?php if ($dat4): ?>
-                    <h3 class="text-lg font-bold mb-4">Observações Adicionais</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <?php exibir_dados_formatados($dat4); ?>
+                    <!-- Detalhes do Acidente -->
+                    <?php if ($dat2): ?>
+                    <div class="glass-effect rounded-2xl shadow-lg p-6 card-hover">
+                        <div class="flex items-center mb-6">
+                            <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mr-4">
+                                <i class='bx bx-error text-red-600 text-2xl'></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800">Detalhes do Acidente</h3>
+                        </div>
+                        <div class="space-y-4 divide-y divide-gray-100">
+                            <?php exibir_dados_formatados($dat2); ?>
+                        </div>
                     </div>
                     <?php endif; ?>
+                </div>
 
-                    <?php else: ?>
-                    <h2 class="text-2xl font-bold text-gray-700 mb-6">Detalhes do Formulário</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <?php foreach ($formulario as $coluna => $valor): ?>
-                        <div><strong><?php echo ucfirst(str_replace('_', ' ', $coluna)); ?>:</strong>
-                            <?php echo !empty($valor) ? htmlspecialchars($valor) : 'Não informado';?></div>
+                <!-- Veículos Envolvidos -->
+                <?php if ($dat3): ?>
+                <div class="mt-8">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-4">
+                            <i class='bx bx-car text-green-600 text-2xl'></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800">Veículos Envolvidos</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <?php foreach ($dat3 as $index => $veiculo): ?>
+                        <div class="glass-effect rounded-2xl shadow-lg p-6 card-hover">
+                            <div class="flex items-center justify-between mb-6">
+                                <h4 class="text-lg font-bold text-gray-700 flex items-center">
+                                    <i class='bx bxs-car-crash text-gray-500 mr-2 text-xl'></i>
+                                    Veículo <?php echo $index + 1; ?>
+                                </h4>
+                                <span
+                                    class="px-3 py-1 rounded-full text-sm <?php echo $index % 2 ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'; ?>">
+                                    #<?php echo $index + 1; ?>
+                                </span>
+                            </div>
+                            <div class="space-y-3">
+                                <?php exibir_dados_formatados($veiculo); ?>
+
+                                <?php if (!empty($veiculo['damaged_parts'])): ?>
+                                <div class="mt-4 bg-gray-50 p-4 rounded-lg">
+                                    <h5 class="font-semibold text-gray-700 mb-2">Áreas Danificadas:</h5>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <?php 
+                                            $damaged_parts = json_decode($veiculo['damaged_parts'], true);
+                                            foreach ($damaged_parts as $part):
+                                                if ($part['checked']):
+                                            ?>
+                                        <div class="flex items-center">
+                                            <span class="material-icons text-red-500 text-sm mr-1">warning</span>
+                                            <span
+                                                class="text-sm"><?php echo ucfirst(str_replace('_', ' ', $part['name'])); ?></span>
+                                        </div>
+                                        <?php 
+                                                endif;
+                                            endforeach; 
+                                            ?>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                         <?php endforeach; ?>
                     </div>
-                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
 
-                    <!-- Botões de ação -->
-                    <div class="mt-8 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-                        <div class="flex space-x-4">
-                            <a href="formularios.php"
-                                class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition">Voltar</a>
-                            <button onclick="openEditModal()"
-                                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Editar</button>
+                <?php else: ?>
+                <!-- Outros tipos de formulário -->
+                <div class="glass-effect rounded-2xl shadow-lg p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <?php foreach ($formulario as $coluna => $valor): ?>
+                        <div class="p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 card-hover">
+                            <label class="text-sm font-medium text-gray-600 block mb-1">
+                                <?php echo ucfirst(str_replace('_', ' ', $coluna)); ?>
+                            </label>
+                            <div class="text-gray-900 font-medium">
+                                <?php echo !empty($valor) ? htmlspecialchars($valor) : '<span class="text-gray-400">Não informado</span>';?>
+                            </div>
                         </div>
-                        <div class="flex space-x-4">
-                            <button onclick="openDeleteModal()"
-                                class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition">Excluir</button>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Botões de ação -->
+                <div class="mt-8 glass-effect rounded-2xl p-4 flex justify-between items-center">
+                    <div class="flex space-x-4">
+                        <a href="formularios.php"
+                            class="flex items-center px-6 py-3 bg-white text-gray-700 rounded-xl hover:bg-gray-50 transition shadow-sm">
+                            <i class='bx bx-arrow-back mr-2'></i>
+                            Voltar
+                        </a>
+                        <button onclick="openEditModal()"
+                            class="flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition shadow-sm">
+                            <i class='bx bx-edit-alt mr-2'></i>
+                            Editar
+                        </button>
+                    </div>
+                    <button onclick="openDeleteModal()"
+                        class="flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition shadow-sm">
+                        <i class='bx bx-trash mr-2'></i>
+                        Excluir
+                    </button>
                 </div>
             </main>
 
             <!-- Footer -->
-            <?php include 'footer.php'; ?>
+            <footer class="bg-white shadow-md py-4 px-6">
+                <p class="text-gray-600 text-center">&copy; <?php echo date('Y'); ?> Departamento de Trânsito. Todos os
+                    direitos reservados.</p>
+            </footer>
         </div>
     </div>
 

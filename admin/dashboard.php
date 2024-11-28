@@ -52,6 +52,8 @@ $dat4Formularios = obterUltimosFormularios($conn, 'DAT4');
 // Obter o total de registros Parecer
 $parecerTotalRegistros = $conn->query("SELECT COUNT(*) AS total FROM Parecer")->fetch_assoc()['total'];
 
+$parecerFormularios = obterUltimosFormularios($conn, 'Parecer');
+
 function renderPagination($paginaAtual, $totalPaginas, $param) {
     $maxPaginasVisiveis = 8;
     $html = '';
@@ -92,6 +94,26 @@ function renderPagination($paginaAtual, $totalPaginas, $param) {
     }
 
     return $html;
+}
+
+function renderFormCard($form) {
+    ?>
+<div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100">
+    <div class="rounded-full bg-blue-100 p-2 mr-4">
+        <span class="material-icons text-blue-500">description</span>
+    </div>
+    <div class="flex-1">
+        <h3 class="text-sm font-medium"><?php echo htmlspecialchars($form['nome']); ?></h3>
+        <p class="text-xs text-gray-500">
+            <?php echo date('d/m/Y H:i', strtotime($form['data_submissao'])); ?>
+        </p>
+    </div>
+    <a href="detalhes_formulario.php?id=<?php echo $form['id']; ?>&tipo=<?php echo strtoupper($form['tipo']); ?>"
+        class="text-gray-400 hover:text-gray-600">
+        <span class="material-icons">chevron_right</span>
+    </a>
+</div>
+<?php
 }
 
 ?>
@@ -272,117 +294,267 @@ function renderPagination($paginaAtual, $totalPaginas, $param) {
             </header>
 
             <!-- Main -->
-            <main class="flex-1 overflow-y-auto p-6">
-                <!-- Welcome Banner -->
-                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <h1 class="text-2xl font-bold text-gray-800">Bem-vindo, <?php echo $_SESSION['usuario_nome']; ?>!
-                    </h1>
-                    <p class="text-gray-600 mt-2">Aqui está o resumo das atividades recentes.</p>
-                </div>
-
-                <!-- Cards -->
-                <!-- Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    <!-- Card 1 -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <div class="flex items-center">
-                            <span class="material-icons text-blue-600 text-4xl">assignment</span>
-                            <div class="ml-4">
-                                <p class="text-gray-600">Formulários SAC</p>
-                                <p class="text-2xl font-bold"><?php echo $sacFormularios->num_rows; ?></p>
-                            </div>
-                        </div>
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+                <!-- Welcome Section -->
+                <div class="relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-8 mb-6">
+                    <div class="relative z-10">
+                        <h1 class="text-3xl font-bold text-white mb-2">Olá, <?php echo $_SESSION['usuario_nome']; ?>!
+                        </h1>
+                        <p class="text-blue-100">Dashboard Administrativa - Gestão de Formulários</p>
                     </div>
-                    <!-- Card 2 -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <div class="flex items-center">
-                            <span class="material-icons text-green-600 text-4xl">how_to_vote</span>
-                            <div class="ml-4">
-                                <p class="text-gray-600">Defesas JARI</p>
-                                <p class="text-2xl font-bold"><?php echo $jariFormularios->num_rows; ?></p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Card 3 -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <div class="flex items-center">
-                            <span class="material-icons text-purple-600 text-4xl">accessible</span>
-                            <div class="ml-4">
-                                <p class="text-gray-600">Cartões PCD</p>
-                                <p class="text-2xl font-bold"><?php echo $pcdFormularios->num_rows; ?></p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Novo Card (DAT4) -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <div class="flex items-center">
-                            <span class="material-icons text-red-600 text-4xl">directions_car</span>
-                            <div class="ml-4">
-                                <p class="text-gray-600">Acidente - DAT</p>
-                                <p class="text-2xl font-bold"><?php echo $dat4Formularios->num_rows; ?></p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Novo Card (Parecer) -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <div class="flex items-center">
-                            <span class="material-icons text-yellow-600 text-4xl">event_note</span>
-                            <div class="ml-4">
-                                <p class="text-gray-600">Parecer</p>
-                                <p class="text-2xl font-bold"><?php echo $parecerTotalRegistros; ?></p>
-                            </div>
-                        </div>
+                    <div class="absolute right-0 top-0 transform translate-x-1/4 -translate-y-1/4">
+                        <span class="material-icons text-blue-400 opacity-50" style="font-size: 196px;">dashboard</span>
                     </div>
                 </div>
 
-
-                <!-- Recent Submissions -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Recent JARI Forms -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <h2 class="text-xl font-bold text-gray-800 mb-4">Últimas Defesas JARI</h2>
-                        <?php while($formulario = $jariFormularios->fetch_assoc()): ?>
-                        <div class="border-b py-2">
-                            <a href="detalhes_formulario.php?id=<?php echo $formulario['id']; ?>&tipo=JARI"
-                                class="flex justify-between items-center">
-                                <div>
-                                    <p class="text-gray-700 font-medium"><?php echo $formulario['nome']; ?></p>
-                                    <p class="text-sm text-gray-600">
-                                        <?php echo date('d/m/Y', strtotime($formulario['data_submissao'])); ?></p>
-                                </div>
-                                <span class="material-icons text-gray-400">chevron_right</span>
-                            </a>
-                        </div>
-                        <?php endwhile; ?>
-
-                        <!-- Pagination Controls for JARI -->
-                        <div class="mt-4 flex justify-center">
-                            <?php echo renderPagination($jariPaginaAtual, $jariTotalPaginas, 'jari_pagina'); ?>
+                <!-- Stats Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
+                    <!-- SAC Card -->
+                    <div class="bg-white rounded-xl p-6 transform transition-all hover:scale-105 hover:shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">SAC</p>
+                                <p class="text-2xl font-bold text-gray-800 mt-1">
+                                    <?php echo $sacFormularios->num_rows; ?></p>
+                                <p class="text-xs text-green-500 mt-2">
+                                    <span class="material-icons text-xs align-middle">trending_up</span>
+                                    Ativos
+                                </p>
+                            </div>
+                            <div class="bg-blue-100 rounded-full p-3">
+                                <span class="material-icons text-blue-500">support_agent</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Recent PCD Forms -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <h2 class="text-xl font-bold text-gray-800 mb-4">Últimos Formulários PCD</h2>
-                        <?php while($formulario = $pcdFormularios->fetch_assoc()): ?>
-                        <div class="border-b py-2">
-                            <a href="detalhes_formulario.php?id=<?php echo $formulario['id']; ?>&tipo=PCD"
-                                class="flex justify-between items-center">
-                                <div>
-                                    <p class="text-gray-700 font-medium"><?php echo $formulario['solicitante']; ?></p>
-                                    <p class="text-sm text-gray-600">
-                                        <?php echo date('d/m/Y', strtotime($formulario['data_submissao'])); ?></p>
-                                </div>
-                                <span class="material-icons text-gray-400">chevron_right</span>
-                            </a>
-                        </div>
-                        <?php endwhile; ?>
-
-                        <!-- Pagination Controls for PCD -->
-                        <div class="mt-4 flex justify-center">
-                            <?php echo renderPagination($pcdPaginaAtual, $pcdTotalPaginas, 'pcd_pagina'); ?>
+                    <!-- JARI Card -->
+                    <div class="bg-white rounded-xl p-6 transform transition-all hover:scale-105 hover:shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Defesas JARI</p>
+                                <p class="text-2xl font-bold text-gray-800 mt-1">
+                                    <?php echo $jariFormularios->num_rows; ?></p>
+                                <p class="text-xs text-yellow-500 mt-2">
+                                    <span class="material-icons text-xs align-middle">pending</span>
+                                    Em Análise
+                                </p>
+                            </div>
+                            <div class="bg-yellow-100 rounded-full p-3">
+                                <span class="material-icons text-yellow-500">gavel</span>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- PCD Card -->
+                    <div class="bg-white rounded-xl p-6 transform transition-all hover:scale-105 hover:shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Cartões PCD</p>
+                                <p class="text-2xl font-bold text-gray-800 mt-1">
+                                    <?php echo $pcdFormularios->num_rows; ?></p>
+                                <p class="text-xs text-purple-500 mt-2">
+                                    <span class="material-icons text-xs align-middle">card_membership</span>
+                                    Solicitações
+                                </p>
+                            </div>
+                            <div class="bg-purple-100 rounded-full p-3">
+                                <span class="material-icons text-purple-500">accessible</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DAT Card -->
+                    <div class="bg-white rounded-xl p-6 transform transition-all hover:scale-105 hover:shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">DAT</p>
+                                <p class="text-2xl font-bold text-gray-800 mt-1">
+                                    <?php echo $dat4Formularios->num_rows; ?></p>
+                                <p class="text-xs text-red-500 mt-2">
+                                    <span class="material-icons text-xs align-middle">report</span>
+                                    Acidentes
+                                </p>
+                            </div>
+                            <div class="bg-red-100 rounded-full p-3">
+                                <span class="material-icons text-red-500">car_crash</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parecer Card -->
+                    <div class="bg-white rounded-xl p-6 transform transition-all hover:scale-105 hover:shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Parecer</p>
+                                <p class="text-2xl font-bold text-gray-800 mt-1">
+                                    <?php echo $parecerFormularios->num_rows; ?></p>
+                                <p class="text-xs text-green-500 mt-2">
+                                    <span class="material-icons text-xs align-middle">description</span>
+                                    Pareceres
+                                </p>
+                            </div>
+                            <div class="bg-green-100 rounded-full p-3">
+                                <span class="material-icons text-green-500">assignment</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Section with Tabs -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Latest Forms with Tabs -->
+                    <div class="bg-white rounded-xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-bold text-gray-800">Últimas Solicitações</h2>
+                            <a href="formularios.php" class="text-sm text-blue-500 hover:text-blue-700">Ver todos</a>
+                        </div>
+
+                        <!-- Tabs -->
+                        <div x-data="{ activeTab: 'latest' }" class="mb-4">
+                            <div class="flex space-x-4 border-b">
+                                <button @click="activeTab = 'latest'"
+                                    :class="{ 'border-b-2 border-blue-500': activeTab === 'latest' }"
+                                    class="px-4 py-2 text-sm font-medium">Recentes</button>
+                                <button @click="activeTab = 'sac'"
+                                    :class="{ 'border-b-2 border-blue-500': activeTab === 'sac' }"
+                                    class="px-4 py-2 text-sm font-medium">SAC</button>
+                                <button @click="activeTab = 'jari'"
+                                    :class="{ 'border-b-2 border-blue-500': activeTab === 'jari' }"
+                                    class="px-4 py-2 text-sm font-medium">JARI</button>
+                                <button @click="activeTab = 'pcd'"
+                                    :class="{ 'border-b-2 border-blue-500': activeTab === 'pcd' }"
+                                    class="px-4 py-2 text-sm font-medium">PCD</button>
+                                <button @click="activeTab = 'dat'"
+                                    :class="{ 'border-b-2 border-blue-500': activeTab === 'dat' }"
+                                    class="px-4 py-2 text-sm font-medium">DAT</button>
+                                <button @click="activeTab = 'parecer'"
+                                    :class="{ 'border-b-2 border-blue-500': activeTab === 'parecer' }"
+                                    class="px-4 py-2 text-sm font-medium">Parecer</button>
+                            </div>
+
+                            <!-- Tab Contents -->
+                            <div class="space-y-4 mt-4">
+                                <!-- Latest Tab -->
+                                <div x-show="activeTab === 'latest'" class="space-y-4">
+                                    <?php 
+                                    $latestFormularios = $conn->query("
+                                        (SELECT id, nome, data_submissao, 'sac' as tipo FROM sac)
+                                        UNION
+                                        (SELECT id, nome, data_submissao, 'jari' as tipo FROM solicitacoes_demutran)
+                                        UNION
+                                        (SELECT id, nome, data_submissao, 'pcd' as tipo FROM solicitacao_cartao)
+                                        UNION
+                                        (SELECT id, nome, data_submissao, 'parecer' as tipo FROM Parecer)
+                                        ORDER BY data_submissao DESC LIMIT 5
+                                    ");
+                                    while($form = $latestFormularios->fetch_assoc()):
+                                    renderFormCard($form);
+                                    endwhile;
+                                    ?>
+                                </div>
+
+                                <!-- SAC Tab -->
+                                <div x-show="activeTab === 'sac'" class="space-y-4">
+                                    <?php 
+                                    $sacFormularios = $conn->query("SELECT id, nome, data_submissao, 'sac' as tipo FROM sac ORDER BY data_submissao DESC LIMIT 5");
+                                    while($form = $sacFormularios->fetch_assoc()):
+                                    renderFormCard($form);
+                                    endwhile;
+                                    ?>
+                                </div>
+
+                                <!-- JARI Tab -->
+                                <div x-show="activeTab === 'jari'" class="space-y-4">
+                                    <?php 
+                                    $jariFormularios = $conn->query("SELECT id, nome, data_submissao, 'jari' as tipo FROM solicitacoes_demutran ORDER BY data_submissao DESC LIMIT 5");
+                                    while($form = $jariFormularios->fetch_assoc()):
+                                    renderFormCard($form);
+                                    endwhile;
+                                    ?>
+                                </div>
+
+                                <!-- PCD Tab -->
+                                <div x-show="activeTab === 'pcd'" class="space-y-4">
+                                    <?php 
+                                    $pcdFormularios = $conn->query("SELECT id, nome, data_submissao, 'pcd' as tipo FROM solicitacao_cartao ORDER BY data_submissao DESC LIMIT 5");
+                                    while($form = $pcdFormularios->fetch_assoc()):
+                                    renderFormCard($form);
+                                    endwhile;
+                                    ?>
+                                </div>
+
+                                <!-- DAT Tab -->
+                                <div x-show="activeTab === 'dat'" class="space-y-4">
+                                    <?php 
+                                    $datFormularios = $conn->query("
+                                        SELECT 
+                                            d4.id, 
+                                            d1.nome, 
+                                            d4.data_submissao, 
+                                            'dat' as tipo 
+                                        FROM DAT4 d4
+                                        JOIN DAT1 d1 ON d4.token = d1.token 
+                                        ORDER BY d4.data_submissao DESC 
+                                        LIMIT 5
+                                    ");
+                                    while($form = $datFormularios->fetch_assoc()):
+                                    renderFormCard($form);
+                                    endwhile;
+                                    ?>
+                                </div>
+
+                                <!-- Parecer Tab -->
+                                <div x-show="activeTab === 'parecer'" class="space-y-4">
+                                    <?php 
+                                    $parecerFormularios = $conn->query("SELECT id, nome, data_submissao, 'parecer' as tipo FROM Parecer ORDER BY data_submissao DESC LIMIT 5");
+                                    while($form = $parecerFormularios->fetch_assoc()):
+                                    renderFormCard($form);
+                                    endwhile;
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-xl p-6 h-fit">
+                        <!-- Added h-fit to match height -->
+                        <h2 class="text-lg font-bold text-gray-800 mb-4">Ações Rápidas</h2>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            <!-- Changed to 3 columns on larger screens -->
+                            <a href="formularios.php?tipo=JARI"
+                                class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                <span class="material-icons text-yellow-500 mb-2">gavel</span>
+                                <span class="text-sm font-medium text-center">Defesas JARI</span>
+                            </a>
+                            <a href="formularios.php?tipo=PCD"
+                                class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                <span class="material-icons text-purple-500 mb-2">accessible</span>
+                                <span class="text-sm font-medium text-center">Cartões PCD</span>
+                            </a>
+                            <a href="formularios.php?tipo=DAT"
+                                class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                <span class="material-icons text-red-500 mb-2">car_crash</span>
+                                <span class="text-sm font-medium text-center">Registrar DAT</span>
+                            </a>
+                            <a href="formularios.php?tipo=SAC"
+                                class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                <span class="material-icons text-blue-500 mb-2">support_agent</span>
+                                <span class="text-sm font-medium text-center">SAC</span>
+                            </a>
+                            <a href="formularios.php?tipo=PARECER"
+                                class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                <span class="material-icons text-green-500 mb-2">assignment</span>
+                                <span class="text-sm font-medium text-center">Parecer</span>
+                            </a>
+                            <a href="gerenciar_noticias.php"
+                                class="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                <span class="material-icons text-indigo-500 mb-2">article</span>
+                                <span class="text-sm font-medium text-center">Notícias</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </main>
 
             <!-- Footer -->

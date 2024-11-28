@@ -12,6 +12,10 @@
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
       rel="stylesheet" />
+    <!-- Adicionar Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   </head>
   <body class="min-h-screen bg-gray-100">
     <!-- Topbar -->
@@ -96,6 +100,7 @@
         <form id="SoliForm" method="post" enctype="multipart/form-data">
           <!-- Checkbox de Residente -->
           <div class="mb-4 flex items-center">
+            <i class="fas fa-home mr-2"></i>
             <input
               type="checkbox"
               id="resident_check"
@@ -109,7 +114,7 @@
           <!-- Tipo de Solicitação -->
           <div class="mb-4">
             <label for="tipo_solicitacao" class="block text-gray-700 mb-2">
-              Tipo da Solicitação:
+              <i class="fas fa-list"></i> Tipo da Solicitação:
             </label>
             <select
               id="tipo_solicitacao"
@@ -232,28 +237,29 @@
           <div class="mb-4">
             <p class="text-gray-600 mb-2">Apenas em PDF*</p>
             <label for="doc_identidade" class="block text-gray-700 mb-2">
-              Anexar Identidade (Frente e Verso):
+              <i class="far fa-file-alt"></i> Anexar Identidade (Frente e
+              Verso):
             </label>
             <input
               type="file"
               id="doc_identidade"
               name="doc_identidade"
               accept="application/pdf"
-              class="w-full" />
+              class="w-full text-gray-600 border rounded-md file:border-0 file:border-r border-gray-300 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 hover:file:bg-gray-100 file:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" />
           </div>
 
           <div class="mb-4">
             <label
               for="comprovante_residencia"
               class="block text-gray-700 mb-2">
-              Anexar Comprovante de Residência:
+              <i class="far fa-file-alt"></i> Anexar Comprovante de Residência:
             </label>
             <input
               type="file"
               id="comprovante_residencia"
               name="comprovante_residencia"
               accept="application/pdf"
-              class="w-full" />
+              class="w-full text-gray-600 border rounded-md file:border-0 file:border-r border-gray-300 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 hover:file:bg-gray-100 file:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" />
           </div>
 
           <!-- Campo de Laudo Médico que aparece somente se "pcd" for selecionado -->
@@ -357,7 +363,7 @@
                 id="doc_identidade_representante"
                 name="doc_identidade_representante"
                 accept="application/pdf"
-                class="w-full" />
+                class="w-full text-gray-600 border rounded-md file:border-0 file:border-r border-gray-300 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 hover:file:bg-gray-100 file:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" />
             </div>
 
             <div class="mb-4">
@@ -369,7 +375,7 @@
                 id="proc_comprovante"
                 name="proc_comprovante"
                 accept="application/pdf"
-                class="w-full" />
+                class="w-full text-gray-600 border rounded-md file:border-0 file:border-r border-gray-300 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 hover:file:bg-gray-100 file:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" />
             </div>
           </div>
           <div id="feedback" class="hidden"></div>

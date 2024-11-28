@@ -60,135 +60,319 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adicionar Notícia</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Font - Roboto -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tiny.cloud/1/djvd4vhwlkk5pio6pmjhmqd0a0j0iwziovpy9rz7k4jvzboi/tinymce/6/tinymce.min.js"
+        referrerpolicy="origin"></script>
+    <!-- Adicionar language pack do TinyMCE -->
+    <script src="https://cdn.tiny.cloud/1/djvd4vhwlkk5pio6pmjhmqd0a0j0iwziovpy9rz7k4jvzboi/tinymce/6/langs/pt_BR.js">
+    </script>
     <style>
     body {
-        font-family: 'Roboto', sans-serif;
+        font-family: 'Inter', sans-serif;
     }
 
-    /* Estilo para a área de drag-and-drop */
     .dropzone {
-        border: 2px dashed #3b82f6;
-        padding: 20px;
-        text-align: center;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
+        border: 2px dashed #4F46E5;
+        background: #F5F3FF;
+        transition: all 0.3s ease;
     }
 
-    .dropzone:hover {
-        background-color: #ebf4ff;
+    .dropzone.dragover {
+        background: #EEF2FF;
+        border-color: #6366F1;
     }
 
-    /* Imagem de pré-visualização */
-    #preview {
-        max-width: 100%;
-        max-height: 300px;
-        margin-top: 20px;
-        display: none;
+    .tox-tinymce {
+        border-radius: 0.5rem !important;
+    }
+
+    .tox .tox-mbtn__select-label {
+        font-family: 'Inter', sans-serif !important;
     }
     </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen">
-
-    <!-- Navbar -->
-    <nav class="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-800">Adicionar Notícia</h1>
-            <div class="flex items-center space-x-4">
-                <span class="text-gray-700">Olá, <?php echo $_SESSION['usuario_nome']; ?></span>
-                <a href="logout.php" class="text-red-600 hover:underline">Sair</a>
+<body class="bg-gray-50">
+    <!-- Substituir navbar antiga pelo novo Wrapper com Sidebar -->
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-md flex-shrink-0 hidden md:flex flex-col">
+            <div class="p-6 flex flex-col h-full">
+                <h1 class="text-2xl font-bold text-blue-600 mb-6">Painel Admin</h1>
+                <nav class="space-y-2 flex-1">
+                    <a href="dashboard.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
+                        <span class="material-icons">dashboard</span>
+                        <span class="ml-3">Dashboard</span>
+                    </a>
+                    <a href="formularios.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
+                        <span class="material-icons">assignment</span>
+                        <span class="ml-3">Formulários</span>
+                    </a>
+                    <a href="gerenciar_noticias.php" class="flex items-center p-2 text-gray-700 bg-blue-50 rounded">
+                        <span class="material-icons">article</span>
+                        <span class="ml-3 font-semibold">Notícias</span>
+                    </a>
+                    <a href="usuarios.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
+                        <span class="material-icons">people</span>
+                        <span class="ml-3">Usuários</span>
+                    </a>
+                </nav>
+                <div class="mt-6">
+                    <a href="logout.php" class="flex items-center p-2 text-red-600 hover:bg-red-50 rounded">
+                        <span class="material-icons">logout</span>
+                        <span class="ml-3">Sair</span>
+                    </a>
+                </div>
             </div>
-        </div>
-    </nav>
+        </aside>
 
-    <!-- Espaço para compensar o navbar fixo -->
-    <div class="h-16"></div>
-
-    <!-- Conteúdo Principal -->
-    <div class="container mx-auto px-4 py-8">
-        <div class="bg-white shadow-md rounded-lg p-8 max-w-3xl mx-auto">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Adicionar Notícia</h2>
-
-            <!-- Formulário de Adição -->
-            <form method="POST" action="" enctype="multipart/form-data">
-                <?php if (isset($error)): ?>
-                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
-                    <p><?php echo $error; ?></p>
-                </div>
-                <?php endif; ?>
-
-                <div class="mb-6">
-                    <label for="titulo" class="block text-gray-700">Título</label>
-                    <input type="text" id="titulo" name="titulo"
-                        class="w-full p-3 border rounded-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-                        required>
-                </div>
-
-                <div class="mb-6">
-                    <label for="resumo" class="block text-gray-700">Resumo</label>
-                    <textarea id="resumo" name="resumo"
-                        class="w-full p-3 border rounded-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-                        rows="4" required></textarea>
-                </div>
-
-                <div class="mb-6">
-                    <label for="conteudo" class="block text-gray-700">Conteúdo</label>
-                    <textarea id="conteudo" name="conteudo"
-                        class="w-full p-3 border rounded-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-                        rows="8" required></textarea>
-                </div>
-
-                <!-- Campo de Upload de Imagem com Drag-and-Drop -->
-                <div class="mb-6">
-                    <label for="imagem" class="block text-gray-700">Imagem da Notícia</label>
-                    <div id="dropzone" class="dropzone rounded-md">
-                        Arraste e solte a imagem aqui ou clique para selecionar
-                        <input type="file" id="imagem" name="imagem" class="hidden" accept="image/*"
-                            onchange="previewImage(event)">
-                    </div>
-                    <img id="preview" alt="Pré-visualização da imagem">
-                </div>
-
-                <div class="mb-6">
-                    <label for="data_publicacao" class="block text-gray-700">Data de Publicação</label>
-                    <input type="date" id="data_publicacao" name="data_publicacao"
-                        class="w-full p-3 border rounded-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-                        required>
-                </div>
-
-                <!-- Botão Adicionar -->
-                <div class="flex justify-end">
-                    <button type="submit"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                        Adicionar Notícia
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Topbar -->
+            <header class="bg-white shadow-md py-4 px-6 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <button @click="open = !open" class="md:hidden focus:outline-none">
+                        <span class="material-icons">menu</span>
                     </button>
+                    <h2 class="text-xl font-semibold text-gray-800">Adicionar Notícia</h2>
                 </div>
-            </form>
+                <div class="flex items-center space-x-4">
+                    <!-- User Profile -->
+                    <div x-data="{ open: false }" class="relative">
+                        <button @click="open = !open" class="flex items-center focus:outline-none">
+                            <img src="avatar.png" alt="Avatar" class="w-8 h-8 rounded-full">
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-cloak
+                            class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
+                            <div class="p-4 border-b text-gray-700 font-bold">
+                                <?php echo $_SESSION['usuario_nome']; ?>
+                            </div>
+                            <ul>
+                                <li class="p-4 hover:bg-gray-50">
+                                    <a href="perfil.php" class="block text-gray-700">Perfil</a>
+                                </li>
+                                <li class="p-4 hover:bg-gray-50">
+                                    <a href="logout.php" class="block text-red-600">Sair</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- Mover o conteúdo existente para dentro desta main -->
+                <div class="container mx-auto">
+                    <div class="bg-white shadow-xl rounded-2xl p-8 max-w-4xl mx-auto">
+                        <?php if (isset($error)): ?>
+                        <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg" role="alert">
+                            <p><?php echo $error; ?></p>
+                        </div>
+                        <?php endif; ?>
+
+                        <form method="POST" action="" enctype="multipart/form-data" class="space-y-6">
+                            <div class="grid gap-6 md:grid-cols-2">
+                                <div>
+                                    <label for="titulo"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Título</label>
+                                    <input type="text" id="titulo" name="titulo"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label for="data_publicacao"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Data de
+                                        Publicação</label>
+                                    <input type="date" id="data_publicacao" name="data_publicacao"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="resumo" class="block text-sm font-medium text-gray-700 mb-1">Resumo</label>
+                                <textarea id="resumo" name="resumo" rows="3"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                            </div>
+
+                            <div>
+                                <label for="conteudo"
+                                    class="block text-sm font-medium text-gray-700 mb-1">Conteúdo</label>
+                                <textarea id="conteudo" name="conteudo"></textarea>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-700">Imagem da Notícia</label>
+                                <div id="dropzone" class="dropzone rounded-lg p-8 text-center cursor-pointer">
+                                    <div class="space-y-2">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none"
+                                            viewBox="0 0 48 48">
+                                            <path
+                                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                        <div class="text-gray-600">
+                                            Arraste e solte uma imagem ou clique para selecionar
+                                        </div>
+                                    </div>
+                                    <input type="file" id="imagem" name="imagem" class="hidden" accept="image/*">
+                                </div>
+                                <div id="preview-container" class="hidden mt-4">
+                                    <img id="preview" class="max-h-64 rounded-lg mx-auto">
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" onclick="history.back()"
+                                    class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                    Cancelar
+                                </button>
+                                <button type="submit" id="submit-btn"
+                                    class="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:opacity-90 transition-opacity">
+                                    Publicar Notícia
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
 
-    <!-- Script para exibir pré-visualização da imagem -->
-    <script>
-    // Função para exibir a imagem de pré-visualização
-    function previewImage(event) {
-        const input = event.target;
-        const reader = new FileReader();
-        reader.onload = function() {
-            const preview = document.getElementById('preview');
-            preview.src = reader.result;
-            preview.style.display = 'block';
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
+    <!-- Adicionar os scripts necessários -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="//unpkg.com/alpinejs" defer></script>
 
-    // Acessando o campo oculto de input ao clicar na área de drag-and-drop
-    document.getElementById('dropzone').addEventListener('click', function() {
-        document.getElementById('imagem').click();
+    <script>
+    // Inicialização do TinyMCE
+    tinymce.init({
+        selector: '#conteudo',
+        language: 'pt_BR',
+        height: 500,
+        plugins: [
+            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+            'insertdatetime', 'media', 'table', 'help', 'wordcount'
+        ],
+        toolbar: 'undo redo | formatselect | ' +
+            'bold italic backcolor | alignleft aligncenter ' +
+            'alignright alignjustify | bullist numlist outdent indent | ' +
+            'removeformat | image media link table | help',
+        content_style: "body { font-family: 'Inter', sans-serif; }",
+
+        // Configurações em português
+        language_url: 'pt_BR',
+
+        // Configurações de imagem
+        image_title: true,
+        automatic_uploads: true,
+        file_picker_types: 'image',
+        images_upload_handler: function(blobInfo, progress) {
+            return new Promise((resolve, reject) => {
+                let formData = new FormData();
+                formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+                fetch('upload_image.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erro no upload: ' + response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then(result => {
+                        if (result.location) {
+                            resolve(result.location);
+                        } else {
+                            reject(result.error || 'Erro no upload da imagem');
+                        }
+                    })
+                    .catch(error => {
+                        reject('Erro no upload: ' + error.message);
+                    });
+            });
+        },
+
+        // Adicionar configurações adicionais para melhor tratamento de imagens
+        image_uploadtab: true,
+        images_reuse_filename: true,
+        automatic_uploads: true,
+        images_file_types: 'jpg,jpeg,png,gif,webp',
+        max_file_size: '5mb',
+
+        // Configurações de formato
+        formats: {
+            alignleft: {
+                selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img',
+                classes: 'text-left'
+            },
+            aligncenter: {
+                selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img',
+                classes: 'text-center'
+            },
+            alignright: {
+                selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img',
+                classes: 'text-right'
+            },
+            bold: {
+                inline: 'span',
+                classes: 'font-bold'
+            },
+            italic: {
+                inline: 'span',
+                classes: 'italic'
+            }
+        },
+
+        // Menu de contexto em português
+        contextmenu: "link image table",
+
+        // Permitir tags HTML específicas e seus atributos
+        extended_valid_elements: "img[class|src|border=0|alt|title|hspace|vspace|width|height|align|onmouseover|onmouseout|name|style],hr[class|width|size|noshade],font[face|size|color|style],span[class|align|style]"
     });
+
+    // Preview da imagem
+    const dropzone = document.getElementById('dropzone');
+    const imageInput = document.getElementById('imagem');
+    const previewContainer = document.getElementById('preview-container');
+    const preview = document.getElementById('preview');
+
+    dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('dragover');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            imageInput.files = e.dataTransfer.files;
+            showPreview(e.dataTransfer.files[0]);
+        }
+    });
+
+    dropzone.addEventListener('click', () => imageInput.click());
+
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            showPreview(e.target.files[0]);
+        }
+    });
+
+    function showPreview(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            preview.src = e.target.result;
+            previewContainer.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
     </script>
 
 </body>
