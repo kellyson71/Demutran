@@ -438,8 +438,23 @@ if ($tipo == 'DAT') {
                     <!-- User Profile -->
                     <div x-data="{ open: false }" class="relative">
                         <button @click="open = !open" class="flex items-center focus:outline-none">
-                            <img src="avatar.png" alt="Avatar" class="w-8 h-8 rounded-full">
+                            <?php 
+                            $avatarUrl = $_SESSION['usuario_avatar'] ?? '';
+                            $nome = $_SESSION['usuario_nome'];
+                            $iniciais = strtoupper(mb_substr($nome, 0, 1) . mb_substr(strstr($nome, ' '), 1, 1));
+                            
+                            if ($avatarUrl) {
+                                echo "<img src='{$avatarUrl}' alt='Avatar' 
+                                      class='w-8 h-8 rounded-full object-cover ring-2 ring-blue-500 ring-offset-2'
+                                      onerror=\"this.onerror=null; this.parentNode.innerHTML='<div class=\\\'w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold ring-2 ring-blue-500 ring-offset-2\\\'>{$iniciais}</div>';\">";
+                            } else {
+                                echo "<div class='w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold ring-2 ring-blue-500 ring-offset-2'>
+                                        {$iniciais}
+                                      </div>";
+                            }
+                            ?>
                         </button>
+                        <!-- ...existing code... -->
                         <div x-show="open" @click.away="open = false" x-cloak
                             class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
                             <div class="p-4 border-b text-gray-700 font-bold">

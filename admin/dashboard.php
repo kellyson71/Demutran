@@ -274,22 +274,50 @@ function renderFormCard($form) {
                     <!-- User Profile -->
                     <div x-data="{ open: false }" class="relative">
                         <button @click="open = !open" class="flex items-center focus:outline-none">
-                            <img src="avatar.png" alt="Avatar" class="w-8 h-8 rounded-full">
+                            <?php 
+                            $avatarUrl = $_SESSION['usuario_avatar'] ?? '';
+                            $nome = $_SESSION['usuario_nome'];
+                            $iniciais = strtoupper(mb_substr($nome, 0, 1) . mb_substr(strstr($nome, ' '), 1, 1));
+                            
+                            if ($avatarUrl) {
+                                echo "<img src='{$avatarUrl}' alt='Avatar' 
+                                      class='w-8 h-8 rounded-full object-cover ring-2 ring-blue-500 ring-offset-2'
+                                      onerror=\"this.onerror=null; this.parentNode.innerHTML='<div class=\\\'w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold ring-2 ring-blue-500 ring-offset-2\\\'>{$iniciais}</div>';\">";
+                            } else {
+                                echo "<div class='w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold ring-2 ring-blue-500 ring-offset-2'>
+                                        {$iniciais}
+                                      </div>";
+                            }
+                            ?>
                         </button>
                         <div x-show="open" @click.away="open = false" x-cloak
                             class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
-                            <div class="p-4 border-b text-gray-700 font-bold"><?php echo $_SESSION['usuario_nome']; ?>
+                            <div class="p-4 border-b text-gray-700 font-bold">
+                                <?php echo $_SESSION['usuario_nome']; ?>
                             </div>
                             <ul>
                                 <li class="p-4 hover:bg-gray-50">
-                                    <a href="perfil.php" class="block text-gray-700">Perfil</a>
+                                    <a href="perfil.php" class="block text-gray-700">
+                                        <span class="material-icons align-middle mr-2">account_circle</span>
+                                        Perfil
+                                    </a>
                                 </li>
                                 <li class="p-4 hover:bg-gray-50">
-                                    <a href="logout.php" class="block text-red-600">Sair</a>
+                                    <a href="alterar_avatar.php" class="block text-gray-700">
+                                        <span class="material-icons align-middle mr-2">image</span>
+                                        Alterar Avatar
+                                    </a>
+                                </li>
+                                <li class="p-4 hover:bg-gray-50">
+                                    <a href="logout.php" class="block text-red-600">
+                                        <span class="material-icons align-middle mr-2">logout</span>
+                                        Sair
+                                    </a>
                                 </li>
                             </ul>
                         </div>
                     </div>
+
                 </div>
             </header>
 

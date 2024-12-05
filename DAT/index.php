@@ -7,6 +7,7 @@
     <title>Multi-step Form - DEMUTRAN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="../icon.png" type="image/png" />
     <style>
     .step {
         transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
@@ -33,7 +34,8 @@
     <header class="bg-green-600 text-white shadow-md w-full fixed top-0 left-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <!-- Logo -->
-            <div class="text-lg font-semibold">
+            <div class="text-lg font-semibold flex items-center">
+                <img src="../assets/icon.png" alt="DEMUTRAN" class="h-8 w-8 mr-2" />
                 <a href="../" class="hover:text-green-300">DEMUTRAN</a>
             </div>
 
@@ -42,6 +44,7 @@
                 <a href="../PCD/index.html" class="hover:text-green-300">Cartão Vaga Especial</a>
                 <a href="../Defesa/index.html" class="hover:text-green-300">Defesa Prévia/JARI</a>
                 <a href="../DAT/index.php" class="hover:text-green-300">DAT</a>
+                <a href="../Parecer/index.php" class="hover:text-green-300">Parecer</a>
                 <a href="../contato/index.html" class="hover:text-green-300">Contato</a>
             </nav>
 
@@ -62,6 +65,7 @@
             <a href="../PCD/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Cartão Vaga Especial</a>
             <a href="../Defesa/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Defesa Prévia/JARI</a>
             <a href="../DAT/index.php" class="block px-4 py-2 text-white hover:bg-green-500">DAT</a>
+            <a href="../Parecer/index.php" class="block px-4 py-2 text-white hover:bg-green-500">Parecer</a>
             <a href="../contato/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Contato</a>
         </div>
     </header>

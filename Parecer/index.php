@@ -1,69 +1,13 @@
 <?php
 include '../env/config.php';
+session_start();
 
-// Verifica a conexão
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+// Pegar mensagens da sessão se existirem
+$successMessage = $_SESSION['success_message'] ?? null;
+$errorMessage = $_SESSION['error_message'] ?? null;
 
-// Inicializa as variáveis como strings vazias
-$showModal = false;
-$nomeSolicitante = $telefone = $cpfCnpj = $localEvento = $evento = $pontoReferencia = $dataHorario = $email = ""; // Adiciona a variável para o e-mail
-$protocolo = "";
-
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nomeSolicitante = $_POST['nome'] ?? '';
-    $telefone = $_POST['telefone'] ?? '';
-    $cpfCnpj = $_POST['cpf_cnpj'] ?? '';
-    $localEvento = $_POST['local'] ?? '';
-    $evento = $_POST['evento'] ?? '';
-    $pontoReferencia = $_POST['ponto_referencia'] ?? '';
-    $dataHorario = $_POST['data_horario'] ?? '';
-    $email = $_POST['email'] ?? ''; // Obtém o e-mail do POST
-
-    // Obter o valor da declaração
-    $declaracao = isset($_POST['declaracao']) ? 1 : 0;
-
-    // Gera um número de protocolo aleatório de 5 dígitos
-    $protocolo = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
-
-    // Inserir os dados no banco de dados, incluindo o protocolo e a declaração
-    $sql = "INSERT INTO Parecer (protocolo, nome, telefone, cpf_cnpj, email, local, evento, ponto_referencia, data_horario, declaracao)
-            VALUES ('$protocolo', '$nomeSolicitante', '$telefone', '$cpfCnpj', '$email', '$localEvento', '$evento', '$pontoReferencia', '$dataHorario', '$declaracao')";
-
-    if ($conn->query($sql) === TRUE) {
-        $successMessage = "Mensagem enviada com sucesso. Você receberá um comprovante por e-mail.";
-
-        // Preparar dados para futuro envio por e-mail
-        // $emailData = [ ... ]; // Dados a serem enviados por e-mail
-        // TODO: Implementar envio de e-mail
-
-    } else {
-        $errorMessage = "Erro ao inserir os dados: " . $conn->error;
-    }
-
-    // Formatar data para exibição
-    $meses = array(
-        'January' => 'janeiro',
-        'February' => 'fevereiro',
-        'March' => 'março',
-        'April' => 'abril',
-        'May' => 'maio',
-        'June' => 'junho',
-        'July' => 'julho',
-        'August' => 'agosto',
-        'September' => 'setembro',
-        'October' => 'outubro',
-        'November' => 'novembro',
-        'December' => 'dezembro'
-    );
-    $mesIngles = date('F');
-    $mesPortugues = $meses[$mesIngles];
-    $dataAtual = date('d') . ' de ' . $mesPortugues . ' de ' . date('Y');
-}
-
-$conn->close();
+// Limpar mensagens da sessão
+unset($_SESSION['success_message'], $_SESSION['error_message']);
 ?>
 
 <!DOCTYPE html>
@@ -127,6 +71,7 @@ $conn->close();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
     <!-- Inclua o Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="icon" href="../icon.png" type="image/png">
 </head>
 
 <body class="min-h-screen bg-gray-100">
@@ -134,7 +79,8 @@ $conn->close();
     <header class="bg-green-600 text-white shadow-md w-full fixed top-0 left-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <!-- Logo -->
-            <div class="text-lg font-semibold">
+            <div class="text-lg font-semibold flex items-center">
+                <img src="../assets/icon.png" alt="DEMUTRAN" class="h-8 w-8 mr-2">
                 <a href="../" class="hover:text-green-300 text-white no-underline">DEMUTRAN</a>
             </div>
 
@@ -177,6 +123,13 @@ $conn->close();
             <h2 class="text-2xl font-bold text-gray-800 mb-4">
                 SOLICITAÇÃO DE PARECER AO DEPARTAMENTO MUNICIPAL DE TRÂNSITO – DEMUTRAN/PAU DOS FERROS
             </h2>
+            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
+                <p><strong>ATENÇÃO:</strong></p>
+                <ul class="list-disc ml-6">
+                    <li>A solicitação deverá ser feita no mínimo 08 dias antes do evento</li>
+                    <li>O parecer será entregue presencialmente</li>
+                </ul>
+            </div>
             <p class="text-gray-600 mb-6">
                 <strong>Preencha todos os dados para podermos dar continuidade à sua solicitação.</strong>
             </p>
@@ -193,13 +146,12 @@ $conn->close();
             </div>
             <?php endif; ?>
 
-            <form method="post">
-                <!-- Nome -->
+            <form method="post" enctype="multipart/form-data" action="processa_formulario.php">
+                <!-- Campos básicos -->
                 <div class="mb-4">
                     <label for="nome" class="block text-gray-700 mb-2">NOME DO SOLICITANTE:</label>
-                    <input type="text" id="nome" name="nome" required
+                    <input type="text" id="nome" name="nome_solicitante" required
                         class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                        value="<?php echo htmlspecialchars($nomeSolicitante ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                         placeholder="Exemplo: João da Silva">
                 </div>
 
@@ -208,7 +160,6 @@ $conn->close();
                     <label for="telefone" class="block text-gray-700 mb-2">Nº TELEFONE:</label>
                     <input type="tel" id="telefone" name="telefone" required
                         class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                        value="<?php echo htmlspecialchars($telefone ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                         placeholder="Exemplo: (84) 99999-9999">
                 </div>
 
@@ -217,7 +168,6 @@ $conn->close();
                     <label for="cpf_cnpj" class="block text-gray-700 mb-2">CPF/CNPJ:</label>
                     <input type="text" id="cpf_cnpj" name="cpf_cnpj" required
                         class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                        value="<?php echo htmlspecialchars($cpfCnpj ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                         placeholder="Exemplo: 123.456.789-00">
                 </div>
 
@@ -226,7 +176,6 @@ $conn->close();
                     <label for="email" class="block text-gray-700 mb-2">E-MAIL:</label>
                     <input type="email" id="email" name="email" required
                         class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                        value="<?php echo htmlspecialchars($email ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                         placeholder="Exemplo: seuemail@exemplo.com">
                 </div>
 
@@ -235,7 +184,6 @@ $conn->close();
                     <label for="local" class="block text-gray-700 mb-2">LOCAL:</label>
                     <input type="text" id="local" name="local" required
                         class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                        value="<?php echo htmlspecialchars($localEvento ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                         placeholder="Exemplo: Rua das Flores, 123">
                 </div>
 
@@ -244,7 +192,6 @@ $conn->close();
                     <label for="evento" class="block text-gray-700 mb-2">Evento:</label>
                     <input type="text" id="evento" name="evento" required
                         class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                        value="<?php echo htmlspecialchars($evento ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                         placeholder="Exemplo: Festa de Aniversário">
                 </div>
 
@@ -253,7 +200,6 @@ $conn->close();
                     <label for="ponto_referencia" class="block text-gray-700 mb-2">Ponto de Referência:</label>
                     <input type="text" id="ponto_referencia" name="ponto_referencia" required
                         class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                        value="<?php echo htmlspecialchars($pontoReferencia ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                         placeholder="Exemplo: Próximo ao Mercado Central">
                 </div>
 
@@ -262,7 +208,6 @@ $conn->close();
                     <label for="data_horario" class="block text-gray-700 mb-2">Data/Horário:</label>
                     <input type="text" id="data_horario" name="data_horario" required
                         class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                        value="<?php echo htmlspecialchars($dataHorario ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                         placeholder="Selecione a data e horário">
                 </div>
 
@@ -274,9 +219,35 @@ $conn->close();
                     </label>
                 </div>
 
-                <!-- Botão de Enviar -->
-                <button type="submit"
-                    class="bg-green-600 text-white px-4 py-2 rounded mt-4 hover:bg-green-700">Enviar</button>
+                <!-- Upload Documento de Identificação -->
+                <div class="mb-4">
+                    <label for="doc_identificacao" class="block text-gray-700 mb-2">
+                        Documento de Identificação (PDF ou imagem):
+                    </label>
+                    <input type="file" id="doc_identificacao" name="doc_identificacao" required
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <p class="text-sm text-gray-500 mt-1">Formatos aceitos: PDF, JPG, PNG (máx. 5MB)</p>
+                </div>
+
+                <!-- Upload Comprovante de Residência -->
+                <div class="mb-4">
+                    <label for="comp_residencia" class="block text-gray-700 mb-2">
+                        Comprovante de Residência (PDF ou imagem):
+                    </label>
+                    <input type="file" id="comp_residencia" name="comp_residencia" required
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <p class="text-sm text-gray-500 mt-1">Formatos aceitos: PDF, JPG, PNG (máx. 5MB)</p>
+                </div>
+
+                <button type="submit" id="submitButton"
+                    class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                    <span class="flex items-center">
+                        <i class="fas fa-check mr-2"></i>
+                        <span>Enviar</span>
+                    </span>
+                </button>
             </form>
         </div>
     </div>
@@ -315,6 +286,21 @@ $conn->close();
                 ],
             },
         }
+    });
+
+    // Modificar o envio do formulário para mostrar o loading
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const submitButton = document.getElementById('submitButton');
+        submitButton.disabled = true;
+        submitButton.innerHTML = `
+            <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Processando...
+        `;
+        this.submit();
     });
     </script>
 </body>
