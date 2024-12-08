@@ -140,8 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $cnh_condutor_url = null;
     $notif_DEMUTRAN_url = null;
     $crlv_url = null;
-    $comprovante_residencia_url = null;
-    $doc_complementares_urls = null;
+    $comprovante_residencia_url = null;+
     $signed_document_url = null;
     $descricao = null;
 
@@ -264,6 +263,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         } else {
             echo "Nenhum arquivo enviado ou erro no upload.";
+        }
+
+        // Adicione ao trecho onde são capturados os dados do formulário
+        if ($tipo_solicitacao === 'apresentacao_condutor') {
+            $identidade = verificaTexto($_POST['identidade']);
+            
+            // Adicione os campos de assinatura
+            $assinatura_condutor_url = uploadFile('assinatura_condutor', $upload_dir, $base_url, $id_solicitacao);
+            $assinatura_proprietario_url = uploadFile('assinatura_proprietario', $upload_dir, $base_url, $id_solicitacao);
+            
+            // Modifique a query SQL removendo o orgao_emissor
+            $sql = "UPDATE solicitacoes_demutran SET 
+                    identidade = ?,
+                    assinatura_condutor_url = ?,
+                    assinatura_proprietario_url = ?
+                    WHERE id = ?";
+                    
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("sssi", 
+                $identidade,
+                $assinatura_condutor_url,
+                $assinatura_proprietario_url,
+                $id_solicitacao
+            );
         }
 
         // Atualizar os campos de URLs no banco de dados

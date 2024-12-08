@@ -1,6 +1,7 @@
 <?php
 session_start();
 include '../env/config.php';
+include './includes/template.php';
 
 if (!isset($_SESSION['usuario_id'])) {
     header('Location: login.php');
@@ -156,30 +157,7 @@ function renderFormCard($form) {
         <aside class="w-64 bg-white shadow-md flex-shrink-0 hidden md:flex flex-col">
             <div class="p-6 flex flex-col h-full">
                 <h1 class="text-2xl font-bold text-blue-600 mb-6">Painel Admin</h1>
-                <nav class="space-y-2 flex-1">
-                    <a href="dashboard.php" class="flex items-center p-2 text-gray-700 bg-blue-50 rounded">
-                        <span class="material-icons">dashboard</span>
-                        <span class="ml-3 font-semibold">Dashboard</span>
-                    </a>
-                    <a href="formularios.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
-                        <span class="material-icons">assignment</span>
-                        <span class="ml-3">Formulários</span>
-                    </a>
-                    <a href="gerenciar_noticias.php"
-                        class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
-                        <span class="material-icons">article</span>
-                        <span class="ml-3">Notícias</span>
-                    </a>
-                    <a href="usuarios.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
-                        <span class="material-icons">people</span>
-                        <span class="ml-3">Usuários</span>
-                    </a>
-                    <a href="gerenciar_noticias.php"
-                        class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
-                        <span class="material-icons">article</span>
-                        <span class="ml-3">Gerenciar Notícias</span>
-                    </a>
-                </nav>
+                <?php echo getSidebarHtml('dashboard'); ?>
                 <div class="mt-6">
                     <a href="logout.php" class="flex items-center p-2 text-red-600 hover:bg-red-50 rounded">
                         <span class="material-icons">logout</span>
@@ -233,93 +211,11 @@ function renderFormCard($form) {
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Topbar -->
-            <header class="bg-white shadow-md py-4 px-6 flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <!-- Mobile Menu Button -->
-                    <button @click="open = !open" class="md:hidden focus:outline-none">
-                        <span class="material-icons">menu</span>
-                    </button>
-                    <h2 class="text-xl font-semibold text-gray-800">Dashboard</h2>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <!-- Notifications -->
-                    <div x-data="{ open: false }" class="relative">
-                        <button @click="open = !open" class="relative focus:outline-none">
-                            <span class="material-icons text-gray-700">notifications</span>
-                            <?php if ($notificacoesNaoLidas > 0): ?>
-                            <span
-                                class="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 text-xs"><?php echo $notificacoesNaoLidas; ?></span>
-                            <?php endif; ?>
-                        </button>
-                        <div x-show="open" @click.away="open = false" x-cloak
-                            class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
-                            <div class="p-4 border-b text-gray-700 font-bold">Notificações</div>
-                            <ul>
-                                <?php
-                                $notificacoes = obterUltimosFormularios($conn, 'sac');
-                                while($notificacao = $notificacoes->fetch_assoc()):
-                                ?>
-                                <li class="p-4 border-b hover:bg-gray-50">
-                                    <a href="#" class="block">
-                                        <p class="font-medium text-gray-800"><?php echo $notificacao['nome']; ?></p>
-                                        <p class="text-sm text-gray-600"><?php echo $notificacao['assunto']; ?></p>
-                                    </a>
-                                </li>
-                                <?php endwhile; ?>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- User Profile -->
-                    <div x-data="{ open: false }" class="relative">
-                        <button @click="open = !open" class="flex items-center focus:outline-none">
-                            <?php 
-                            $avatarUrl = $_SESSION['usuario_avatar'] ?? '';
-                            $nome = $_SESSION['usuario_nome'];
-                            $iniciais = strtoupper(mb_substr($nome, 0, 1) . mb_substr(strstr($nome, ' '), 1, 1));
-                            
-                            if ($avatarUrl) {
-                                echo "<img src='{$avatarUrl}' alt='Avatar' 
-                                      class='w-8 h-8 rounded-full object-cover ring-2 ring-blue-500 ring-offset-2'
-                                      onerror=\"this.onerror=null; this.parentNode.innerHTML='<div class=\\\'w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold ring-2 ring-blue-500 ring-offset-2\\\'>{$iniciais}</div>';\">";
-                            } else {
-                                echo "<div class='w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold ring-2 ring-blue-500 ring-offset-2'>
-                                        {$iniciais}
-                                      </div>";
-                            }
-                            ?>
-                        </button>
-                        <div x-show="open" @click.away="open = false" x-cloak
-                            class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
-                            <div class="p-4 border-b text-gray-700 font-bold">
-                                <?php echo $_SESSION['usuario_nome']; ?>
-                            </div>
-                            <ul>
-                                <li class="p-4 hover:bg-gray-50">
-                                    <a href="perfil.php" class="block text-gray-700">
-                                        <span class="material-icons align-middle mr-2">account_circle</span>
-                                        Perfil
-                                    </a>
-                                </li>
-                                <li class="p-4 hover:bg-gray-50">
-                                    <a href="alterar_avatar.php" class="block text-gray-700">
-                                        <span class="material-icons align-middle mr-2">image</span>
-                                        Alterar Avatar
-                                    </a>
-                                </li>
-                                <li class="p-4 hover:bg-gray-50">
-                                    <a href="logout.php" class="block text-red-600">
-                                        <span class="material-icons align-middle mr-2">logout</span>
-                                        Sair
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                </div>
-            </header>
+            <?php 
+            $topbarHtml = getTopbarHtml('Dashboard', $notificacoesNaoLidas);
+            $avatarHtml = getAvatarHtml($_SESSION['usuario_nome'], $_SESSION['usuario_avatar'] ?? '');
+            echo str_replace('[AVATAR_PLACEHOLDER]', $avatarHtml, $topbarHtml);
+            ?>
 
             <!-- Main -->
             <main class="flex-1 overflow-y-auto p-6 bg-gray-50">

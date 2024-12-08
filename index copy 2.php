@@ -87,101 +87,27 @@ $conn->close();
 </head>
 
 <body class="font-roboto bg-gray-100">
-    <!-- Hero Section com background enriquecido -->
-    <div class="relative bg-gradient-to-br from-green-50 via-gray-50 to-white">
+    <!-- Hero Section com background melhorado -->
+    <div class="relative bg-gradient-to-br from-green-50 to-gray-50">
         <!-- Elementos decorativos de fundo -->
         <div class="absolute inset-0 overflow-hidden">
-            <!-- Padrão de grid principal -->
+            <!-- Padrão de grid sutil -->
             <div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
-
-            <!-- Elementos decorativos flutuantes -->
-            <div class="absolute inset-0">
-                <!-- Círculos decorativos -->
-                <div
-                    class="absolute top-20 left-10 w-64 h-64 bg-green-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse">
-                </div>
-                <div
-                    class="absolute top-40 right-20 w-72 h-72 bg-blue-50 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse-slow">
-                </div>
-                <div
-                    class="absolute -bottom-20 left-1/3 w-96 h-96 bg-yellow-50 rounded-full mix-blend-multiply filter blur-3xl opacity-30">
-                </div>
-
-                <!-- Padrões geométricos -->
-                <div class="absolute inset-0 bg-texture opacity-5"></div>
-                <div class="absolute inset-0 bg-dots opacity-10"></div>
-
-                <!-- Linhas decorativas -->
-                <div
-                    class="absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-green-200 to-transparent opacity-30">
-                </div>
-                <div
-                    class="absolute top-3/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent opacity-30">
-                </div>
-
-                <!-- Formas geométricas flutuantes -->
-                <div
-                    class="absolute top-10 right-1/4 w-20 h-20 border-2 border-green-200 rounded-lg transform rotate-45 opacity-20">
-                </div>
-                <div class="absolute bottom-20 left-1/4 w-16 h-16 border-2 border-blue-200 rounded-full opacity-20">
-                </div>
-                <div
-                    class="absolute top-1/3 right-10 w-24 h-24 border-2 border-yellow-200 transform rotate-12 opacity-20">
-                </div>
+            <!-- Círculos decorativos -->
+            <div
+                class="absolute top-0 right-0 w-96 h-96 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-y-1/4">
+            </div>
+            <div
+                class="absolute bottom-0 left-0 w-96 h-96 bg-gray-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 translate-y-1/4">
             </div>
         </div>
 
-        <!-- Estilos adicionais -->
+        <!-- Adicionar estilos no head -->
         <style>
         .bg-grid-pattern {
-            background-image:
-                linear-gradient(to right, rgba(0, 128, 0, 0.05) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(0, 128, 0, 0.05) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-
-        .bg-texture {
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23green' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        }
-
-        .bg-dots {
-            background-image: radial-gradient(circle, rgba(0, 128, 0, 0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-
-        @keyframes pulse-slow {
-
-            0%,
-            100% {
-                opacity: 0.2;
-                transform: scale(1);
-            }
-
-            50% {
-                opacity: 0.3;
-                transform: scale(1.05);
-            }
-        }
-
-        .animate-pulse-slow {
-            animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        /* Animações para formas geométricas */
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0) rotate(45deg);
-            }
-
-            50% {
-                transform: translateY(-10px) rotate(45deg);
-            }
-        }
-
-        .absolute[class*="border-"] {
-            animation: float 15s ease-in-out infinite;
+            background-image: linear-gradient(to right, #e5e7eb 1px, transparent 1px),
+                linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
+            background-size: 4rem 4rem;
         }
         </style>
 

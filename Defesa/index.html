@@ -103,35 +103,51 @@
         <h2 class="text-2xl font-bold text-gray-800 mb-4">
           <i class="far fa-edit"></i> Solicitação DEMUTRAN
         </h2>
-        <div id="documentosNecessarios" class="text-gray-600 mb-6">
-          <strong
-            >Documentos necessários para apresentação de Defesa Prévia:</strong
-          >
-          <ul class="list-disc list-inside mt-2">
-            <li>Requerimento da Defesa preenchido, datado e assinado;</li>
-            <li>
-              Cópia da CNH ou outro documento de identificação que comprove a
-              assinatura que consta no requerimento do recurso. Quando o
-              requerente for representado, anexar também a cópia do documento de
-              identificação do representante legal. E, quando pessoa jurídica,
-              anexar também o ato constitutivo da empresa;
-            </li>
-            <li>Cópia do CRLV;</li>
-            <li>Cópia da Notificação da Autuação;</li>
-            <li>Procuração, quando for o caso;</li>
-            <li>
-              Outros documentos que considerar necessários para apoiar as
-              alegações da defesa.
-            </li>
-          </ul>
-          <p class="mt-4">
-            A Defesa Prévia deverá ser preenchida, assinada e anexada junto com
-            os demais documentos acima relacionados, ou enviada pelos Correios
-            para o endereço:
-            <br />
-            Av. Dom Pedro II nº 1121, Centro – Pau dos Ferros/RN CEP: 59900-000.
-          </p>
+        <div
+          class="flex p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50"
+          role="alert">
+          <svg
+            class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            viewBox="0 0 20 20">
+            <path
+              d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+          </svg>
+          <div>
+            <span class="font-medium">Informações importantes:</span>
+            <ul class="mt-1.5 list-disc list-inside">
+              <li>Todos os documentos devem ser enviados em formato PDF</li>
+              <li>
+                Em caso de pessoa jurídica, anexar o ato constitutivo da empresa
+              </li>
+              <li>Para representação por terceiros, incluir procuração</li>
+            </ul>
+          </div>
         </div>
+        <p class="text-gray-600 mb-6">
+          <strong
+            >Preencha todos os dados para podermos dar continuidade à sua
+            solicitação.</strong
+          >
+        </p>
+        <!-- <div id="documentosNecessarios" class="text-gray-600 mb-6">
+          <strong>Documentos necessários:</strong>
+          <ul class="list-disc list-inside mt-2">
+            <li>
+              Cópia da CNH ou outro documento de identificação do proprietário;
+            </li>
+            <li>
+              Quando pessoa jurídica, anexar também o ato constitutivo da
+              empresa;
+            </li>
+            <li>Em caso de representação por terceiros, incluir procuração.</li>
+          </ul>
+          <p class="mt-2 text-sm text-gray-500">
+            Obs.: Todos os documentos devem estar em formato PDF.
+          </p>
+        </div> -->
 
         <!-- Progress Stepper -->
         <div class="mb-8">
@@ -191,7 +207,6 @@
           id="DefesaForm"
           method="post"
           enctype="multipart/form-data"
-          action="../utils/form/gerar_formulario.php"
           target="_blank">
           <!-- Tipo da Solicitação -->
           <div class="mb-4">
@@ -209,6 +224,38 @@
               </option>
               <option value="jari">JARI</option>
             </select>
+          </div>
+
+          <!-- Campos específicos para Apresentação do Condutor -->
+          <div id="campos_apresentacao" class="hidden">
+            <div class="mb-4">
+              <label for="identidade" class="block text-gray-700 mb-2">
+                <i class="fas fa-id-card"></i> Identidade:
+              </label>
+              <input
+                type="text"
+                id="identidade"
+                name="identidade"
+                class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+            </div>
+
+            <div class="mb-4">
+              <label for="orgao_emissor" class="block text-gray-700 mb-2">
+                <i class="fas fa-building"></i> Órgão Emissor:
+              </label>
+              <input
+                type="text"
+                id="orgao_emissor"
+                name="orgao_emissor"
+                value="DEMUTRAN   21787-0"
+                class="w-full border rounded-md p-2 bg-gray-100 text-gray-600"
+                disabled />
+            </div>
+          </div>
+
+          <!-- Campos específicos para Defesa Prévia -->
+          <div id="campos_defesa" class="hidden">
+            <!-- ...existing fields that are common... -->
           </div>
 
           <!-- Nome -->
@@ -760,6 +807,35 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+      // Add this function at the beginning of your script section
+      function showCustomAlert(message) {
+        // Create alert element
+        const alertDiv = document.createElement("div");
+        alertDiv.className =
+          "fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50";
+        alertDiv.role = "alert";
+
+        // Add content
+        alertDiv.innerHTML = `
+          <span class="font-bold">Atenção!</span>
+          <span class="block sm:inline"> ${message}</span>
+          <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+            <svg onclick="this.parentElement.parentElement.remove()" class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <title>Fechar</title>
+              <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
+            </svg>
+          </span>
+        `;
+
+        // Add to document
+        document.body.appendChild(alertDiv);
+
+        // Remove after 5 seconds
+        setTimeout(() => {
+          alertDiv.remove();
+        }, 5000);
+      }
+
       // Script para alternar o menu mobile
       const menuBtn = document.getElementById("menu-btn");
       const mobileMenu = document.getElementById("mobile-menu");
@@ -771,22 +847,49 @@
       // Mostrar ou ocultar partes do formulário com base no tipo de solicitação
       document
         .getElementById("tipo_solicitacao")
-        .addEventListener("change", function () {
-          var formNormal = document.getElementById("form_normal");
-          var notifDEMUTRANField = document.getElementById(
-            "notif_DEMUTRAN_field"
-          );
+        .addEventListener("change", handleSolicitacaoChange);
 
-          if (formNormal && notifDEMUTRANField) {
-            if (this.value === "apresentacao_condutor") {
-              formNormal.classList.add("hidden");
-              notifDEMUTRANField.classList.remove("hidden");
-            } else {
-              formNormal.classList.remove("hidden");
-              notifDEMUTRANField.classList.add("hidden");
-            }
-          }
-        });
+      function handleSolicitacaoChange() {
+        const tipoSelecionado = this.value;
+        const form = document.getElementById("DefesaForm");
+        const camposApresentacao = document.getElementById(
+          "campos_apresentacao"
+        );
+
+        // Campos que devem ser ocultados para Apresentação do Condutor
+        const camposOcultar = [
+          "cor",
+          "especie",
+          "categoria",
+          "ano",
+          "dataInfracao",
+          "horaInfracao",
+          "localInfracao",
+          "enquadramento",
+          "defesa",
+        ];
+
+        // Define o formulário correto baseado no tipo
+        if (tipoSelecionado === "apresentacao_condutor") {
+          form.action = "../utils/form/gerar_formulario_AP.php";
+          // Mostra campos específicos de apresentação
+          camposApresentacao.classList.remove("hidden");
+          // Oculta campos não necessários
+          camposOcultar.forEach((id) => {
+            const elemento = document.getElementById(id)?.closest(".mb-4");
+            if (elemento) elemento.style.display = "none";
+          });
+        } else {
+          form.action = "../utils/form/gerar_formulario.php";
+          // Oculta campos de apresentação
+          camposApresentacao.classList.add("hidden");
+          // Mostra todos os campos
+          camposOcultar.forEach((id) => {
+            const elemento = document.getElementById(id)?.closest(".mb-4");
+            if (elemento) elemento.style.display = "block";
+          });
+        }
+      }
 
       // Envio do formulário
       document.addEventListener("DOMContentLoaded", () => {
@@ -805,11 +908,6 @@
         window.savedFormData = new FormData(
           document.getElementById("DefesaForm")
         );
-
-        // Hide documentos necessários section
-        document
-          .getElementById("documentosNecessarios")
-          .classList.add("hidden");
 
         // Update stepper styles
         document.getElementById("step1").classList.remove("text-green-600");
@@ -852,11 +950,6 @@
           });
         }
 
-        // Show documentos necessários section
-        document
-          .getElementById("documentosNecessarios")
-          .classList.remove("hidden");
-
         // Update stepper styles
         document.getElementById("step1").classList.add("text-green-600");
         document.getElementById("step1").classList.remove("text-gray-500");
@@ -886,13 +979,9 @@
         const tipoSolicitacao =
           document.getElementById("tipo_solicitacao").value;
 
-        // Garante que o tipo de solicitação seja incluído no formulário
-        if (!form.querySelector('input[name="tipo_solicitacao"]')) {
-          const hiddenInput = document.createElement("input");
-          hiddenInput.type = "hidden";
-          hiddenInput.name = "tipo_solicitacao";
-          hiddenInput.value = tipoSolicitacao;
-          form.appendChild(hiddenInput);
+        if (!tipoSolicitacao) {
+          showCustomAlert("Selecione um tipo de solicitação válido");
+          return;
         }
 
         form.target = "_blank";
@@ -1060,6 +1149,45 @@
       function validateAndProceed() {
         showSecondTab();
       }
+
+      // Adicione esta função ao seu JavaScript existente
+      document
+        .getElementById("tipo_solicitacao")
+        .addEventListener("change", function () {
+          const tipoSelecionado = this.value;
+          const camposApresentacao = document.getElementById(
+            "campos_apresentacao"
+          );
+          const camposDefesa = document.getElementById("campos_defesa");
+
+          // Campos que devem ser escondidos para Apresentação do Condutor
+          const camposEsconder = [
+            "cor",
+            "especie",
+            "categoria",
+            "ano",
+            "dataInfracao",
+            "horaInfracao",
+            "localInfracao",
+            "enquadramento",
+            "defesa",
+          ].forEach((id) => {
+            const elemento = document.getElementById(id)?.closest(".mb-4");
+            if (elemento) {
+              elemento.style.display =
+                tipoSelecionado === "apresentacao_condutor" ? "none" : "block";
+            }
+          });
+
+          // Mostrar/esconder campos específicos
+          if (tipoSelecionado === "apresentacao_condutor") {
+            camposApresentacao.classList.remove("hidden");
+            camposDefesa.classList.add("hidden");
+          } else if (tipoSelecionado === "defesa_previa") {
+            camposApresentacao.classList.add("hidden");
+            camposDefesa.classList.remove("hidden");
+          }
+        });
     </script>
   </body>
 </html>

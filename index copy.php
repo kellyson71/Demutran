@@ -87,104 +87,8 @@ $conn->close();
 </head>
 
 <body class="font-roboto bg-gray-100">
-    <!-- Hero Section com background enriquecido -->
-    <div class="relative bg-gradient-to-br from-green-50 via-gray-50 to-white">
-        <!-- Elementos decorativos de fundo -->
-        <div class="absolute inset-0 overflow-hidden">
-            <!-- Padrão de grid principal -->
-            <div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
-
-            <!-- Elementos decorativos flutuantes -->
-            <div class="absolute inset-0">
-                <!-- Círculos decorativos -->
-                <div
-                    class="absolute top-20 left-10 w-64 h-64 bg-green-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse">
-                </div>
-                <div
-                    class="absolute top-40 right-20 w-72 h-72 bg-blue-50 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse-slow">
-                </div>
-                <div
-                    class="absolute -bottom-20 left-1/3 w-96 h-96 bg-yellow-50 rounded-full mix-blend-multiply filter blur-3xl opacity-30">
-                </div>
-
-                <!-- Padrões geométricos -->
-                <div class="absolute inset-0 bg-texture opacity-5"></div>
-                <div class="absolute inset-0 bg-dots opacity-10"></div>
-
-                <!-- Linhas decorativas -->
-                <div
-                    class="absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-green-200 to-transparent opacity-30">
-                </div>
-                <div
-                    class="absolute top-3/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent opacity-30">
-                </div>
-
-                <!-- Formas geométricas flutuantes -->
-                <div
-                    class="absolute top-10 right-1/4 w-20 h-20 border-2 border-green-200 rounded-lg transform rotate-45 opacity-20">
-                </div>
-                <div class="absolute bottom-20 left-1/4 w-16 h-16 border-2 border-blue-200 rounded-full opacity-20">
-                </div>
-                <div
-                    class="absolute top-1/3 right-10 w-24 h-24 border-2 border-yellow-200 transform rotate-12 opacity-20">
-                </div>
-            </div>
-        </div>
-
-        <!-- Estilos adicionais -->
-        <style>
-        .bg-grid-pattern {
-            background-image:
-                linear-gradient(to right, rgba(0, 128, 0, 0.05) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(0, 128, 0, 0.05) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-
-        .bg-texture {
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23green' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        }
-
-        .bg-dots {
-            background-image: radial-gradient(circle, rgba(0, 128, 0, 0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-
-        @keyframes pulse-slow {
-
-            0%,
-            100% {
-                opacity: 0.2;
-                transform: scale(1);
-            }
-
-            50% {
-                opacity: 0.3;
-                transform: scale(1.05);
-            }
-        }
-
-        .animate-pulse-slow {
-            animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        /* Animações para formas geométricas */
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0) rotate(45deg);
-            }
-
-            50% {
-                transform: translateY(-10px) rotate(45deg);
-            }
-        }
-
-        .absolute[class*="border-"] {
-            animation: float 15s ease-in-out infinite;
-        }
-        </style>
-
+    <!-- Hero Section -->
+    <div class="bg-white border-b">
         <!-- Top Bar fixo -->
         <header class="bg-green-600 text-white w-full fixed top-0 left-0 z-50">
             <div class="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -225,150 +129,48 @@ $conn->close();
             </div>
         </header>
 
-        <!-- Conteúdo com padding-top para compensar a topbar fixa -->
-        <div class="relative pt-14">
-            <!-- Faixa Institucional (não fixa) -->
-            <div class="bg-gradient-to-r from-gray-800 to-gray-900 text-white border-b border-gray-700">
-                <div class="container mx-auto">
-                    <div class="flex flex-col md:flex-row justify-between items-center py-2 px-4">
-                        <div class="flex items-center space-x-6">
-                            <a href="https://paudosferros.rn.gov.br" target="_blank"
-                                class="flex items-center space-x-3 hover:text-green-300 transition-colors">
-                                <img src="admin/assets/prefeitura-logo.png" alt="Brasão de Pau dos Ferros"
-                                    class="h-8 w-auto">
-                                <div class="text-left">
-                                    <p class="font-semibold text-sm">Prefeitura Municipal de</p>
-                                    <p class="text-base">Pau dos Ferros</p>
-                                </div>
-                            </a>
-                            <div class="hidden md:block h-6 w-px bg-gray-700"></div>
-                            <div class="hidden md:block text-xs text-gray-300">
-                                <p>Rio Grande do Norte</p>
-                                <p>CNPJ: 08.148.421/0001-76</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-6">
-                            <a href="https://www.instagram.com/demutran_paudosferros/" target="_blank"
-                                class="hover:text-green-300 transition-colors flex items-center space-x-2">
-                                <i class="fab fa-instagram"></i>
-                                <span class="text-xs hidden md:inline">Instagram</span>
-                            </a>
-                            <div class="h-6 w-px bg-gray-700"></div>
-                            <a href="https://paudosferros.rn.gov.br/acessoainformacao.php" target="_blank"
-                                class="hover:text-green-300 transition-colors">
-                                <div class="flex items-center space-x-2">
-                                    <i class="fas fa-search text-xs"></i>
-                                    <span class="text-xs">Portal da Transparência</span>
-                                </div>
-                            </a>
-                        </div>
+        <!-- Hero Section Reorganizada -->
+        <div class="container mx-auto pt-24 pb-12 px-4">
+            <!-- Cabeçalho com Logos -->
+            <div class="flex flex-col items-center justify-center space-y-8">
+                <!-- Logos principais em uma linha -->
+                <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+                    <img src="utils/form/image1.png" alt="DEMUTRAN Logo" class="h-24 md:h-28 object-contain">
+                    <img src="admin/assets/logo vazada horizontal.png" alt="Logo Demutran"
+                        class="h-24 md:h-28 object-contain">
+                    <img src="./assets/prefeitura-logo.png" alt="Prefeitura Logo" class="h-24 md:h-28 object-contain">
+                </div>
+
+                <!-- Título e Subtítulo -->
+                <div class="text-center max-w-3xl mx-auto">
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
+                        DEPARTAMENTO MUNICIPAL DE TRÂNSITO
+                    </h1>
+                    <p class="text-xl text-gray-600 mb-4">
+                        Pau dos Ferros/RN
+                    </p>
+                    <div class="text-sm text-gray-600 bg-gray-50 p-4 rounded-lg">
+                        <p class="mb-2">
+                            Integrado ao Sistema Nacional de Trânsito<br>
+                            Portaria nº 150/2022 SENATRAN<br>
+                            Código do órgão autuador: 21787-0
+                        </p>
                     </div>
                 </div>
-            </div>
 
-            <!-- Hero Section Reformulada -->
-            <div class="container mx-auto py-12 px-4">
-                <div class="max-w-7xl mx-auto">
-                    <div class="grid md:grid-cols-2 gap-12 items-center">
-                        <!-- Conteúdo Principal -->
-                        <div class="space-y-8">
-                            <div class="space-y-4">
-                                <div class="flex items-center space-x-3 mb-6">
-                                    <span
-                                        class="px-4 py-2 rounded-full bg-green-50 border border-green-100 text-green-700 text-sm font-medium">
-                                        Sistema Nacional de Trânsito
-                                    </span>
-                                    <span
-                                        class="px-4 py-2 rounded-full bg-gray-50 border border-gray-100 text-gray-700 text-sm font-medium">
-                                        Pau dos Ferros/RN
-                                    </span>
-                                </div>
-                                <h1 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-                                    Departamento Municipal de Trânsito
-                                </h1>
-                                <p class="text-xl text-gray-600 leading-relaxed max-w-2xl">
-                                    Órgão executivo municipal responsável pela gestão e fiscalização do trânsito,
-                                    trabalhando por uma mobilidade mais segura e eficiente.
-                                </p>
-                            </div>
-
-                            <!-- Cards de Credenciais -->
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="p-2 bg-green-50 rounded-full">
-                                            <i class="fas fa-building text-green-600"></i>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-medium text-gray-900">Órgão Oficial</p>
-                                            <p class="text-xs text-gray-500">Executivo Municipal</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="p-2 bg-green-50 rounded-full">
-                                            <i class="fas fa-file-contract text-green-600"></i>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-medium text-gray-900">Portaria SENATRAN</p>
-                                            <p class="text-xs text-gray-500">Nº 150/2022</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="p-2 bg-green-50 rounded-full">
-                                            <i class="fas fa-id-card text-green-600"></i>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-medium text-gray-900">Código Autuador</p>
-                                            <p class="text-xs text-gray-500">21787-0</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Informação Adicional -->
-                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <p class="text-sm text-gray-600 leading-relaxed">
-                                    Responsável pela gestão do trânsito municipal e pela Junta Administrativa de
-                                    Recursos de
-                                    Infração (JARI),
-                                    atuando em conformidade com as diretrizes do Sistema Nacional de Trânsito para
-                                    garantir
-                                    um trânsito mais seguro e organizado.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Imagem Principal -->
-                        <div class="relative">
-                            <div
-                                class="absolute inset-0 bg-gradient-to-r from-green-600 to-green-400 rounded-3xl opacity-10 blur-3xl transform rotate-6">
-                            </div>
-                            <div class="relative bg-white p-8 rounded-2xl shadow-xl">
-                                <a href="https://paudosferros.rn.gov.br" target="_blank"
-                                    class="block transition-transform duration-500 hover:scale-105">
-                                    <img src="admin/assets/logo vazada horizontal.png"
-                                        alt="Brasão da Prefeitura Municipal de Pau dos Ferros" class="w-full h-auto"
-                                        title="Prefeitura Municipal de Pau dos Ferros">
-                                </a>
-                                <div class="text-center mt-6">
-                                    <p class="text-lg font-semibold text-gray-800">Prefeitura Municipal de Pau dos
-                                        Ferros
-                                    </p>
-                                    <p class="text-sm text-gray-600">Administração 2021-2024</p>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
+                <!-- Informação Legal em Card -->
+                <div class="bg-white shadow-sm rounded-lg p-6 max-w-3xl w-full">
+                    <p class="text-sm text-gray-700">
+                        <span class="font-semibold block mb-2">LEI N° 1129/2014, DE 07 DE MAIO DE 2014</span>
+                        Dispõe sobre a criação do Departamento Municipal de Trânsito, órgão executivo de trânsito
+                        rodoviário,
+                        vinculado ao Gabinete do Município, bem como da Junta Administrativa de Recursos de Infração –
+                        JARI.
+                    </p>
                 </div>
             </div>
         </div>
+
     </div>
 
     <!-- Conteúdo Principal -->

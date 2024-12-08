@@ -1,6 +1,7 @@
 <?php
 session_start();
 include '../env/config.php';
+include './includes/template.php';
 
 if (!isset($_SESSION['usuario_id'])) {
     header('Location: login.php');
@@ -226,6 +227,27 @@ if ($tipo == 'DAT') {
         background: rgba(255, 255, 255, 0.98);
         backdrop-filter: blur(5px);
     }
+
+    .backdrop-blur {
+        backdrop-filter: blur(5px);
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-animation {
+        animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
     </style>
 
     <script>
@@ -342,6 +364,72 @@ if ($tipo == 'DAT') {
                 }
             });
     }
+
+    // Função para abrir o modal de confirmação
+    function openConfirmModal() {
+        document.getElementById("confirm-modal").classList.remove("hidden");
+        document.getElementById("confirm-modal").classList.add("flex");
+    }
+
+    // Função para fechar o modal de confirmação
+    function closeConfirmModal() {
+        document.getElementById("confirm-modal").classList.remove("flex");
+        document.getElementById("confirm-modal").classList.add("hidden");
+    }
+
+    // Modifica a função concluirFormulario para ser chamada após confirmação
+    function concluirFormulario() {
+        // Mostra loading e desabilita botões
+        const loadingButton = document.getElementById('btnConcluir');
+        const cancelButton = document.getElementById('btnCancelar');
+
+        loadingButton.disabled = true;
+        cancelButton.disabled = true;
+        loadingButton.innerHTML = `
+            <svg aria-hidden="true" role="status" class="inline w-4 h-4 me-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
+                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
+            </svg>
+            Enviando email...
+        `;
+
+        var id = <?php echo $id; ?>;
+        var tipo = '<?php echo $tipo; ?>';
+        var email = '<?php echo $tipo == 'DAT' ? $dat1['email'] : $formulario['email']; ?>';
+        var nome = '<?php echo $tipo == 'DAT' ? $dat1['nome'] : $formulario['nome']; ?>';
+
+        var assunto = 'Protocolo #' + id + ' - Concluído';
+        var mensagem = 'Prezado(a) ' + nome + ',\n\n' +
+            'Seu protocolo #' + id + ' foi concluído com sucesso.\n' +
+            'Por favor, compareça ao DEMUTRAN para finalizar o processo.\n\n' +
+            'Atenciosamente,\n' +
+            'Departamento Municipal de Trânsito';
+
+        fetch('../utils/mail.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'email=' + encodeURIComponent(email) +
+                    '&nome=' + encodeURIComponent(nome) +
+                    '&assunto=' + encodeURIComponent(assunto) +
+                    '&mensagem=' + encodeURIComponent(mensagem)
+            })
+            .then(response => response.text())
+            .then(data => {
+                closeConfirmModal();
+                showSuccessAlert('Protocolo concluído e email enviado com sucesso!');
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao concluir o protocolo.');
+            })
+            .finally(() => {
+                loadingButton.disabled = false;
+                cancelButton.disabled = false;
+                loadingButton.innerHTML = 'Sim, concluir';
+            });
+    }
     </script>
 </head>
 
@@ -379,25 +467,7 @@ if ($tipo == 'DAT') {
         <aside class="w-64 bg-white shadow-md flex-shrink-0 hidden md:flex flex-col">
             <div class="p-6 flex flex-col h-full">
                 <h1 class="text-2xl font-bold text-blue-600 mb-6">Painel Admin</h1>
-                <nav class="space-y-2 flex-1">
-                    <a href="dashboard.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
-                        <span class="material-icons">dashboard</span>
-                        <span class="ml-3">Dashboard</span>
-                    </a>
-                    <a href="formularios.php" class="flex items-center p-2 text-gray-700 bg-blue-50 rounded">
-                        <span class="material-icons">assignment</span>
-                        <span class="ml-3 font-semibold">Formulários</span>
-                    </a>
-                    <a href="gerenciar_noticias.php"
-                        class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
-                        <span class="material-icons">article</span>
-                        <span class="ml-3">Notícias</span>
-                    </a>
-                    <a href="usuarios.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
-                        <span class="material-icons">people</span>
-                        <span class="ml-3">Usuários</span>
-                    </a>
-                </nav>
+                <?php echo getSidebarHtml('formularios'); ?>
                 <div class="mt-6">
                     <a href="logout.php" class="flex items-center p-2 text-red-600 hover:bg-red-50 rounded">
                         <span class="material-icons">logout</span>
@@ -409,69 +479,11 @@ if ($tipo == 'DAT') {
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Topbar -->
-            <header class="bg-white shadow-md py-4 px-6 flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <button @click="open = !open" class="md:hidden focus:outline-none">
-                        <span class="material-icons">menu</span>
-                    </button>
-                    <h2 class="text-xl font-semibold text-gray-800">Detalhes do Formulário</h2>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <!-- Notifications -->
-                    <div x-data="{ open: false }" class="relative">
-                        <button @click="open = !open" class="relative focus:outline-none">
-                            <span class="material-icons text-gray-700">notifications</span>
-                            <?php if ($notificacoesNaoLidas > 0): ?>
-                            <span class="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 text-xs">
-                                <?php echo $notificacoesNaoLidas; ?>
-                            </span>
-                            <?php endif; ?>
-                        </button>
-                        <!-- Notification dropdown content -->
-                        <div x-show="open" @click.away="open = false" x-cloak
-                            class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
-                            <!-- ... notification content ... -->
-                        </div>
-                    </div>
-
-                    <!-- User Profile -->
-                    <div x-data="{ open: false }" class="relative">
-                        <button @click="open = !open" class="flex items-center focus:outline-none">
-                            <?php 
-                            $avatarUrl = $_SESSION['usuario_avatar'] ?? '';
-                            $nome = $_SESSION['usuario_nome'];
-                            $iniciais = strtoupper(mb_substr($nome, 0, 1) . mb_substr(strstr($nome, ' '), 1, 1));
-                            
-                            if ($avatarUrl) {
-                                echo "<img src='{$avatarUrl}' alt='Avatar' 
-                                      class='w-8 h-8 rounded-full object-cover ring-2 ring-blue-500 ring-offset-2'
-                                      onerror=\"this.onerror=null; this.parentNode.innerHTML='<div class=\\\'w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold ring-2 ring-blue-500 ring-offset-2\\\'>{$iniciais}</div>';\">";
-                            } else {
-                                echo "<div class='w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold ring-2 ring-blue-500 ring-offset-2'>
-                                        {$iniciais}
-                                      </div>";
-                            }
-                            ?>
-                        </button>
-                        <!-- ...existing code... -->
-                        <div x-show="open" @click.away="open = false" x-cloak
-                            class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
-                            <div class="p-4 border-b text-gray-700 font-bold">
-                                <?php echo $_SESSION['usuario_nome']; ?>
-                            </div>
-                            <ul>
-                                <li class="p-4 hover:bg-gray-50">
-                                    <a href="perfil.php" class="block text-gray-700">Perfil</a>
-                                </li>
-                                <li class="p-4 hover:bg-gray-50">
-                                    <a href="logout.php" class="block text-red-600">Sair</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </header>
+            <?php 
+            $topbarHtml = getTopbarHtml('Detalhes do Formulário', $notificacoesNaoLidas);
+            $avatarHtml = getAvatarHtml($_SESSION['usuario_nome'], $_SESSION['usuario_avatar'] ?? '');
+            echo str_replace('[AVATAR_PLACEHOLDER]', $avatarHtml, $topbarHtml);
+            ?>
 
             <!-- Main -->
             <main class="flex-1 overflow-y-auto p-6 bg-gradient-to-br from-gray-50 to-gray-100">
@@ -615,6 +627,11 @@ if ($tipo == 'DAT') {
                             <i class='bx bx-edit-alt mr-2'></i>
                             Editar
                         </button>
+                        <button onclick="openConfirmModal()"
+                            class="flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition shadow-sm">
+                            <i class='bx bx-check mr-2'></i>
+                            Concluir
+                        </button>
                     </div>
                     <button onclick="openDeleteModal()"
                         class="flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition shadow-sm">
@@ -668,6 +685,41 @@ if ($tipo == 'DAT') {
                     class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition">Cancelar</button>
                 <button onclick="excluirFormulario()"
                     class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirm-modal" tabindex="-1"
+        class="hidden overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center backdrop-blur">
+        <div class="relative p-4 w-full max-w-md max-h-full">
+            <div class="relative bg-white rounded-lg shadow-lg modal-animation">
+                <button type="button" onclick="closeConfirmModal()"
+                    class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                    </svg>
+                    <span class="sr-only">Fechar modal</span>
+                </button>
+                <div class="p-6 text-center">
+                    <svg class="mx-auto mb-4 text-gray-400 w-12 h-12" aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <h3 class="mb-5 text-lg font-normal text-gray-500">Tem certeza que deseja concluir este protocolo?
+                    </h3>
+                    <button id="btnConcluir" onclick="concluirFormulario()" type="button"
+                        class="text-white bg-green-600 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                        Sim, concluir
+                    </button>
+                    <button id="btnCancelar" onclick="closeConfirmModal()" type="button"
+                        class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
+                        Não, cancelar
+                    </button>
+                </div>
             </div>
         </div>
     </div>

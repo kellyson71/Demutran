@@ -8,7 +8,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Verifica se o formulário foi enviado
 if (isset($_SESSION['form_data'])) {
     $formData = $_SESSION['form_data'];
-    $tipoRequerente = $formData['tipoRequerente'] ?? '';
+    // Alteração aqui: usar tipo_solicitacao ao invés de tipoRequerente
+    $tipoRequerente = $formData['tipo_solicitacao'] ?? '';
+    
+    // Formatar o texto do tipo de solicitação para exibição
+    switch($tipoRequerente) {
+        case 'defesa_previa':
+            $tipoRequerente = 'Defesa Prévia';
+            break;
+        case 'apresentacao_condutor':
+            $tipoRequerente = 'Apresentação do Condutor';
+            break;
+        case 'jari':
+            $tipoRequerente = 'JARI';
+            break;
+        default:
+            $tipoRequerente = 'Não informado';
+    }
+
     $nome = $formData['nome'] ?? '';
     $cpf = $formData['cpf'] ?? '';
     $endereco = $formData['endereco'] ?? '';
@@ -70,6 +87,37 @@ if (isset($_SESSION['form_data'])) {
 } else {
     echo 'Dados do formulário não encontrados na sessão.';
     exit;
+}
+
+// Determinar configurações baseadas no tipo de solicitação
+$tipoSolicitacao = $formData['tipo_solicitacao'] ?? '';
+$configs = [
+    'titulo' => '',
+    'bg_color' => '',
+    'border_color' => '',
+    'destinatario' => '',
+    'texto_acao' => ''
+];
+
+switch($tipoSolicitacao) {
+    case 'defesa_previa':
+        $configs = [
+            'titulo' => 'REQUERIMENTO PARA APRESENTAÇÃO DE DEFESA PRÉVIA',
+            'bg_color' => '#E3F2FD',  // Azul claro
+            'border_color' => '#2196F3', // Azul escuro
+            'destinatario' => 'Ilustríssimo Senhor Gerente Executivo do Departamento Municipal de Trânsito – DEMUTRAN de Pau dos Ferros/RN',
+            'texto_acao' => 'Vem interpor Defesa Prévia'
+        ];
+        break;
+    case 'jari':
+        $configs = [
+            'titulo' => 'REQUERIMENTO PARA APRESENTAÇÃO DE RECURSO À JARI',
+            'bg_color' => '#FFF3E0',  // Laranja claro
+            'border_color' => '#FF9800', // Laranja escuro
+            'destinatario' => 'Ilustríssimo Senhor Presidente da Junta Administrativa de Recursos de Infrações - JARI',
+            'texto_acao' => 'Vem interpor Recurso'
+        ];
+        break;
 }
 ?>
 
@@ -147,10 +195,13 @@ if (isset($_SESSION['form_data'])) {
     }
 
     .section-title {
-        background-color: #e9ecef;
+        background-color: <?php echo $configs['bg_color'];
+        ?>;
         padding: 10px;
         margin-top: 20px;
         font-weight: bold;
+        border-left: 4px solid <?php echo $configs['border_color'];
+        ?>;
     }
 
     /* Compactar tabelas para economia de espaço */
@@ -202,7 +253,10 @@ if (isset($_SESSION['form_data'])) {
 
         .section-title {
             -webkit-print-color-adjust: exact;
-            background-color: #e9ecef !important;
+            background-color: <?php echo $configs['bg_color'];
+            ?> !important;
+            border-left-color: <?php echo $configs['border_color'];
+            ?> !important;
         }
     }
     </style>
@@ -233,7 +287,7 @@ if (isset($_SESSION['form_data'])) {
                 <p>Departamento Municipal de Trânsito – DEMUTRAN</p>
             </div>
         </div>
-        <h3 class="text-center mt-3">REQUERIMENTO PARA APRESENTAÇÃO DE DEFESA PRÉVIA</h3>
+        <h3 class="text-center mt-3"><?php echo $configs['titulo']; ?></h3>
 
 
 
@@ -261,10 +315,7 @@ if (isset($_SESSION['form_data'])) {
             </p>
 
             <!-- Saudação -->
-            <p>
-                Ilustríssimo Senhor Gerente Executivo do Departamento Municipal de Trânsito – DEMUTRAN de Pau dos
-                Ferros/RN
-            </p>
+            <p><?php echo $configs['destinatario']; ?></p>
 
             <!-- Dados do Requerente -->
             <!-- Dados do Requerente -->
@@ -327,7 +378,7 @@ if (isset($_SESSION['form_data'])) {
             <!-- Dos Fatos -->
             <div class="section-title">DOS FATOS</div>
             <p>
-                Vem interpor Defesa Prévia, solicitando:
+                <?php echo $configs['texto_acao']; ?>, solicitando:
             </p>
             <p>
                 <?php echo nl2br($defesa); ?>

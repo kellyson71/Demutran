@@ -123,12 +123,17 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             <h2 class="text-2xl font-bold text-gray-800 mb-4">
                 SOLICITAÇÃO DE PARECER AO DEPARTAMENTO MUNICIPAL DE TRÂNSITO – DEMUTRAN/PAU DOS FERROS
             </h2>
-            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
-                <p><strong>ATENÇÃO:</strong></p>
-                <ul class="list-disc ml-6">
-                    <li>A solicitação deverá ser feita no mínimo 08 dias antes do evento</li>
-                    <li>O parecer será entregue presencialmente</li>
-                </ul>
+            <div class="flex p-4 mb-4 text-green-800 rounded-lg bg-green-50" role="alert">
+                <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+                </svg>
+                <div>
+                    <span class="font-medium">Informações importantes:</span>
+                    <ul class="mt-1.5 list-disc list-inside">
+                        <li>A solicitação deverá ser feita no mínimo 08 dias antes do evento</li>
+                        <li>O parecer será entregue presencialmente</li>
+                    </ul>
+                </div>
             </div>
             <p class="text-gray-600 mb-6">
                 <strong>Preencha todos os dados para podermos dar continuidade à sua solicitação.</strong>
@@ -271,6 +276,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
         enableTime: true,
         dateFormat: "d/m/Y H:i",
         time_24hr: true,
+        minDate: new Date().fp_incr(8), // Adiciona 8 dias à data atual
         locale: {
             firstDayOfWeek: 1,
             weekdays: {

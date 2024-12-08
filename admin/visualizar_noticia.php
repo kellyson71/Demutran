@@ -1,6 +1,7 @@
 <?php
 session_start();
 include '../env/config.php';
+include './includes/template.php';
 
 // Verifica se o usuário está logado
 if (!isset($_SESSION['usuario_id'])) {
@@ -66,92 +67,121 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 </head>
 
 <body class="bg-gray-100">
-    <!-- ... existing header and sidebar code ... -->
-
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col overflow-hidden">
-        <!-- Topbar -->
-        <!-- ... existing topbar code ... -->
-
-        <!-- Main -->
-        <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
-            <!-- Breadcrumb -->
-            <nav class="mb-8 flex items-center space-x-2 text-sm text-gray-500">
-                <a href="gerenciar_noticias.php" class="hover:text-blue-600">Notícias</a>
-                <span class="material-icons text-xs">chevron_right</span>
-                <span class="text-gray-900">Visualizar</span>
-            </nav>
-
-            <!-- Notícia Content -->
-            <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm overflow-hidden">
-                <!-- Imagem da Notícia -->
-                <?php if (!empty($noticia['imagem_url'])): ?>
-                <div class="relative h-[400px] w-full">
-                    <img src="<?php echo htmlspecialchars($noticia['imagem_url']); ?>"
-                        alt="<?php echo htmlspecialchars($noticia['titulo']); ?>" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-md flex-shrink-0 hidden md:flex flex-col">
+            <div class="p-6 flex flex-col h-full">
+                <h1 class="text-2xl font-bold text-blue-600 mb-6">Painel Admin</h1>
+                <?php echo getSidebarHtml('gerenciar_noticias'); ?>
+                <div class="mt-6">
+                    <a href="logout.php" class="flex items-center p-2 text-red-600 hover:bg-red-50 rounded">
+                        <span class="material-icons">logout</span>
+                        <span class="ml-3">Sair</span>
+                    </a>
                 </div>
-                <?php endif; ?>
+            </div>
+        </aside>
 
-                <!-- Conteúdo -->
-                <div class="p-8">
-                    <!-- Meta Info -->
-                    <div class="flex items-center gap-4 mb-6 text-sm">
-                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">
-                            Publicada
-                        </span>
-                        <span class="text-gray-500 flex items-center gap-1">
-                            <span class="material-icons text-sm">calendar_today</span>
-                            <?php echo formatarData($noticia['data_publicacao']); ?>
-                        </span>
+        <!-- Mobile Sidebar -->
+        <div x-show="open" @click.away="open = false" x-cloak
+            class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden">
+            <aside class="w-64 bg-white h-full shadow-md">
+                <div class="p-6">
+                    <h1 class="text-2xl font-bold text-blue-600 mb-6">Painel Admin</h1>
+                    <?php echo getSidebarHtml('gerenciar_noticias'); ?>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <?php 
+            $topbarHtml = getTopbarHtml('Visualizar Notícia', $notificacoesNaoLidas);
+            $avatarHtml = getAvatarHtml($_SESSION['usuario_nome'], $_SESSION['usuario_avatar'] ?? '');
+            echo str_replace('[AVATAR_PLACEHOLDER]', $avatarHtml, $topbarHtml);
+            ?>
+
+            <!-- Main -->
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+                <!-- Breadcrumb -->
+                <nav class="mb-8 flex items-center space-x-2 text-sm text-gray-500">
+                    <a href="gerenciar_noticias.php" class="hover:text-blue-600">Notícias</a>
+                    <span class="material-icons text-xs">chevron_right</span>
+                    <span class="text-gray-900">Visualizar</span>
+                </nav>
+
+                <!-- Notícia Content -->
+                <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm overflow-hidden">
+                    <!-- Imagem da Notícia -->
+                    <?php if (!empty($noticia['imagem_url'])): ?>
+                    <div class="relative h-[400px] w-full">
+                        <img src="<?php echo htmlspecialchars($noticia['imagem_url']); ?>"
+                            alt="<?php echo htmlspecialchars($noticia['titulo']); ?>"
+                            class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     </div>
+                    <?php endif; ?>
 
-                    <!-- Título -->
-                    <h1 class="text-3xl font-bold text-gray-900 mb-4">
-                        <?php echo htmlspecialchars($noticia['titulo']); ?>
-                    </h1>
+                    <!-- Conteúdo -->
+                    <div class="p-8">
+                        <!-- Meta Info -->
+                        <div class="flex items-center gap-4 mb-6 text-sm">
+                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">
+                                Publicada
+                            </span>
+                            <span class="text-gray-500 flex items-center gap-1">
+                                <span class="material-icons text-sm">calendar_today</span>
+                                <?php echo formatarData($noticia['data_publicacao']); ?>
+                            </span>
+                        </div>
 
-                    <!-- Resumo -->
-                    <p class="text-lg text-gray-600 mb-8 font-medium">
-                        <?php echo htmlspecialchars($noticia['resumo']); ?>
-                    </p>
+                        <!-- Título -->
+                        <h1 class="text-3xl font-bold text-gray-900 mb-4">
+                            <?php echo htmlspecialchars($noticia['titulo']); ?>
+                        </h1>
 
-                    <!-- Conteúdo Principal -->
-                    <div class="prose max-w-none">
-                        <?php echo nl2br(htmlspecialchars($noticia['conteudo'])); ?>
-                    </div>
+                        <!-- Resumo -->
+                        <p class="text-lg text-gray-600 mb-8 font-medium">
+                            <?php echo htmlspecialchars($noticia['resumo']); ?>
+                        </p>
 
-                    <!-- Ações -->
-                    <div class="mt-12 flex items-center justify-between pt-8 border-t">
-                        <a href="gerenciar_noticias.php"
-                            class="inline-flex items-center text-gray-600 hover:text-gray-900">
-                            <span class="material-icons mr-2">arrow_back</span>
-                            Voltar para lista
-                        </a>
+                        <!-- Conteúdo Principal -->
+                        <div class="prose max-w-none">
+                            <?php echo nl2br(htmlspecialchars($noticia['conteudo'])); ?>
+                        </div>
 
-                        <div class="flex items-center gap-4">
-                            <a href="editar_noticia.php?id=<?php echo $noticia['id']; ?>"
-                                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                <span class="material-icons mr-2">edit</span>
-                                Editar
+                        <!-- Ações -->
+                        <div class="mt-12 flex items-center justify-between pt-8 border-t">
+                            <a href="gerenciar_noticias.php"
+                                class="inline-flex items-center text-gray-600 hover:text-gray-900">
+                                <span class="material-icons mr-2">arrow_back</span>
+                                Voltar para lista
                             </a>
-                            <button onclick="confirmarExclusao(<?php echo $noticia['id']; ?>)"
-                                class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                                <span class="material-icons mr-2">delete</span>
-                                Excluir
-                            </button>
+
+                            <div class="flex items-center gap-4">
+                                <a href="editar_noticia.php?id=<?php echo $noticia['id']; ?>"
+                                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    <span class="material-icons mr-2">edit</span>
+                                    Editar
+                                </a>
+                                <button onclick="confirmarExclusao(<?php echo $noticia['id']; ?>)"
+                                    class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                    <span class="material-icons mr-2">delete</span>
+                                    Excluir
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
+            </main>
 
-        <!-- Footer -->
-        <footer class="bg-white shadow-md py-4 px-6">
-            <p class="text-gray-600 text-center">
-                &copy; <?php echo date('Y'); ?> Departamento de Trânsito. Todos os direitos reservados.
-            </p>
-        </footer>
+            <!-- Footer -->
+            <footer class="bg-white shadow-md py-4 px-6">
+                <p class="text-gray-600 text-center">
+                    &copy; <?php echo date('Y'); ?> Departamento de Trânsito. Todos os direitos reservados.
+                </p>
+            </footer>
+        </div>
     </div>
 
     <!-- Modal de Confirmação de Exclusão -->
