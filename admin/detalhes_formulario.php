@@ -17,12 +17,7 @@ function obterUltimosFormulariosSAC($conn) {
     return $conn->query($sql);
 }
 
-function contarNotificacoesNaoLidas($conn) {
-    $sql = "SELECT COUNT(*) AS total FROM notificacoes WHERE lida = 0";
-    $result = $conn->query($sql);
-    $row = $result->fetch_assoc();
-    return $row['total'];
-}
+
 
 $sacFormularios = obterUltimosFormulariosSAC($conn);
 $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);

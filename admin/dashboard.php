@@ -8,13 +8,6 @@ if (!isset($_SESSION['usuario_id'])) {
     exit();
 }
 
-function contarNotificacoesNaoLidas($conn) {
-    $sql = "SELECT COUNT(*) AS total FROM sac WHERE assunto = 0";
-    $result = $conn->query($sql);
-    $row = $result->fetch_assoc();
-    return $row['total'];
-}
-
 $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 
 function obterUltimosFormularios($conn, $tabela) {
@@ -200,6 +193,10 @@ function renderFormCard($form) {
                             <span class="material-icons">article</span>
                             <span class="ml-3">Gerenciar Notícias</span>
                         </a>
+                        <a href="analytics.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
+                            <span class="material-icons">analytics</span>
+                            <span class="ml-3">Análise de Dados</span>
+                        </a>
                         <a href="logout.php" class="flex items-center p-2 text-red-600 hover:bg-red-50 rounded">
                             <span class="material-icons">logout</span>
                             <span class="ml-3">Sair</span>
@@ -273,7 +270,7 @@ function renderFormCard($form) {
                     <div class="bg-white rounded-xl p-6 transform transition-all hover:scale-105 hover:shadow-lg">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Cartões PCD</p>
+                                <p class="text-sm font-medium text-gray-500">Cart��es PCD</p>
                                 <p class="text-2xl font-bold text-gray-800 mt-1">
                                     <?php echo $pcdFormularios->num_rows; ?></p>
                                 <p class="text-xs text-purple-500 mt-2">
@@ -323,6 +320,8 @@ function renderFormCard($form) {
                         </div>
                     </div>
                 </div>
+
+
 
                 <!-- Recent Activity Section with Tabs -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -479,6 +478,20 @@ function renderFormCard($form) {
                         </div>
                     </div>
                 </div>
+                                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Service Distribution Chart -->
+                    <div class="bg-white rounded-xl p-6">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4">Distribuição de Serviços</h2>
+                        <canvas id="servicesChart"></canvas>
+                    </div>
+
+                    <!-- Monthly Submissions Chart -->
+                    <div class="bg-white rounded-xl p-6">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4">Solicitações Mensais</h2>
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                </div>
             </main>
 
             <!-- Footer -->
@@ -488,6 +501,159 @@ function renderFormCard($form) {
             </footer>
         </div>
     </div>
+
+    <!-- Add Chart.js before closing body tag -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Obter dados para os gráficos
+        const servicesData = {
+            labels: ['SAC', 'JARI', 'PCD', 'DAT', 'Parecer'],
+            datasets: [{
+                data: [
+                    <?php echo $sacFormularios->num_rows; ?>,
+                    <?php echo $jariFormularios->num_rows; ?>,
+                    <?php echo $pcdFormularios->num_rows; ?>,
+                    <?php echo $dat4Formularios->num_rows; ?>,
+                    <?php echo $parecerFormularios->num_rows; ?>
+                ],
+                backgroundColor: [
+                    '#3B82F6', // Azul para SAC
+                    '#F59E0B', // Amarelo para JARI
+                    '#8B5CF6', // Roxo para PCD
+                    '#EF4444', // Vermelho para DAT
+                    '#10B981'  // Verde para Parecer
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        // Configuração do gráfico de pizza
+        const servicesChart = new Chart(
+            document.getElementById('servicesChart'),
+            {
+                type: 'doughnut',
+                data: servicesData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Solicitações por Tipo'
+                        }
+                    }
+                }
+            }
+        );
+
+        // Dados para o gráfico mensal
+        <?php
+        $monthlyStats = $conn->query("
+            SELECT 
+                DATE_FORMAT(data_submissao, '%Y-%m') as month,
+                COUNT(*) as total,
+                SUM(CASE WHEN tipo = 'sac' THEN 1 ELSE 0 END) as sac,
+                SUM(CASE WHEN tipo = 'jari' THEN 1 ELSE 0 END) as jari,
+                SUM(CASE WHEN tipo = 'pcd' THEN 1 ELSE 0 END) as pcd,
+                SUM(CASE WHEN tipo = 'dat' THEN 1 ELSE 0 END) as dat,
+                SUM(CASE WHEN tipo = 'parecer' THEN 1 ELSE 0 END) as parecer
+            FROM (
+                SELECT data_submissao, 'sac' as tipo FROM sac
+                UNION ALL
+                SELECT data_submissao, 'jari' as tipo FROM solicitacoes_demutran
+                UNION ALL
+                SELECT data_submissao, 'pcd' as tipo FROM solicitacao_cartao
+                UNION ALL
+                SELECT data_submissao, 'dat' as tipo FROM DAT4
+                UNION ALL
+                SELECT data_submissao, 'parecer' as tipo FROM Parecer
+            ) AS combined
+            WHERE data_submissao >= DATE_SUB(CURRENT_DATE, INTERVAL 6 MONTH)
+            GROUP BY DATE_FORMAT(data_submissao, '%Y-%m')
+            ORDER BY month ASC
+        ");
+
+        $labels = [];
+        $sacData = [];
+        $jariData = [];
+        $pcdData = [];
+        $datData = [];
+        $parecerData = [];
+
+        while ($row = $monthlyStats->fetch_assoc()) {
+            $labels[] = date('M/Y', strtotime($row['month']));
+            $sacData[] = $row['sac'];
+            $jariData[] = $row['jari'];
+            $pcdData[] = $row['pcd'];
+            $datData[] = $row['dat'];
+            $parecerData[] = $row['parecer'];
+        }
+        ?>
+
+        // Configuração do gráfico de linha
+        const monthlyChart = new Chart(
+            document.getElementById('monthlyChart'),
+            {
+                type: 'line',
+                data: {
+                    labels: <?php echo json_encode($labels); ?>,
+                    datasets: [{
+                            label: 'SAC',
+                            data: <?php echo json_encode($sacData); ?>,
+                            borderColor: '#3B82F6',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'JARI',
+                            data: <?php echo json_encode($jariData); ?>,
+                            borderColor: '#F59E0B',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'PCD',
+                            data: <?php echo json_encode($pcdData); ?>,
+                            borderColor: '#8B5CF6',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'DAT',
+                            data: <?php echo json_encode($datData); ?>,
+                            borderColor: '#EF4444',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Parecer',
+                            data: <?php echo json_encode($parecerData); ?>,
+                            borderColor: '#10B981',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Solicitações nos Últimos 6 Meses'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            }
+        );
+    </script>
 </body>
 
 </html>

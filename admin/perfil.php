@@ -18,12 +18,7 @@ function obterInformacoesUsuario($conn, $usuario_id) {
     return $stmt->get_result()->fetch_assoc();
 }
 
-function contarNotificacoesNaoLidas($conn) {
-    $sql = "SELECT COUNT(*) AS total FROM notificacoes WHERE lida = 0";
-    $result = $conn->query($sql);
-    $row = $result->fetch_assoc();
-    return $row['total'];
-}
+
 
 function obterUltimosFormulariosSAC($conn) {
     $sql = "SELECT * FROM sac ORDER BY id DESC LIMIT 2";

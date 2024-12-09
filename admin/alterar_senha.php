@@ -55,12 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-function contarNotificacoesNaoLidas($conn) {
-    $sql = "SELECT COUNT(*) AS total FROM notificacoes WHERE lida = 0";
-    $result = $conn->query($sql);
-    $row = $result->fetch_assoc();
-    return $row['total'];
-}
+
 
 $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 ?>
