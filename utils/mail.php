@@ -18,12 +18,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     function sendMail($email, $nome, $assunto, $mensagem) {
         try {
+            error_log("Iniciando envio de email para: " . $email);
+            
             $mail = new PHPMailer;
             $mail->isSMTP();
             $mail->Host = 'smtp.hostinger.com';
             $mail->SMTPAuth = true;
             $mail->SMTPSecure = "ssl";
-            $mail->CharSet = 'ISO-8859-1'; // Mudar para ISO-8859-1 para compatibilidade com acentos
+            $mail->CharSet = 'UTF-8';
+            $mail->Encoding = 'base64';
+            
+            // Adicionar imagem embutida
+            $mail->AddEmbeddedImage('./assets/icon.png', 'logo_demutran');
             
             $mail->Username = 'test@potocolo.estagiopaudosferros.com';
             $mail->setFrom('test@potocolo.estagiopaudosferros.com', 'Prefeitura de Pau dos Ferros');
@@ -32,14 +38,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             $mail->addAddress($email, $nome);
             
-            $mail->Subject = $assunto;
-            $mail->Body    = $mensagem;
+            $mail->Subject = '=?UTF-8?B?'.base64_encode($assunto).'?=';
+            $mail->isHTML(true);
+            $mail->Body = mb_convert_encoding($mensagem, 'UTF-8', 'UTF-8');
             
             if (!$mail->send()) {
+                error_log("Erro ao enviar email: " . $mail->ErrorInfo);
                 echo json_encode(['error' => true, 'message' => 'Erro ao enviar email: ' . $mail->ErrorInfo]);
+            } else {
+                error_log("Email enviado com sucesso para: " . $email);
             }
-            // Não retornar nada em caso de sucesso para não interferir com a mensagem principal
         } catch (Exception $e) {
+            error_log("Exceção ao enviar email: " . $e->getMessage());
             echo json_encode(['error' => true, 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
             exit;
         }

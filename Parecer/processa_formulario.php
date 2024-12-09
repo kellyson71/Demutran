@@ -92,14 +92,58 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             throw new Exception("Erro ao atualizar arquivos: " . $stmt->error);
         }
 
-        // Enviar email de confirmação
-        $to = $_POST['email'];
-        $subject = "Solicitação de Parecer - Protocolo: $protocolo";
-        $message = "Sua solicitação foi recebida com sucesso!\n";
-        $message .= "Protocolo: $protocolo\n";
-        // ... resto do email ...
+        if ($stmt->execute()) {
+            // Configurar os dados para envio de email
+            $_POST = array(
+                'email' => $_POST['email'],
+                'nome' => $_POST['nome_solicitante'],
+                'assunto' => "Solicitação de Parecer DEMUTRAN - Protocolo #{$protocolo}",
+                'mensagem' => "
+                <html>
+                <body style='font-family: Arial, sans-serif;'>
+                    <div style='background-color: #f5f5f5; padding: 20px;'>
+                        <h2 style='color: #2c5282;'>Solicitação de Parecer Recebida</h2>
+                        <p>Prezado(a) {$_POST['nome_solicitante']},</p>
+                        <p>Sua solicitação de parecer foi recebida com sucesso!</p>
+                        <p><strong>Número de Protocolo:</strong> #{$protocolo}</p>
+                        <hr style='border: 1px solid #e2e8f0;'>
+                        <p><strong>Detalhes da Solicitação:</strong></p>
+                        <ul style='margin-left: 20px;'>
+                            <li>Local: {$_POST['local']}</li>
+                            <li>Evento: {$_POST['evento']}</li>
+                            <li>Data/Horário: {$_POST['data_horario']}</li>
+                        </ul>
+                        <p><strong>Próximos Passos:</strong></p>
+                        <ol style='margin-left: 20px;'>
+                            <li>Sua solicitação será analisada pela equipe técnica do DEMUTRAN</li>
+                            <li>O prazo para emissão do parecer é de até 8 dias úteis</li>
+                            <li>Você receberá um e-mail quando o parecer estiver pronto para retirada</li>
+                            <li>O documento deverá ser retirado presencialmente na sede do DEMUTRAN</li>
+                            <li>Lembre-se de apresentar um documento de identificação no momento da retirada</li>
+                        </ol>
+                        <p><strong>IMPORTANTE:</strong></p>
+                        <ul style='margin-left: 20px; color: #e53e3e;'>
+                            <li>Este é um e-mail automático, não responda</li>
+                            <li>O parecer NÃO é enviado por e-mail, apenas presencialmente</li>
+                            <li>Guarde seu número de protocolo para consultas futuras</li>
+                        </ul>
+                        <div style='background-color: #ffffff; padding: 15px; border-radius: 5px; margin-top: 20px;'>
+                            <p><strong>Canais de Atendimento DEMUTRAN:</strong></p>
+                            <p>📞 Telefone: (84) 3351-2868</p>
+                            <p>📧 E-mail: demutran@paudosferros.rn.gov.br</p>
+                            <p>📍 Endereço: Av. Getúlio Vargas, 1323, Centro, Pau dos Ferros-RN</p>
+                            <p>⏰ Horário de Atendimento: Segunda a Sexta, das 07h às 13h</p>
+                        </div>
+                    </div>
+                </body>
+                </html>"
+            );
 
-        // mail($to, $subject, $message); // Descomente quando configurar o email
+            // Incluir e executar o envio de email
+            require_once '../utils/mail.php';
+
+            // ...existing code...
+        }
 
         $_SESSION['success_message'] = "Solicitação enviada com sucesso! Seu protocolo é: $protocolo";
         

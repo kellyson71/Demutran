@@ -28,8 +28,81 @@
     }
     </style>
 </head>
-
 <body class="min-h-screen bg-gray-100">
+    <!-- Toast de Progresso -->
+    <div id="toast-progress" class="fixed top-24 right-4 z-50 hidden flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
+        <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg">
+            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+            </svg>
+        </div>
+        <div class="ms-3 text-sm font-normal" id="toast-message"></div>
+        <button type="button" class="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8" onclick="closeToast()">
+            <span class="sr-only">Close</span>
+            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+            </svg>
+        </button>
+    </div>
+
+    <?php
+    include 'scr/config.php';
+    
+    // Verifica se há um token na URL
+    $token = isset($_GET['token']) ? $_GET['token'] : null;
+    
+    if ($token) {
+        // Debug log
+        echo "<script>console.log('Token found: " . $token . "');</script>";
+        
+        // Verifica cada tabela pela ordem
+        $tables = ['DAT1', 'DAT2', 'vehicles'];
+        $step = 1;
+        
+        foreach ($tables as $index => $table) {
+            $sql = "SELECT token FROM $table WHERE token = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("s", $token);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            echo "<script>console.log('Checking table: " . $table . "');</script>";
+            
+            if ($result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                echo "<script>console.log('Found token in " . $table . ": " . $row['token'] . "');</script>";
+                
+                // Remove a verificação de 'RL' e atualiza step baseado na tabela
+                switch($table) {
+                    case 'DAT1':
+                        $step = 4;
+                        echo "<script>console.log('Setting step to 4');</script>";
+                        break;
+                    case 'DAT2':
+                        $step = 5;
+                        echo "<script>console.log('Setting step to 5');</script>";
+                        break;
+                    case 'vehicles':
+                        $step = 6;
+                        echo "<script>console.log('Setting step to 6');</script>";
+                        break;
+                }
+            }
+        }
+        
+        echo "<script>console.log('Final step value: " . $step . "');</script>";
+        
+        if ($step > 1) {
+            echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    console.log('Executing nextStep with value: " . $step . "');
+                    nextStep($step);
+                    showToast($step);
+                });
+            </script>";
+        }
+    }
+    ?>
     <!-- Topbar -->
     <header class="bg-green-600 text-white shadow-md w-full fixed top-0 left-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -244,40 +317,93 @@
             });
 
             // Enviar o e-mail e gerar o token
-            document.getElementById('submitEmailBtn').addEventListener('click', function() {
+            document.getElementById('submitEmailBtn').addEventListener('click', async function() {
+                const submitBtn = document.getElementById('submitEmailBtn');
                 const email = document.getElementById('userEmail').value;
+                const nome = "Usuário";
 
-                // Verificar se o e-mail está preenchido corretamente
                 if (!email || !email.includes('@gmail.com')) {
                     alert('Por favor, insira um Gmail válido.');
                     return;
                 }
 
-                // Fechar o modal de e-mail
-                var emailModal = bootstrap.Modal.getInstance(document.getElementById('emailModal'));
-                emailModal.hide();
+                // Desabilitar botão e mudar texto
+                submitBtn.disabled = true; 
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Enviando...';
 
-                // Gerar token e salvar no servidor com o Gmail
-                fetch('generate_token.php', {
+                try {
+                    // Gerar token
+                    const tokenResponse = await fetch('generate_token.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            gmail: email
+                            gmail: email,
+                            nome: nome
                         })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Exibir token no modal
-                            document.getElementById('tokenDisplay').innerText = data.token;
-                            var tokenModal = new bootstrap.Modal(document.getElementById('tokenModal'));
-                            tokenModal.show();
-                        } else {
-                            alert('Erro ao gerar token');
-                        }
                     });
+                    
+                    const data = await tokenResponse.json();
+                    
+                    if (data.success) {
+                        // Enviar email
+                        await fetch('../utils/mail.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: new URLSearchParams({
+                                'email': email,
+                                'nome': nome,
+                                'assunto': 'Seu Token de Acesso DEMUTRAN',
+                                'mensagem': `
+                                    <html>
+                                    <body style='font-family: Arial, sans-serif;'>
+                                        <div style='background-color: #f5f5f5; padding: 20px;'>
+                                            <h2 style='color: #2c5282;'>Token de Acesso Gerado</h2>
+                                            <p>Prezado(a) usuário(a),</p>
+                                            <p>Seu token de acesso foi gerado com sucesso para continuar o preenchimento do Sistema de Declaração de Acidente de Trânsito - DAT!</p>
+                                            <p style='word-break: break-all;'><strong>Seu Email:</strong> ${email}</p>
+                                            <p><strong>Token:</strong> ${data.token}</p>
+                                            <div style='margin: 20px 0; text-align: center;'>
+                                                <a href='http://localhost/demutran/DAT/index.php?token=${data.token}' 
+                                                   style='background-color: #48bb78; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                                                    Continuar Preenchimento
+                                                </a>
+                                            </div>
+                                            <hr style='border: 1px solid #e2e8f0;'>
+                                            <p><strong>IMPORTANTE:</strong></p>
+                                            <ul style='margin-left: 20px; color: #e53e3e;'>
+                                                <li>Guarde este token com segurança</li>
+                                                <li>Este token é exclusivo para seu preenchimento</li>
+                                                <li>Este é um e-mail automático, não responda</li>
+                                                <li>O token é válido por 48 horas</li>
+                                                <li>Clique no botão acima ou use o token para continuar seu preenchimento</li>
+                                            </ul>
+                                        </div>
+                                    </body>
+                                    </html>`
+                            })
+                        });
+
+                        // Fechar modal de email e mostrar token
+                        var emailModal = bootstrap.Modal.getInstance(document.getElementById('emailModal'));
+                        emailModal.hide();
+                        document.getElementById('tokenDisplay').innerText = data.token;
+                        var tokenModal = new bootstrap.Modal(document.getElementById('tokenModal'));
+                        tokenModal.show();
+                    } else {
+                        throw new Error('Erro ao gerar token');
+                    }
+                } catch (error) {
+                    alert('Erro ao processar sua solicitação');
+                    console.error('Erro:', error);
+                } finally {
+                    // Restaurar botão ao estado original
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Enviar e Continuar';
+                }
             });
 
             // Redirecionar para o formulário com o token
@@ -495,7 +621,9 @@
                     nextButton.disabled = true;
                 }
             }
-            </script>
+            </script> 
+
+
 
             <div id="step-3" class="step hidden">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">
@@ -2132,17 +2260,31 @@
 
     <!-- Modal -->
     <div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center hidden">
-        <div
-            class="bg-white rounded-lg p-8 max-w-sm mx-auto text-center shadow-lg transform transition-all duration-300 ease-out scale-105">
-            <h2 id="modal-title" class="text-3xl font-semibold mb-4 text-gray-800">Sucesso!</h2>
-            <p id="modal-message" class="text-gray-600 mb-6">Uma cópia do seu documento será enviada por e-mail.</p>
-            <button onclick="closeModal()"
-                class="bg-green-600 text-white font-medium px-6 py-2 rounded-lg shadow-md hover:bg-green-700 transition duration-200">
-                OK
+        <div class="bg-white rounded-lg p-8 max-w-md mx-auto text-center shadow-lg transform transition-all duration-300 ease-out scale-105">
+            <svg class="w-16 h-16 mx-auto text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h2 id="modal-title" class="text-3xl font-semibold mb-4 text-gray-800">Declaração Enviada!</h2>
+            <div id="modal-message" class="text-gray-600 mb-6">
+                <p class="mb-2">Sua Declaração de Acidente de Trânsito (DAT) foi registrada com sucesso!</p>
+                <p class="mb-2">Em instantes você receberá um e-mail de confirmação com os detalhes da sua declaração.</p>
+                <p class="mb-2">Lembre-se de verificar também sua caixa de spam.</p>
+                <div class="bg-blue-50 p-4 rounded-lg mt-4">
+                    <p class="text-blue-800 text-sm">
+                        <strong>Próximos passos:</strong>
+                        <ul class="list-disc text-left pl-5 mt-2">
+                            <li>Sua declaração será analisada pela equipe técnica</li>
+                            <li>Você receberá atualizações por e-mail</li>
+                            <li>Guarde seu token para consultas futuras</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+            <button onclick="closeModal()" class="bg-green-600 text-white font-medium px-6 py-3 rounded-lg shadow-md hover:bg-green-700 transition duration-200 w-full">
+                Entendi
             </button>
         </div>
     </div>
-
 
     <script>
     const agreeCheckbox = document.getElementById("agree");
@@ -2176,6 +2318,23 @@
         }
     }
 
+    // Função para mostrar o toast
+    function showToast(step) {
+        const toast = document.getElementById('toast-progress');
+        const message = document.getElementById('toast-message');
+        message.textContent = `Progresso restaurado para a etapa ${step}`;
+        toast.classList.remove('hidden');
+        
+        // Esconder o toast após 3 segundos
+        setTimeout(() => {
+            closeToast();
+        }, 3000);
+    }
+
+    function closeToast() {
+        const toast = document.getElementById('toast-progress');
+        toast.classList.add('hidden');
+    }
 
     // function submitForm() {
     // Função para inicializar o listener do formulário
@@ -2204,11 +2363,9 @@
                 const meioAmbienteCheckbox = document.getElementById('meio-ambiente-checkbox').checked;
                 const meioAmbienteText = document.getElementById('meio-ambiente-text').value;
 
-                const informacoesComplementaresCheckbox = document.getElementById(
-                    'informacoes-complementares-checkbox').checked;
-                const informacoesComplementaresText = document.getElementById('informacoes-complementares-text')
-                    .value;
-                console.log('Formulário encontrado');
+                const informacoesComplementaresCheckbox = document.getElementById('informacoes-complementares-checkbox').checked;
+                const informacoesComplementaresText = document.getElementById('informacoes-complementares-text').value;
+
                 const token = getTokenFromURL();
                 const formData = new FormData();
                 formData.append('patrimonio_checkbox', patrimonioCheckbox);
@@ -2217,24 +2374,33 @@
                 formData.append('meio_ambiente_text', meioAmbienteText);
                 formData.append('informacoes_complementares_checkbox', informacoesComplementaresCheckbox);
                 formData.append('informacoes_complementares_text', informacoesComplementaresText);
-                formData.append('informacoes_complementares_text', informacoesComplementaresText);
                 formData.append('token', token);
 
+                // Primeiro, envia os dados do formulário
                 fetch('Process_form/DAT4.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(result => {
+                    // Após salvar os dados, envia o e-mail de confirmação
+                    return fetch('Process_form/send_confirmation_email.php', {
                         method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.text())
-                    .then(result => {
-                        console.log('Formulário enviado com sucesso:', result);
-                        showModal()
-                    })
-                    .catch(error => {
-                        console.error('Erro ao enviar o formulário:', error);
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `token=${token}`
                     });
-
+                })
+                .then(response => response.text())
+                .then(emailResult => {
+                    console.log('E-mail enviado:', emailResult);
+                    showModal();
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                });
             });
-
         } else {
             console.error('Formulário não encontrado');
         }
@@ -2257,6 +2423,7 @@
         modal.classList.add("hidden");
         window.location.href = 'index.php';
     }
+    
     </script>
 </body>
 

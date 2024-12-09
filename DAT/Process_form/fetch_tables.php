@@ -144,49 +144,106 @@ function displayBinaryValue($value) {
     return $value == 1 ? 'Sim' : ($value == 0 ? 'Não' : $value);
 }
 
-// Verifica se há resultados
 if (!empty($results)) {
-    // Percorre cada tabela para exibir seus dados
+    echo "<div class='max-w-6xl mx-auto p-6 space-y-8'>"; // Aumentado para max-w-6xl
+    
     foreach ($results as $table => $rows) {
-        echo "<h3 class='text-xl font-semibold mb-4'>Formulario: $table</h3>";
-
-        // Adiciona a classe overflow-x-auto para rolagem horizontal
-        echo "<div class='overflow-x-auto'>";
-        echo "<table class='min-w-full bg-white border border-gray-300'><thead>";
-        echo "<tr class='bg-gray-100 border-b'>";
-
-        // Exibe os cabeçalhos das colunas (omitindo 'token' e 'id')
+        echo "<div class='bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100'>";
+        // Novo cabeçalho mais suave
+        echo "<div class='bg-gray-50 border-b border-gray-200 p-4 flex items-center space-x-3'>";
+        echo "<svg class='w-5 h-5 text-gray-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' />
+              </svg>";
+        echo "<span class='text-lg text-gray-700 font-medium'>Formulário {$table}</span>";
+        echo "</div>";
+        
+        echo "<div class='max-h-[700px] overflow-y-auto'>";  // Aumentada altura máxima
+        echo "<table class='w-full table-fixed'><tbody>";
+        
         foreach (array_keys($rows[0]) as $column) {
             if ($column !== 'token' && $column !== 'id') {
-                $columnName = $columnNames[$table][$column] ?? $column; // Usa o nome amigável ou o original
-                echo "<th class='text-left p-4 border-b-2 border-gray-300'>$columnName</th>";
-            }
-        }
-        echo "</tr></thead><tbody>";
-
-        // Exibe os dados de cada linha
-        foreach ($rows as $row) {
-            echo "<tr class='border-b'>";
-            foreach ($row as $key => $cell) {
-                // Ignora as colunas 'token' e 'id'
-                if ($key === 'token' || $key === 'id') {
-                    continue;
-                }
-                // Tratamento especial para a coluna damaged_parts
-                if ($table === 'vehicles' && $key === 'damaged_parts') {
-                    echo "<td class='p-4 border-t border-gray-300'>" . displayDamagedParts($cell) . "</td>";
+                $columnName = $columnNames[$table][$column] ?? $column;
+                $value = $rows[0][$column];
+                
+                echo "<tr class='border-b border-gray-100 transition-colors hover:bg-blue-50'>";
+                echo "<td class='py-4 px-6 font-medium text-gray-700 w-2/5 bg-gray-50'>";
+                echo "<div class='flex items-center space-x-2'>";
+                echo "<span class='text-blue-600'>•</span>";
+                echo "<span>{$columnName}</span>";
+                echo "</div>";
+                echo "</td>";
+                
+                echo "<td class='py-4 px-6 text-gray-600'>";
+                if ($table === 'vehicles' && $column === 'damaged_parts') {
+                    echo displayDamagedParts($value);
                 } else {
-                    // Exibe "Sim" ou "Não" para colunas binárias
-                    echo "<td class='p-4 border-t border-gray-300'>" . displayBinaryValue($cell) . "</td>";
+                    $displayValue = displayBinaryValue($value);
+                    // Adiciona classes especiais para Sim/Não
+                    if ($displayValue === 'Sim') {
+                        echo "<span class='px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium'>Sim</span>";
+                    } else if ($displayValue === 'Não') {
+                        echo "<span class='px-3 py-1 rounded-full bg-red-100 text-red-700 text-sm font-medium'>Não</span>";
+                    } else {
+                        echo "<span class='text-gray-700'>{$displayValue}</span>";
+                    }
                 }
+                echo "</td>";
+                echo "</tr>";
             }
-            echo "</tr>";
         }
-
-        echo "</tbody></table></div>";
+        
+        echo "</tbody></table>";
+        echo "</div></div>";
     }
+    echo "</div>";
+
+    echo "<style>
+        .max-h-[700px]::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .max-h-[700px]::-webkit-scrollbar-track {
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .max-h-[700px]::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+            border: 2px solid #f8fafc;
+        }
+        
+        .max-h-[700px]::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Animação suave no hover */
+        .transition-colors {
+            transition: all 0.2s ease;
+        }
+        
+        /* Para Firefox */
+        .max-h-[700px] {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f8fafc;
+        }
+        
+        /* Sombra suave nos cards */
+        .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>";
 } else {
-    echo "Nenhum resultado encontrado.";
+    echo "<div class='max-w-6xl mx-auto p-6'>
+            <div class='bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md'>
+                <div class='flex items-center'>
+                    <svg class='h-6 w-6 text-red-500 mr-3' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                        <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                    </svg>
+                    <p class='font-medium'>Nenhum resultado encontrado.</p>
+                </div>
+            </div>
+          </div>";
 }
 
 $conn->close();

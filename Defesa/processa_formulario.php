@@ -327,8 +327,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_POST = array(
                 'email' => $gmail,
                 'nome' => $nome,
-                'assunto' => mb_convert_encoding("Confirmação de Abertura de Defesa Prévia", 'ISO-8859-1', 'UTF-8'),
-                'mensagem' => mb_convert_encoding("Prezado(a) {$nome},\n\nSua defesa prévia foi recebida com sucesso.\nNúmero da Solicitação: {$id_solicitacao}\n\nAtenciosamente,\nEquipe DEMUTRAN", 'ISO-8859-1', 'UTF-8')
+                'assunto' => "Confirmação de Defesa/JARI - Protocolo #{$id_solicitacao}",
+                'mensagem' => "
+                <html>
+                <body style='font-family: Arial, sans-serif;'>
+                // ...resto do HTML...
+                </body>
+                </html>"
             );
 
             // Incluir e executar o envio de email
@@ -343,6 +348,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 'success' => true,
                 'message' => 'Dados inseridos com sucesso! Um email de confirmação foi enviado.'
             ], JSON_UNESCAPED_UNICODE);
+            
+            // Dentro do if ($update_stmt->execute())
+            $to = $gmail;
+            $subject = "Confirmação de Defesa/JARI - Protocolo #{$id_solicitacao}";
+            $message = "
+            <html>
+            <body style='font-family: Arial, sans-serif;'>
+                <div style='background-color: #f5f5f5; padding: 20px;'>
+                    <h2 style='color: #2c5282;'>Solicitação de {$tipo_solicitacao} Recebida</h2>
+                    <p>Prezado(a) {$nome},</p>
+                    <p>Sua solicitação foi recebida com sucesso!</p>
+                    <p><strong>Número da Solicitação:</strong> #{$id_solicitacao}</p>
+                    <hr style='border: 1px solid #e2e8f0;'>
+                    <p><strong>Próximos Passos:</strong></p>
+                    <ol style='margin-left: 20px;'>
+                        <li>Sua defesa será analisada pela JARI (Junta Administrativa de Recursos de Infrações)</li>
+                        <li>O prazo médio de análise é de 30 dias úteis</li>
+                        <li>O resultado será enviado para este e-mail</li>
+                        <li>Você poderá acompanhar o processo através do protocolo informado acima</li>
+                    </ol>
+                    <p><strong>IMPORTANTE:</strong> Este é um e-mail automático, não responda.</p>
+                    <div style='background-color: #ffffff; padding: 15px; border-radius: 5px; margin-top: 20px;'>
+                        <p><strong>Canais de Atendimento DEMUTRAN:</strong></p>
+                        <p>📞 Telefone: (84) 3351-2868</p>
+                        <p>📧 E-mail: demutran@paudosferros.rn.gov.br</p>
+                        <p>📍 Endereço: Av. Getúlio Vargas, 1323, Centro, Pau dos Ferros-RN</p>
+                    </div>
+                </div>
+            </body>
+            </html>";
+
+            $headers = "MIME-Version: 1.0\r\n";
+            $headers .= "Content-type: text/html; charset=utf-8\r\n";
+            $headers .= "From: DEMUTRAN <demutran@paudosferros.rn.gov.br>\r\n";
+
+            mail($to, $subject, $message, $headers);
         } else {
             echo json_encode([
                 'error' => true,

@@ -107,8 +107,55 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     );
 
     if ($stmt->execute()) {
-        // Obter o ID inserido
         $id_solicitacao = $conn->insert_id;
+
+        // Salvar os valores originais do POST
+        $original_post = $_POST;
+
+        // Configurar os dados para envio de email
+        $_POST = array(
+            'email' => $email, // Usando o email do formulário
+            'nome' => $nome,
+            'assunto' => "Solicitação de Cartão Vaga Especial - Protocolo #{$id_solicitacao}",
+            'mensagem' => "
+            <html>
+            <body style='font-family: Arial, sans-serif;'>
+                <div style='background-color: #f5f5f5; padding: 20px;'>
+                    <h2 style='color: #2c5282;'>Solicitação Recebida</h2>
+                    <p>Prezado(a) {$nome},</p>
+                    <p>Sua solicitação de Cartão Vaga Especial foi recebida com sucesso!</p>
+                    <p><strong>Número de Protocolo:</strong> #{$id_solicitacao}</p>
+                    <hr style='border: 1px solid #e2e8f0;'>
+                    <p><strong>Próximos Passos:</strong></p>
+                    <ol style='margin-left: 20px;'>
+                        <li>Sua solicitação será analisada pela nossa equipe</li>
+                        <li>Você receberá as atualizações sobre sua solicitação neste e-mail</li>
+                        <li>O prazo para análise é de até 15 dias úteis</li>
+                        <li>Se aprovada, você receberá instruções para retirada do cartão</li>
+                        <li>Se houver pendências, você será notificado para regularização</li>
+                    </ol>
+                    <p><strong>IMPORTANTE:</strong> Este é um e-mail automático, não responda.</p>
+                    <div style='background-color: #ffffff; padding: 15px; border-radius: 5px; margin-top: 20px;'>
+                        <p><strong>Canais de Atendimento DEMUTRAN:</strong></p>
+                        <p>📞 Telefone: (84) 3351-2868</p>
+                        <p>📧 E-mail: demutran@paudosferros.rn.gov.br</p>
+                        <p>📍 Endereço: Av. Getúlio Vargas, 1323, Centro, Pau dos Ferros-RN</p>
+                    </div>
+                </div>
+            </body>
+            </html>"
+        );
+
+        // Incluir e executar o envio de email
+        try {
+            require_once '../utils/mail.php';
+            error_log("Enviando email para: " . $email);
+        } catch (Exception $e) {
+            error_log("Erro ao enviar email: " . $e->getMessage());
+        }
+
+        // Restaurar os valores originais do POST
+        $_POST = $original_post;
 
         // Diretório base para upload
         $upload_dir = 'midia/';

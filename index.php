@@ -276,7 +276,7 @@ $conn->close();
                                 <div class="flex items-center space-x-3 mb-6">
                                     <span
                                         class="px-4 py-2 rounded-full bg-green-50 border border-green-100 text-green-700 text-sm font-medium">
-                                        Sistema Nacional de Trânsito
+                                        Sistema Municipal de Trânsito
                                     </span>
                                     <span
                                         class="px-4 py-2 rounded-full bg-gray-50 border border-gray-100 text-gray-700 text-sm font-medium">
@@ -333,14 +333,17 @@ $conn->close();
 
                             <!-- Informação Adicional -->
                             <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <p class="text-sm text-gray-600 leading-relaxed">
-                                    Responsável pela gestão do trânsito municipal e pela Junta Administrativa de
-                                    Recursos de
-                                    Infração (JARI),
-                                    atuando em conformidade com as diretrizes do Sistema Nacional de Trânsito para
-                                    garantir
-                                    um trânsito mais seguro e organizado.
-                                </p>
+                                <div class="flex items-center space-x-4">
+                                    <img src="./assets/icon.png" alt="Logo DEMUTRAN" class="h-12 w-12">
+                                    <p class="text-sm text-gray-600 leading-relaxed">
+                                        Responsável pela gestão do trânsito municipal e pela Junta Administrativa de
+                                        Recursos de
+                                        Infração (JARI),
+                                        atuando em conformidade com as diretrizes do Sistema Nacional de Trânsito para
+                                        garantir
+                                        um trânsito mais seguro e organizado.
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
@@ -505,7 +508,7 @@ $conn->close();
 
             <!-- Linha inferior - 2 cards largos -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <a href="./DAT/index.php" class="h-full">
+                <a href="./escolher-dat.html" class="h-full">
                     <div
                         class="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 h-full flex flex-col items-center justify-center text-center">
                         <i class="fas fa-car-crash text-green-600 text-5xl mb-4"></i>
