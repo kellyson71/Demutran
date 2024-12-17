@@ -25,21 +25,20 @@ function obterSubmissoesPaginadas($conn, $tabela, $limite, $offset) {
     return $conn->query($sql);
 }
 
-function getFormularioStyle($tipo_formulario) {
-    $styles = [
-        'DAT' => ['bg' => 'bg-blue-100', 'border' => 'border-blue-500', 'text' => 'text-blue-800', 'icon' => 'directions_car', 'gradient' => 'from-blue-500 to-blue-600'],
-        'JARI' => ['bg' => 'bg-red-100', 'border' => 'border-red-500', 'text' => 'text-red-800', 'icon' => 'gavel', 'gradient' => 'from-red-500 to-red-600'],
-        'PCD' => ['bg' => 'bg-green-100', 'border' => 'border-green-500', 'text' => 'text-green-800', 'icon' => 'accessible', 'gradient' => 'from-green-500 to-green-600'],
-        'SAC' => ['bg' => 'bg-purple-100', 'border' => 'border-purple-500', 'text' => 'text-purple-800', 'icon' => 'email', 'gradient' => 'from-purple-500 to-purple-600'],
-        'Parecer' => ['bg' => 'bg-yellow-100', 'border' => 'border-yellow-500', 'text' => 'text-yellow-800', 'icon' => 'description', 'gradient' => 'from-yellow-500 to-yellow-600'],
-    ];
-
-    return $styles[$tipo_formulario] ?? ['bg' => 'bg-gray-100', 'border' => 'border-gray-500', 'text' => 'text-gray-800', 'icon' => 'help', 'gradient' => 'from-gray-500 to-gray-600'];
-}
-
 // Add this helper function near the top with other functions
 function safeString($value) {
     return htmlspecialchars($value ?? 'Não informado', ENT_QUOTES, 'UTF-8');
+}
+
+// Adicionar função auxiliar para obter o título correto
+function getTipoJariLabel($subtipo) {
+    $labels = [
+        'apresentacao_condutor' => ['titulo' => 'Apresentação de Condutor', 'subtitulo' => 'Indicação do condutor infrator'],
+        'defesa_previa' => ['titulo' => 'Defesa Prévia', 'subtitulo' => 'Contestação de infração'],
+        'jari' => ['titulo' => 'Recurso JARI', 'subtitulo' => 'Junta Administrativa de Recursos de Infrações']
+    ];
+
+    return $labels[$subtipo] ?? ['titulo' => 'JARI', 'subtitulo' => 'Tipo não especificado'];
 }
 
 // Variáveis de paginação
@@ -65,7 +64,8 @@ while ($row = $jari->fetch_assoc()) {
     $submissoes[] = $row;
 }
 while ($row = $pcd->fetch_assoc()) {
-    $row['tipo'] = 'PCD';
+    // Define o tipo baseado no tipo_solicitacao
+    $row['tipo'] = strtoupper($row['tipo_solicitacao']); // Converte 'pcd' ou 'idoso' para maiúsculas
     $submissoes[] = $row;
 }
 // Processamento das submissões de 'DAT'
@@ -104,38 +104,91 @@ $submissoes = [];
 // Definir um limite maior para buscar mais registros para a filtragem
 $fetch_limit = 100;
 
-// Obter submissões com base na pesquisa e filtros
+// Adicionar lógica para processar grupos no PHP (antes do foreach dos tipos)
+$tipo_filter = isset($_GET['tipo']) ? $_GET['tipo'] : '';
+
+// Expandir filtros de grupo para seus tipos correspondentes
+if ($tipo_filter == 'SAC_GRUPO') {
+    $tipos_selecionados = ['SAC'];
+} elseif ($tipo_filter == 'JARI_GRUPO') {
+    $tipos_selecionados = ['JARI'];
+} elseif ($tipo_filter == 'CREDENCIAIS_GRUPO') {
+    $tipos_selecionados = ['PCD', 'IDOSO'];
+} elseif ($tipo_filter == 'OUTROS_GRUPO') {
+    $tipos_selecionados = ['DAT', 'Parecer'];
+} else {
+    $tipos_selecionados = [$tipo_filter];
+}
+
+// Modificar a lógica de processamento das submissões
 foreach ($tipos as $tipo => $tabela) {
-    if (empty($tipo_filter) || $tipo_filter == $tipo) {
-        $result = obterSubmissoesPaginadas($conn, $tabela, $fetch_limit, 0);
-        while ($row = $result->fetch_assoc()) {
-            $row['tipo'] = $tipo;
+    $is_jari_subtipo = strpos($tipo_filter, 'JARI_') === 0;
+    $jari_subtipo = $is_jari_subtipo ? substr($tipo_filter, 5) : null;
+    
+    // Verificar se deve processar este tipo
+    $should_process = empty($tipo_filter) || // Sem filtro
+                     in_array($tipo, $tipos_selecionados) || // Tipo específico ou grupo
+                     ($tipo == 'JARI' && $is_jari_subtipo); // Subtipo JARI
 
-            // Para 'DAT', buscar 'nome' na tabela 'DAT1'
-            if ($tipo == 'DAT') {
-                $token = $conn->real_escape_string($row['token']);
-                $sql_nome = "SELECT nome FROM DAT1 WHERE token = '$token' LIMIT 1";
-                $result_nome = $conn->query($sql_nome);
-                if ($result_nome->num_rows > 0) {
-                    $row_nome = $result_nome->fetch_assoc();
-                    $row['nome'] = $row_nome['nome'];
-                } else {
-                    $row['nome'] = 'Nome não encontrado';
+    if ($should_process) {
+        if ($tabela === 'solicitacao_cartao') {
+            // Tratamento para PCD e IDOSO
+            $sql = "SELECT *, UPPER(tipo_solicitacao) as tipo FROM $tabela ORDER BY id DESC LIMIT $fetch_limit";
+            $result = $conn->query($sql);
+            while ($row = $result->fetch_assoc()) {
+                // Garantir que o tipo seja maiúsculo e corresponda exatamente a 'PCD' ou 'IDOSO'
+                $row['tipo'] = strtoupper($row['tipo_solicitacao']);
+                if (empty($tipo_filter) || 
+                    in_array($row['tipo'], $tipos_selecionados) || 
+                    $tipo_filter == 'CREDENCIAIS_GRUPO') {
+                    $submissoes[] = $row;
                 }
             }
-
-            // No special processing needed for 'Parecer'
-
-            // Aplicar filtro de pesquisa
-            if (!empty($search)) {
-                if (isset($row['nome']) && stripos($row['nome'], $search) === false) {
-                    continue; // Ignorar se não corresponder à pesquisa
-                }
+        } elseif ($tabela === 'solicitacoes_demutran') {
+            // Tratamento para JARI
+            $sql = "SELECT *, tipo_solicitacao as subtipo FROM $tabela";
+            // Adiciona WHERE apenas se for um subtipo específico de JARI
+            if ($is_jari_subtipo && $tipo_filter !== 'JARI_GRUPO') {
+                $sql .= " WHERE tipo_solicitacao = '" . $conn->real_escape_string($jari_subtipo) . "'";
             }
+            $sql .= " ORDER BY id DESC LIMIT $fetch_limit";
+            
+            $result = $conn->query($sql);
+            while ($row = $result->fetch_assoc()) {
+                $row['tipo'] = 'JARI';
+                $row['subtipo_label'] = ucfirst(str_replace('_', ' ', $row['subtipo']));
+                $submissoes[] = $row;
+            }
+        } else {
+            // Processamento para outras tabelas
+            $result = obterSubmissoesPaginadas($conn, $tabela, $fetch_limit, 0);
+            while ($row = $result->fetch_assoc()) {
+                $row['tipo'] = $tipo;
+                
+                // Para 'DAT', buscar 'nome' na tabela 'DAT1'
+                if ($tipo == 'DAT') {
+                    $token = $conn->real_escape_string($row['token']);
+                    $sql_nome = "SELECT nome FROM DAT1 WHERE token = '$token' LIMIT 1";
+                    $result_nome = $conn->query($sql_nome);
+                    if ($result_nome->num_rows > 0) {
+                        $row_nome = $result_nome->fetch_assoc();
+                        $row['nome'] = $row_nome['nome'];
+                    } else {
+                        $row['nome'] = 'Nome não encontrado';
+                    }
+                }
 
-            $submissoes[] = $row;
+                $submissoes[] = $row;
+            }
         }
     }
+}
+
+// Aplicar filtro de pesquisa após coletar todas as submissões
+if (!empty($search)) {
+    $submissoes = array_filter($submissoes, function($row) use ($search) {
+        return isset($row['nome']) && stripos($row['nome'], $search) !== false;
+    });
 }
 
 // Ordenar submissões por data
@@ -227,7 +280,7 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                 <div class="p-6">
                     <h1 class="text-2xl font-bold text-blue-600 mb-6">Painel Admin</h1>
                     <nav class="space-y-2">
-                        <a href="dashboard.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
+                        <a href="index.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
                             <span class="material-icons">dashboard</span>
                             <span class="ml-3">Dashboard</span>
                         </a>
@@ -291,21 +344,34 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                                     <select name="tipo"
                                         class="block w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-lg appearance-none bg-white shadow-sm text-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer transition-all duration-200">
                                         <option value="">Todos os tipos</option>
-                                        <option value="SAC"
-                                            <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'SAC') ? 'selected' : ''; ?>>
-                                            SAC</option>
-                                        <option value="JARI"
-                                            <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'JARI') ? 'selected' : ''; ?>>
-                                            JARI</option>
-                                        <option value="PCD"
-                                            <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'PCD') ? 'selected' : ''; ?>>
-                                            PCD</option>
-                                        <option value="DAT"
-                                            <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'DAT') ? 'selected' : ''; ?>>
-                                            DAT</option>
-                                        <option value="Parecer"
-                                            <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'Parecer') ? 'selected' : ''; ?>>
-                                            Parecer</option>
+                                        
+                                        <!-- Grupo SAC -->
+                                        <optgroup label="SAC">
+                                            <option value="SAC_GRUPO" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'SAC_GRUPO') ? 'selected' : ''; ?>>Todos SAC</option>
+                                            <option value="SAC" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'SAC') ? 'selected' : ''; ?>>&nbsp;&nbsp;&nbsp;&nbsp;SAC Individual</option>
+                                        </optgroup>
+                                        
+                                        <!-- Grupo Recursos e Defesas -->
+                                        <optgroup label="Recursos e Defesas">
+                                            <option value="JARI_GRUPO" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'JARI_GRUPO') ? 'selected' : ''; ?>>Todos os Recursos</option>
+                                            <option value="JARI_apresentacao_condutor" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'JARI_apresentacao_condutor') ? 'selected' : ''; ?>>&nbsp;&nbsp;&nbsp;&nbsp;Apresentação de Condutor</option>
+                                            <option value="JARI_defesa_previa" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'JARI_defesa_previa') ? 'selected' : ''; ?>>&nbsp;&nbsp;&nbsp;&nbsp;Defesa Prévia</option>
+                                            <option value="JARI_jari" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'JARI_jari') ? 'selected' : ''; ?>>&nbsp;&nbsp;&nbsp;&nbsp;Recurso JARI</option>
+                                        </optgroup>
+                                        
+                                        <!-- Grupo Credenciais -->
+                                        <optgroup label="Credenciais">
+                                            <option value="CREDENCIAIS_GRUPO" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'CREDENCIAIS_GRUPO') ? 'selected' : ''; ?>>Todas as Credenciais</option>
+                                            <option value="PCD" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'PCD') ? 'selected' : ''; ?>>&nbsp;&nbsp;&nbsp;&nbsp;PCD</option>
+                                            <option value="IDOSO" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'IDOSO') ? 'selected' : ''; ?>>&nbsp;&nbsp;&nbsp;&nbsp;IDOSO</option>
+                                        </optgroup>
+                                        
+                                        <!-- Grupo Outros -->
+                                        <optgroup label="Outros">
+                                            <option value="OUTROS_GRUPO" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'OUTROS_GRUPO') ? 'selected' : ''; ?>>Todos os Outros</option>
+                                            <option value="DAT" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'DAT') ? 'selected' : ''; ?>>&nbsp;&nbsp;&nbsp;&nbsp;DAT</option>
+                                            <option value="Parecer" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'Parecer') ? 'selected' : ''; ?>>&nbsp;&nbsp;&nbsp;&nbsp;Parecer</option>
+                                        </optgroup>
                                     </select>
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                                         <span class="material-icons text-gray-400">expand_more</span>
@@ -373,112 +439,161 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                     'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4': viewMode === 'grid',
                     'space-y-3': viewMode === 'list'
                 }">
-                    <?php foreach ($submissoes_pagina as $item): ?>
-                    <?php $style = getFormularioStyle($item['tipo']); ?>
+                    <?php if (empty($submissoes_pagina)): ?>
+                        <div class="bg-white rounded-lg shadow-sm p-6 text-center flex flex-col items-center">
+                            <span class="material-icons text-gray-400 mb-4" style="font-size: 48px;">inbox</span>
+                            <p class="text-gray-600 text-lg">Nenhum formulário encontrado.</p>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($submissoes_pagina as $item): ?>
+                            <?php $style = getFormularioStyle($item['tipo'], $item['subtipo'] ?? null); ?>
 
-                    <div class="form-card bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
-                        x-bind:class="{
-                            'border-l-4 <?php echo $style['border']; ?>': viewMode === 'grid',
-                            'border border-gray-200 hover:border-<?php echo explode('-', $style['border'])[1]; ?>': viewMode === 'list'
-                        }">
-                        <!-- Grid View -->
-                        <template x-if="viewMode === 'grid'">
-                            <div class="p-5">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex items-center">
-                                        <span
-                                            class="material-icons <?php echo $style['text']; ?> mr-2"><?php echo $style['icon']; ?></span>
-                                        <h3 class="text-lg font-semibold text-gray-800"><?php echo $item['tipo']; ?>
-                                        </h3>
-                                    </div>
-                                    <span class="text-sm text-gray-500">#<?php echo $item['id']; ?></span>
-                                </div>
-
-                                <div class="space-y-2">
-                                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                                        <span class="text-sm text-gray-600">Nome</span>
-                                        <span
-                                            class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['nome']); ?></span>
-                                    </div>
-
-                                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                                        <span class="text-sm text-gray-600">Data</span>
-                                        <span
-                                            class="text-sm font-medium text-gray-800"><?php echo date('d/m/Y', strtotime($item['data_submissao'])); ?></span>
-                                    </div>
-
-                                    <?php if($item['tipo'] === 'Parecer'): ?>
-                                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                                        <span class="text-sm text-gray-600">Local</span>
-                                        <span
-                                            class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['local']); ?></span>
-                                    </div>
-                                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                                        <span class="text-sm text-gray-600">Protocolo</span>
-                                        <span
-                                            class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['protocolo']); ?></span>
-                                    </div>
-                                    <?php endif; ?>
-                                </div>
-
-                                <div class="mt-4 pt-2">
-                                    <a href="detalhes_formulario.php?id=<?php echo $item['id']; ?>&tipo=<?php echo $item['tipo']; ?>"
-                                        class="inline-flex items-center justify-center w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                                        <span class="material-icons text-sm mr-2">visibility</span>
-                                        Visualizar detalhes
-                                    </a>
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- List View -->
-                        <template x-if="viewMode === 'list'">
-                            <div class="flex items-center p-4">
-                                <div class="flex items-center justify-between w-full">
-                                    <!-- Left section: Icon and Basic Info -->
-                                    <div class="flex items-center space-x-4">
-                                        <div class="<?php echo $style['bg']; ?> p-2 rounded-lg">
-                                            <span
-                                                class="material-icons <?php echo $style['text']; ?>"><?php echo $style['icon']; ?></span>
-                                        </div>
-                                        <div>
-                                            <div class="flex items-center space-x-2">
-                                                <h3 class="font-semibold text-gray-800">
-                                                    <?php echo safeString($item['nome'] ?? ($item['solicitante'] ?? '')); ?>
-                                                </h3>
-                                                <span
-                                                    class="px-2 py-1 text-xs rounded-full <?php echo $style['bg']; ?> <?php echo $style['text']; ?>"><?php echo $item['tipo']; ?></span>
+                            <div class="form-card bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+                                x-bind:class="{\
+                                    'border-l-4 <?php echo $style['border']; ?>': viewMode === 'grid',
+                                    'border border-gray-200 hover:border-<?php echo explode('-', $style['border'])[1]; ?>': viewMode === 'list'
+                                }">
+                                <!-- Grid View -->
+                                <template x-if="viewMode === 'grid'">
+                                    <div class="p-5">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div class="flex items-center">
+                                                <span class="material-icons <?php echo $style['text']; ?> mr-2"><?php echo $style['icon']; ?></span>
+                                                <div>
+                                                    <h3 class="text-lg font-semibold text-gray-800">
+                                                        <?php if($item['tipo'] === 'JARI' && isset($item['subtipo'])): ?>
+                                                            <?php $labelInfo = getTipoJariLabel($item['subtipo']); ?>
+                                                            <?php echo $labelInfo['titulo']; ?>
+                                                            <div class="text-xs <?php echo $style['text']; ?>"><?php echo $labelInfo['subtitulo']; ?></div>
+                                                        <?php else: ?>
+                                                            <?php echo $item['tipo']; ?>
+                                                        <?php endif; ?>
+                                                    </h3>
+                                                </div>
                                             </div>
-                                            <p class="text-sm text-gray-500">
-                                                ID: #<?php echo $item['id']; ?> •
-                                                Submetido em:
-                                                <?php echo date('d/m/Y', strtotime($item['data_submissao'])); ?>
-                                            </p>
+                                            <span class="text-sm text-gray-500">#<?php echo $item['id']; ?></span>
+                                        </div>
+
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                                                <span class="text-sm text-gray-600">Nome</span>
+                                                <span
+                                                    class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['nome']); ?></span>
+                                            </div>
+
+                                            <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                                                <span class="text-sm text-gray-600">Data</span>
+                                                <span
+                                                    class="text-sm font-medium text-gray-800"><?php echo date('d/m/Y', strtotime($item['data_submissao'])); ?></span>
+                                            </div>
+
+                                            <?php if($item['tipo'] === 'PCD' || $item['tipo'] === 'IDOSO'): ?>
+                                            <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                                                <span class="text-sm text-gray-600">Nº do Cartão</span>
+                                                <span class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['n_cartao'] ?? 'Não atribuído'); ?></span>
+                                            </div>
+                                            <?php endif; ?>
+
+                                            <?php if($item['tipo'] === 'Parecer'): ?>
+                                            <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                                                <span class="text-sm text-gray-600">Local</span>
+                                                <span
+                                                    class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['local']); ?></span>
+                                            </div>
+                                            <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                                                <span class="text-sm text-gray-600">Protocolo</span>
+                                                <span
+                                                    class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['protocolo']); ?></span>
+                                            </div>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <div class="mt-4 pt-2">
+                                            <a href="detalhes_formulario.php?id=<?php echo $item['id']; ?>&tipo=<?php 
+                        // Mapeia os tipos para os tipos suportados pelo detalhes_formulario.php
+                        $tipoRedirect = $item['tipo'];
+                        if ($tipoRedirect === 'IDOSO') {
+                            $tipoRedirect = 'PCD'; // IDOSO é tratado como PCD no detalhes
+                        }
+                        echo $tipoRedirect; 
+                    ?>"
+                                                class="inline-flex items-center justify-center w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                                                <span class="material-icons text-sm mr-2">visibility</span>
+                                                Visualizar detalhes
+                                            </a>
                                         </div>
                                     </div>
+                                </template>
 
-                                    <!-- Right section: Status and Action -->
-                                    <div class="flex items-center space-x-4">
-                                        <?php if($item['tipo'] === 'Parecer'): ?>
-                                        <div class="hidden md:block text-right">
-                                            <p class="text-sm text-gray-600">Local:
-                                                <?php echo safeString($item['local']); ?></p>
-                                            <p class="text-sm text-gray-600">Protocolo:
-                                                <?php echo safeString($item['protocolo']); ?></p>
+                                <!-- List View -->
+                                <template x-if="viewMode === 'list'">
+                                    <div class="flex items-center p-4">
+                                        <div class="flex items-center justify-between w-full">
+                                            <!-- Left section: Icon and Basic Info -->
+                                            <div class="flex items-center space-x-4">
+                                                <div class="<?php echo $style['bg']; ?> p-2 rounded-lg">
+                                                    <span
+                                                        class="material-icons <?php echo $style['text']; ?>"><?php echo $style['icon']; ?></span>
+                                                </div>
+                                                <div>
+                                                    <div class="flex items-center space-x-2">
+                                                        <h3 class="font-semibold text-gray-800">
+                                                            <?php echo safeString($item['nome'] ?? ($item['solicitante'] ?? '')); ?>
+                                                        </h3>
+                                                        <span
+                                                            class="px-2 py-1 text-xs rounded-full <?php echo $style['bg']; ?> <?php echo $style['text']; ?>">
+                                                            <?php if($item['tipo'] === 'JARI' && isset($item['subtipo'])): ?>
+                                                                <?php $labelInfo = getTipoJariLabel($item['subtipo']); ?>
+                                                                <?php echo $labelInfo['titulo']; ?>
+                                                            <?php else: ?>
+                                                                <?php echo $item['tipo']; ?>
+                                                            <?php endif; ?>
+                                                        </span>
+                                                        <?php if($item['tipo'] === 'JARI' && isset($item['subtipo'])): ?>
+                                                        <span class="text-xs text-gray-500"><?php echo getTipoJariLabel($item['subtipo'])['subtitulo']; ?></span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <p class="text-sm text-gray-500">
+                                                        ID: #<?php echo $item['id']; ?> •
+                                                        Submetido em:
+                                                        <?php echo date('d/m/Y', strtotime($item['data_submissao'])); ?>
+                                                        <?php if($item['tipo'] === 'PCD' || $item['tipo'] === 'IDOSO'): ?>
+                                                        • Cartão: <?php echo htmlspecialchars($item['n_cartao'] ?? 'Não atribuído'); ?>
+                                                        <?php endif; ?>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Right section: Status and Action -->
+                                            <div class="flex items-center space-x-4">
+                                                <?php if($item['tipo'] === 'Parecer'): ?>
+                                                <div class="hidden md:block text-right">
+                                                    <p class="text-sm text-gray-600">Local:
+                                                        <?php echo safeString($item['local']); ?></p>
+                                                    <p class="text-sm text-gray-600">Protocolo:
+                                                        <?php echo safeString($item['protocolo']); ?></p>
+                                                </div>
+                                                <?php endif; ?>
+
+                                                <a href="detalhes_formulario.php?id=<?php echo $item['id']; ?>&tipo=<?php 
+                    // Mapeia os tipos para os tipos suportados pelo detalhes_formulario.php
+                    $tipoRedirect = $item['tipo'];
+                    if ($tipoRedirect === 'IDOSO') {
+                        $tipoRedirect = 'PCD'; // IDOSO é tratado como PCD no detalhes
+                    }
+                    echo $tipoRedirect; 
+                ?>"
+                                                    class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                                                    <span class="material-icons text-sm mr-2">visibility</span>
+                                                    Detalhes
+                                                </a>
+                                            </div>
                                         </div>
-                                        <?php endif; ?>
-
-                                        <a href="detalhes_formulario.php?id=<?php echo $item['id']; ?>&tipo=<?php echo $item['tipo']; ?>"
-                                            class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                                            <span class="material-icons text-sm mr-2">visibility</span>
-                                            Detalhes
-                                        </a>
                                     </div>
-                                </div>
+                                </template>
                             </div>
-                        </template>
-                    </div>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
 
 

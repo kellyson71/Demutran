@@ -3,7 +3,7 @@ session_start();
 include '../env/config.php';
 
 if (isset($_SESSION['usuario_id'])) {
-    header('Location: dashboard.php');
+    header('Location: index.php');
     exit();
 }
 

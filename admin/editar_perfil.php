@@ -83,7 +83,7 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
             <div class="p-6 flex flex-col h-full">
                 <h1 class="text-2xl font-bold text-blue-600 mb-6">Painel Admin</h1>
                 <nav class="space-y-2 flex-1">
-                    <a href="dashboard.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
+                    <a href="index.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
                         <span class="material-icons">dashboard</span>
                         <span class="ml-3">Dashboard</span>
                     </a>
@@ -116,7 +116,7 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                 <div class="p-6">
                     <h1 class="text-2xl font-bold text-blue-600 mb-6">Painel Admin</h1>
                     <nav class="space-y-2">
-                        <a href="dashboard.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
+                        <a href="index.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
                             <span class="material-icons">dashboard</span>
                             <span class="ml-3">Dashboard</span>
                         </a>

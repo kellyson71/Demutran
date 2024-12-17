@@ -48,6 +48,31 @@ $parecerTotalRegistros = $conn->query("SELECT COUNT(*) AS total FROM Parecer")->
 
 $parecerFormularios = obterUltimosFormularios($conn, 'Parecer');
 
+// Adicionar contagem separada para PCD e IDOSO
+$sql_cartoes = "SELECT 
+    SUM(CASE WHEN tipo_solicitacao = 'pcd' THEN 1 ELSE 0 END) as total_pcd,
+    SUM(CASE WHEN tipo_solicitacao = 'idoso' THEN 1 ELSE 0 END) as total_idoso
+FROM solicitacao_cartao";
+$result_cartoes = $conn->query($sql_cartoes);
+$cartoes = $result_cartoes->fetch_assoc();
+
+// Adicionar queries para SAC e JARI no início do arquivo após as outras queries
+$sql_sac = "SELECT 
+    SUM(CASE WHEN tipo_contato = 'solicitacao' THEN 1 ELSE 0 END) as total_solicitacao,
+    SUM(CASE WHEN tipo_contato = 'reclamacao' THEN 1 ELSE 0 END) as total_reclamacao,
+    SUM(CASE WHEN tipo_contato = 'denuncia' THEN 1 ELSE 0 END) as total_denuncia
+FROM sac";
+$result_sac = $conn->query($sql_sac);
+$sac_tipos = $result_sac->fetch_assoc();
+
+$sql_jari = "SELECT 
+    SUM(CASE WHEN tipo_solicitacao = 'apresentacao_condutor' THEN 1 ELSE 0 END) as total_apresentacao,
+    SUM(CASE WHEN tipo_solicitacao = 'defesa_previa' THEN 1 ELSE 0 END) as total_defesa,
+    SUM(CASE WHEN tipo_solicitacao = 'jari' THEN 1 ELSE 0 END) as total_jari
+FROM solicitacoes_demutran";
+$result_jari = $conn->query($sql_jari);
+$jari_tipos = $result_jari->fetch_assoc();
+
 function renderPagination($paginaAtual, $totalPaginas, $param) {
     $maxPaginasVisiveis = 8;
     $html = '';
@@ -110,6 +135,16 @@ function renderFormCard($form) {
 <?php
 }
 
+function renderEmptyState() {
+    ?>
+<div class="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg">
+    <span class="material-icons text-gray-400 text-5xl mb-4">inbox</span>
+    <p class="text-gray-500 text-center mb-2">Nenhuma solicitação encontrada</p>
+    <p class="text-sm text-gray-400 text-center">As solicitações aparecerão aqui quando forem enviadas.</p>
+</div>
+<?php
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR" x-data="{ open: false }" x-init="$refs.loading.classList.add('hidden')">
@@ -167,7 +202,7 @@ function renderFormCard($form) {
                 <div class="p-6">
                     <h1 class="text-2xl font-bold text-blue-600 mb-6">Painel Admin</h1>
                     <nav class="space-y-2">
-                        <a href="dashboard.php" class="flex items-center p-2 text-gray-700 bg-blue-50 rounded">
+                        <a href="index.php" class="flex items-center p-2 text-gray-700 bg-blue-50 rounded">
                             <span class="material-icons">dashboard</span>
                             <span class="ml-3 font-semibold">Dashboard</span>
                         </a>
@@ -232,54 +267,107 @@ function renderFormCard($form) {
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
                     <!-- SAC Card -->
                     <div class="bg-white rounded-xl p-6 transform transition-all hover:scale-105 hover:shadow-lg">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between mb-4">
                             <div>
                                 <p class="text-sm font-medium text-gray-500">SAC</p>
                                 <p class="text-2xl font-bold text-gray-800 mt-1">
-                                    <?php echo $sacFormularios->num_rows; ?></p>
-                                <p class="text-xs text-green-500 mt-2">
-                                    <span class="material-icons text-xs align-middle">trending_up</span>
-                                    Ativos
+                                    <?php echo ($sac_tipos['total_solicitacao'] + $sac_tipos['total_reclamacao'] + $sac_tipos['total_denuncia']); ?>
                                 </p>
                             </div>
                             <div class="bg-blue-100 rounded-full p-3">
                                 <span class="material-icons text-blue-500">support_agent</span>
                             </div>
                         </div>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="flex items-center">
+                                    <span class="material-icons text-green-500 text-sm mr-1">question_answer</span>
+                                    Solicitações
+                                </span>
+                                <span class="font-medium"><?php echo $sac_tipos['total_solicitacao']; ?></span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="flex items-center">
+                                    <span class="material-icons text-orange-500 text-sm mr-1">warning</span>
+                                    Reclamações
+                                </span>
+                                <span class="font-medium"><?php echo $sac_tipos['total_reclamacao']; ?></span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="flex items-center">
+                                    <span class="material-icons text-red-500 text-sm mr-1">report</span>
+                                    Denúncias
+                                </span>
+                                <span class="font-medium"><?php echo $sac_tipos['total_denuncia']; ?></span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- JARI Card -->
                     <div class="bg-white rounded-xl p-6 transform transition-all hover:scale-105 hover:shadow-lg">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between mb-4">
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Defesas JARI</p>
                                 <p class="text-2xl font-bold text-gray-800 mt-1">
-                                    <?php echo $jariFormularios->num_rows; ?></p>
-                                <p class="text-xs text-yellow-500 mt-2">
-                                    <span class="material-icons text-xs align-middle">pending</span>
-                                    Em Análise
+                                    <?php echo ($jari_tipos['total_apresentacao'] + $jari_tipos['total_defesa'] + $jari_tipos['total_jari']); ?>
                                 </p>
                             </div>
                             <div class="bg-yellow-100 rounded-full p-3">
                                 <span class="material-icons text-yellow-500">gavel</span>
                             </div>
                         </div>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="flex items-center">
+                                    <span class="material-icons text-indigo-500 text-sm mr-1">person_pin</span>
+                                    Apresentação
+                                </span>
+                                <span class="font-medium"><?php echo $jari_tipos['total_apresentacao']; ?></span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="flex items-center">
+                                    <span class="material-icons text-purple-500 text-sm mr-1">security</span>
+                                    Defesa Prévia
+                                </span>
+                                <span class="font-medium"><?php echo $jari_tipos['total_defesa']; ?></span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="flex items-center">
+                                    <span class="material-icons text-yellow-500 text-sm mr-1">balance</span>
+                                    Recurso JARI
+                                </span>
+                                <span class="font-medium"><?php echo $jari_tipos['total_jari']; ?></span>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- PCD Card -->
+                    <!-- PCD/IDOSO Card -->
                     <div class="bg-white rounded-xl p-6 transform transition-all hover:scale-105 hover:shadow-lg">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between mb-4">
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Cart��es PCD</p>
+                                <p class="text-sm font-medium text-gray-500">Cartões Especiais</p>
                                 <p class="text-2xl font-bold text-gray-800 mt-1">
-                                    <?php echo $pcdFormularios->num_rows; ?></p>
-                                <p class="text-xs text-purple-500 mt-2">
-                                    <span class="material-icons text-xs align-middle">card_membership</span>
-                                    Solicitações
+                                    <?php echo ($cartoes['total_pcd'] + $cartoes['total_idoso']); ?>
                                 </p>
                             </div>
                             <div class="bg-purple-100 rounded-full p-3">
-                                <span class="material-icons text-purple-500">accessible</span>
+                                <span class="material-icons text-purple-500">badge</span>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="flex items-center">
+                                    <span class="material-icons text-blue-500 text-sm mr-1">accessible</span>
+                                    PCD
+                                </span>
+                                <span class="font-medium"><?php echo $cartoes['total_pcd']; ?></span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="flex items-center">
+                                    <span class="material-icons text-green-500 text-sm mr-1">elderly</span>
+                                    IDOSO
+                                </span>
+                                <span class="font-medium"><?php echo $cartoes['total_idoso']; ?></span>
                             </div>
                         </div>
                     </div>
@@ -370,9 +458,13 @@ function renderFormCard($form) {
                                         (SELECT id, nome, data_submissao, 'parecer' as tipo FROM Parecer)
                                         ORDER BY data_submissao DESC LIMIT 5
                                     ");
-                                    while($form = $latestFormularios->fetch_assoc()):
-                                    renderFormCard($form);
-                                    endwhile;
+                                    if ($latestFormularios->num_rows > 0) {
+                                        while($form = $latestFormularios->fetch_assoc()):
+                                            renderFormCard($form);
+                                        endwhile;
+                                    } else {
+                                        renderEmptyState();
+                                    }
                                     ?>
                                 </div>
 
@@ -380,9 +472,13 @@ function renderFormCard($form) {
                                 <div x-show="activeTab === 'sac'" class="space-y-4">
                                     <?php 
                                     $sacFormularios = $conn->query("SELECT id, nome, data_submissao, 'sac' as tipo FROM sac ORDER BY data_submissao DESC LIMIT 5");
-                                    while($form = $sacFormularios->fetch_assoc()):
-                                    renderFormCard($form);
-                                    endwhile;
+                                    if ($sacFormularios->num_rows > 0) {
+                                        while($form = $sacFormularios->fetch_assoc()):
+                                            renderFormCard($form);
+                                        endwhile;
+                                    } else {
+                                        renderEmptyState();
+                                    }
                                     ?>
                                 </div>
 
@@ -390,9 +486,13 @@ function renderFormCard($form) {
                                 <div x-show="activeTab === 'jari'" class="space-y-4">
                                     <?php 
                                     $jariFormularios = $conn->query("SELECT id, nome, data_submissao, 'jari' as tipo FROM solicitacoes_demutran ORDER BY data_submissao DESC LIMIT 5");
-                                    while($form = $jariFormularios->fetch_assoc()):
-                                    renderFormCard($form);
-                                    endwhile;
+                                    if ($jariFormularios->num_rows > 0) {
+                                        while($form = $jariFormularios->fetch_assoc()):
+                                            renderFormCard($form);
+                                        endwhile;
+                                    } else {
+                                        renderEmptyState();
+                                    }
                                     ?>
                                 </div>
 
@@ -400,9 +500,13 @@ function renderFormCard($form) {
                                 <div x-show="activeTab === 'pcd'" class="space-y-4">
                                     <?php 
                                     $pcdFormularios = $conn->query("SELECT id, nome, data_submissao, 'pcd' as tipo FROM solicitacao_cartao ORDER BY data_submissao DESC LIMIT 5");
-                                    while($form = $pcdFormularios->fetch_assoc()):
-                                    renderFormCard($form);
-                                    endwhile;
+                                    if ($pcdFormularios->num_rows > 0) {
+                                        while($form = $pcdFormularios->fetch_assoc()):
+                                            renderFormCard($form);
+                                        endwhile;
+                                    } else {
+                                        renderEmptyState();
+                                    }
                                     ?>
                                 </div>
 
@@ -420,9 +524,13 @@ function renderFormCard($form) {
                                         ORDER BY d4.data_submissao DESC 
                                         LIMIT 5
                                     ");
-                                    while($form = $datFormularios->fetch_assoc()):
-                                    renderFormCard($form);
-                                    endwhile;
+                                    if ($datFormularios->num_rows > 0) {
+                                        while($form = $datFormularios->fetch_assoc()):
+                                            renderFormCard($form);
+                                        endwhile;
+                                    } else {
+                                        renderEmptyState();
+                                    }
                                     ?>
                                 </div>
 
@@ -430,9 +538,13 @@ function renderFormCard($form) {
                                 <div x-show="activeTab === 'parecer'" class="space-y-4">
                                     <?php 
                                     $parecerFormularios = $conn->query("SELECT id, nome, data_submissao, 'parecer' as tipo FROM Parecer ORDER BY data_submissao DESC LIMIT 5");
-                                    while($form = $parecerFormularios->fetch_assoc()):
-                                    renderFormCard($form);
-                                    endwhile;
+                                    if ($parecerFormularios->num_rows > 0) {
+                                        while($form = $parecerFormularios->fetch_assoc()):
+                                            renderFormCard($form);
+                                        endwhile;
+                                    } else {
+                                        renderEmptyState();
+                                    }
                                     ?>
                                 </div>
                             </div>
@@ -478,20 +590,6 @@ function renderFormCard($form) {
                         </div>
                     </div>
                 </div>
-                                <!-- Charts Section -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <!-- Service Distribution Chart -->
-                    <div class="bg-white rounded-xl p-6">
-                        <h2 class="text-lg font-bold text-gray-800 mb-4">Distribuição de Serviços</h2>
-                        <canvas id="servicesChart"></canvas>
-                    </div>
-
-                    <!-- Monthly Submissions Chart -->
-                    <div class="bg-white rounded-xl p-6">
-                        <h2 class="text-lg font-bold text-gray-800 mb-4">Solicitações Mensais</h2>
-                        <canvas id="monthlyChart"></canvas>
-                    </div>
-                </div>
             </main>
 
             <!-- Footer -->
@@ -502,158 +600,7 @@ function renderFormCard($form) {
         </div>
     </div>
 
-    <!-- Add Chart.js before closing body tag -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // Obter dados para os gráficos
-        const servicesData = {
-            labels: ['SAC', 'JARI', 'PCD', 'DAT', 'Parecer'],
-            datasets: [{
-                data: [
-                    <?php echo $sacFormularios->num_rows; ?>,
-                    <?php echo $jariFormularios->num_rows; ?>,
-                    <?php echo $pcdFormularios->num_rows; ?>,
-                    <?php echo $dat4Formularios->num_rows; ?>,
-                    <?php echo $parecerFormularios->num_rows; ?>
-                ],
-                backgroundColor: [
-                    '#3B82F6', // Azul para SAC
-                    '#F59E0B', // Amarelo para JARI
-                    '#8B5CF6', // Roxo para PCD
-                    '#EF4444', // Vermelho para DAT
-                    '#10B981'  // Verde para Parecer
-                ],
-                borderWidth: 1
-            }]
-        };
 
-        // Configuração do gráfico de pizza
-        const servicesChart = new Chart(
-            document.getElementById('servicesChart'),
-            {
-                type: 'doughnut',
-                data: servicesData,
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        },
-                        title: {
-                            display: true,
-                            text: 'Distribuição de Solicitações por Tipo'
-                        }
-                    }
-                }
-            }
-        );
-
-        // Dados para o gráfico mensal
-        <?php
-        $monthlyStats = $conn->query("
-            SELECT 
-                DATE_FORMAT(data_submissao, '%Y-%m') as month,
-                COUNT(*) as total,
-                SUM(CASE WHEN tipo = 'sac' THEN 1 ELSE 0 END) as sac,
-                SUM(CASE WHEN tipo = 'jari' THEN 1 ELSE 0 END) as jari,
-                SUM(CASE WHEN tipo = 'pcd' THEN 1 ELSE 0 END) as pcd,
-                SUM(CASE WHEN tipo = 'dat' THEN 1 ELSE 0 END) as dat,
-                SUM(CASE WHEN tipo = 'parecer' THEN 1 ELSE 0 END) as parecer
-            FROM (
-                SELECT data_submissao, 'sac' as tipo FROM sac
-                UNION ALL
-                SELECT data_submissao, 'jari' as tipo FROM solicitacoes_demutran
-                UNION ALL
-                SELECT data_submissao, 'pcd' as tipo FROM solicitacao_cartao
-                UNION ALL
-                SELECT data_submissao, 'dat' as tipo FROM DAT4
-                UNION ALL
-                SELECT data_submissao, 'parecer' as tipo FROM Parecer
-            ) AS combined
-            WHERE data_submissao >= DATE_SUB(CURRENT_DATE, INTERVAL 6 MONTH)
-            GROUP BY DATE_FORMAT(data_submissao, '%Y-%m')
-            ORDER BY month ASC
-        ");
-
-        $labels = [];
-        $sacData = [];
-        $jariData = [];
-        $pcdData = [];
-        $datData = [];
-        $parecerData = [];
-
-        while ($row = $monthlyStats->fetch_assoc()) {
-            $labels[] = date('M/Y', strtotime($row['month']));
-            $sacData[] = $row['sac'];
-            $jariData[] = $row['jari'];
-            $pcdData[] = $row['pcd'];
-            $datData[] = $row['dat'];
-            $parecerData[] = $row['parecer'];
-        }
-        ?>
-
-        // Configuração do gráfico de linha
-        const monthlyChart = new Chart(
-            document.getElementById('monthlyChart'),
-            {
-                type: 'line',
-                data: {
-                    labels: <?php echo json_encode($labels); ?>,
-                    datasets: [{
-                            label: 'SAC',
-                            data: <?php echo json_encode($sacData); ?>,
-                            borderColor: '#3B82F6',
-                            tension: 0.1
-                        },
-                        {
-                            label: 'JARI',
-                            data: <?php echo json_encode($jariData); ?>,
-                            borderColor: '#F59E0B',
-                            tension: 0.1
-                        },
-                        {
-                            label: 'PCD',
-                            data: <?php echo json_encode($pcdData); ?>,
-                            borderColor: '#8B5CF6',
-                            tension: 0.1
-                        },
-                        {
-                            label: 'DAT',
-                            data: <?php echo json_encode($datData); ?>,
-                            borderColor: '#EF4444',
-                            tension: 0.1
-                        },
-                        {
-                            label: 'Parecer',
-                            data: <?php echo json_encode($parecerData); ?>,
-                            borderColor: '#10B981',
-                            tension: 0.1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        },
-                        title: {
-                            display: true,
-                            text: 'Solicitações nos Últimos 6 Meses'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
-                            }
-                        }
-                    }
-                }
-            }
-        );
-    </script>
 </body>
 
 </html>

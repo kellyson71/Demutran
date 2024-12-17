@@ -65,32 +65,42 @@ function exibir_dados_formatados($dados) {
     $colunas_arquivo = ['arquivo_anexo', 'documento', 'comprovante', 'midia'];
 
     if (empty($dados)) {
-        echo "<div><strong>Dados não disponíveis.</strong></div>";
+        echo "<div class='bg-gray-50 p-4 rounded-lg text-gray-600 font-medium'>Dados não disponíveis.</div>";
         return;
     }
 
+    echo "<div class='border border-gray-200 rounded-lg divide-y divide-gray-200'>";
+    
     foreach ($dados as $coluna => $valor) {
         if (!in_array($coluna, $colunas_ocultas)) {
             $nome_coluna = isset($colunas_personalizadas[$coluna]) ? $colunas_personalizadas[$coluna] : ucfirst(str_replace('_', ' ', $coluna));
 
-            // Verifica se é uma coluna de arquivo ou contém URL
+            echo "<div class='px-4 py-3 bg-white hover:bg-gray-50 transition-colors'>";
+            
             if (in_array($coluna, $colunas_arquivo) || filter_var($valor, FILTER_VALIDATE_URL)) {
-                echo "<div class='flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg'>";
-                echo "<strong class='text-gray-700'>" . $nome_coluna . ":</strong>";
+                echo "<div class='flex items-center justify-between'>";
+                echo "<div class='text-gray-600 font-medium'>" . $nome_coluna . "</div>";
                 echo "<a href='" . htmlspecialchars($valor) . "' target='_blank' 
-                     class='flex items-center gap-2 text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors'>
+                     class='inline-flex items-center gap-2 text-blue-700 hover:text-blue-800 font-medium text-sm bg-blue-50 px-3 py-1 rounded border border-blue-100'>
                      <i class='bx bx-file'></i>
-                     <span>Visualizar arquivo</span>
+                     <span>Ver arquivo</span>
                      </a>";
                 echo "</div>";
             } else {
-                echo "<div class='p-2 hover:bg-gray-50 rounded-lg'>";
-                echo "<strong class='text-gray-700'>" . $nome_coluna . ":</strong> ";
-                echo "<span class='text-gray-600'>" . (!empty($valor) ? htmlspecialchars($valor) : 'Não informado') . "</span>";
+                echo "<div class='grid grid-cols-3 gap-4'>";
+                echo "<div class='text-gray-600 font-medium'>" . $nome_coluna . "</div>";
+                echo "<div class='col-span-2 text-gray-800'>" . 
+                     (!empty($valor) ? htmlspecialchars($valor) : 
+                     '<span class="text-gray-400 italic">Não informado</span>') . 
+                     "</div>";
                 echo "</div>";
             }
+            
+            echo "</div>";
         }
     }
+    
+    echo "</div>";
 }
 
 // Lógica específica para cada tipo de formulário
@@ -188,24 +198,6 @@ if ($tipo == 'DAT') {
         exit();
     }
 }
-
-// Marcar como lido após carregar os detalhes
-$tabela = match($tipo) {
-    'DAT' => 'DAT4',
-    'Parecer' => 'Parecer',
-    'SAC' => 'sac',
-    'PCD' => 'solicitacao_cartao',
-    'JARI' => 'solicitacoes_demutran',
-    default => null
-};
-
-if ($tabela) {
-    $sql = "UPDATE {$tabela} SET is_read = 1 WHERE id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', $id);
-    $stmt->execute();
-}
-
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR" x-data="{ open: false }">
@@ -620,263 +612,131 @@ function showErrorAlert(message) {
                 </div>
 
                 <?php if ($tipo == 'DAT'): ?>
-<!-- Seção DAT -->
-<div class="space-y-8">
-    <!-- Informações Gerais -->
-    <?php if ($dat1): ?>
-    <div class="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
-        <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
-            <h3 class="text-lg font-semibold text-gray-900">Informações do Solicitante</h3>
-        </div>
-        <div class="divide-y divide-gray-200">
-            <?php 
-            foreach ($dat1 as $campo => $valor) {
-                if (!in_array($campo, ['token', 'id'])) {
-                    $labelCampo = ucfirst(str_replace('_', ' ', $campo));
-                    echo '<div class="px-6 py-4 grid grid-cols-3">';
-                    echo '<div class="text-sm font-medium text-gray-600">' . $labelCampo . '</div>';
-                    echo '<div class="col-span-2 text-sm text-gray-900">' . 
-                         (!empty($valor) ? htmlspecialchars($valor) : 
-                         '<span class="text-gray-400">Não informado</span>') . '</div>';
-                    echo '</div>';
-                }
-            }
-            ?>
-        </div>
-    </div>
-    <?php endif; ?>
+                <!-- Seção DAT -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Informações Gerais -->
+                    <?php if ($dat1): ?>
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="border-b border-gray-200 px-6 py-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Informações Gerais</h3>
+                        </div>
+                        <div class="p-6">
+                            <?php exibir_dados_formatados($dat1); ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
 
-    <!-- Detalhes do Acidente -->
-    <?php if ($dat2): ?>
-    <div class="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
-        <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
-            <h3 class="text-lg font-semibold text-gray-900">Detalhes do Acidente</h3>
-        </div>
-        <div class="divide-y divide-gray-200">
-            <?php 
-            foreach ($dat2 as $campo => $valor) {
-                if (!in_array($campo, ['token', 'id'])) {
-                    $labelCampo = ucfirst(str_replace('_', ' ', $campo));
-                    echo '<div class="px-6 py-4 grid grid-cols-3">';
-                    echo '<div class="text-sm font-medium text-gray-600">' . $labelCampo . '</div>';
-                    echo '<div class="col-span-2 text-sm text-gray-900">' . 
-                         (!empty($valor) ? htmlspecialchars($valor) : 
-                         '<span class="text-gray-400">Não informado</span>') . '</div>';
-                    echo '</div>';
-                }
-            }
-            ?>
-        </div>
-    </div>
-    <?php endif; ?>
-
-    <!-- Veículos Envolvidos -->
-    <?php if ($dat3): ?>
-    <div class="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
-        <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
-            <h3 class="text-lg font-semibold text-gray-900">Veículos Envolvidos</h3>
-        </div>
-        <?php foreach ($dat3 as $index => $veiculo): ?>
-        <div class="border-b border-gray-200 last:border-b-0">
-            <div class="px-6 py-4">
-                <h4 class="text-base font-medium text-gray-900 mb-4">Veículo <?php echo $index + 1; ?></h4>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <?php 
-                    foreach ($veiculo as $campo => $valor) {
-                        if (!in_array($campo, ['token', 'id', 'damaged_parts'])) {  // Correção aqui
-                            $labelCampo = ucfirst(str_replace('_', ' ', $campo));
-                            echo '<div class="grid grid-cols-2">';
-                            echo '<div class="text-sm font-medium text-gray-600">' . $labelCampo . ':</div>';
-                            echo '<div class="text-sm text-gray-900">' . 
-                                 (!empty($valor) ? htmlspecialchars($valor) : 
-                                 '<span class="text-gray-400">Não informado</span>') . '</div>';
-                            echo '</div>';
-                        }
-                    }
-                    ?>
+                    <!-- Detalhes do Acidente -->
+                    <?php if ($dat2): ?>
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="border-b border-gray-200 px-6 py-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Detalhes do Acidente</h3>
+                        </div>
+                        <div class="p-6">
+                            <?php exibir_dados_formatados($dat2); ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
 
-                <?php if (!empty($veiculo['damaged_parts'])): ?>
-                <div class="mt-6 border-t border-gray-100 pt-4">
-                    <h5 class="text-sm font-medium text-gray-900 mb-3">Áreas Danificadas</h5>
-                    <div class="grid grid-cols-2 gap-3">
-                        <?php 
-                        $damaged_parts = json_decode($veiculo['damaged_parts'], true);
-                        foreach ($damaged_parts as $part):
-                            if ($part['checked']):
-                        ?>
-                        <div class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                            <span class="text-sm text-gray-600">
-                                <?php echo ucfirst(str_replace('_', ' ', $part['name'])); ?>
-                            </span>
+                <!-- Veículos Envolvidos -->
+                <?php if ($dat3): ?>
+                <div class="mt-8">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-4">
+                            <i class='bx bx-car text-green-600 text-2xl'></i>
                         </div>
-                        <?php 
-                            endif;
-                        endforeach; 
-                        ?>
+                        <h3 class="text-xl font-bold text-gray-800">Veículos Envolvidos</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <?php foreach ($dat3 as $index => $veiculo): ?>
+                        <div class="glass-effect rounded-2xl shadow-lg p-6 card-hover">
+                            <div class="flex items-center justify-between mb-6">
+                                <h4 class="text-lg font-bold text-gray-700 flex items-center">
+                                    <i class='bx bxs-car-crash text-gray-500 mr-2 text-xl'></i>
+                                    Veículo <?php echo $index + 1; ?>
+                                </h4>
+                                <span
+                                    class="px-3 py-1 rounded-full text-sm <?php echo $index % 2 ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'; ?>">
+                                    #<?php echo $index + 1; ?>
+                                </span>
+                            </div>
+                            <div class="space-y-3">
+                                <?php exibir_dados_formatados($veiculo); ?>
+
+                                <?php if (!empty($veiculo['damaged_parts'])): ?>
+                                <div class="mt-4 bg-gray-50 p-4 rounded-lg">
+                                    <h5 class="font-semibold text-gray-700 mb-2">Áreas Danificadas:</h5>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <?php 
+                                            $damaged_parts = json_decode($veiculo['damaged_parts'], true);
+                                            foreach ($damaged_parts as $part):
+                                                if ($part['checked']):
+                                            ?>
+                                        <div class="flex items-center">
+                                            <span class="material-icons text-red-500 text-sm mr-1">warning</span>
+                                            <span
+                                                class="text-sm"><?php echo ucfirst(str_replace('_', ' ', $part['name'])); ?></span>
+                                        </div>
+                                        <?php 
+                                                endif;
+                                            endforeach; 
+                                            ?>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
                 <?php endif; ?>
-            </div>
-        </div>
-        <?php endforeach; ?>
-    </div>
-    <?php endif; ?>
-</div>
 
-<?php else: ?>
-<!-- Outros tipos de formulário -->
-<div class="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
-    <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
-        <h3 class="text-lg font-semibold text-gray-900">Detalhes da Solicitação</h3>
-    </div>
-    <div class="divide-y divide-gray-200">
-        <?php 
-        foreach ($formulario as $campo => $valor) {
-            if (!in_array($campo, ['token', 'id'])) {  // Correção aqui
-                $labelCampo = ucfirst(str_replace('_', ' ', $campo));
-                echo '<div class="px-6 py-4 grid grid-cols-3">';
-                echo '<div class="text-sm font-medium text-gray-600">' . $labelCampo . '</div>';
-                echo '<div class="col-span-2 text-sm text-gray-900">' . 
-                     (!empty($valor) ? htmlspecialchars($valor) : 
-                     '<span class="text-gray-400">Não informado</span>') . '</div>';
-                echo '</div>';
-            }
-        }
-        ?>
-    </div>
-</div>
-<?php endif; ?>
+                <?php else: ?>
+                <!-- Outros tipos de formulário -->
+                <div class="glass-effect rounded-2xl shadow-lg p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <?php foreach ($formulario as $coluna => $valor): ?>
+                        <div class="p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 card-hover">
+                            <label class="text-sm font-medium text-gray-600 block mb-1">
+                                <?php echo ucfirst(str_replace('_', ' ', $coluna)); ?>
+                            </label>
+                            <div class="text-gray-900 font-medium">
+                                <?php echo !empty($valor) ? htmlspecialchars($valor) : '<span class="text-gray-400">Não informado</span>';?>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
 
                 <!-- Botões de ação -->
                 <div class="mt-8 glass-effect rounded-2xl p-4 flex justify-between items-center">
-    <div class="flex space-x-4">
-        <a href="formularios.php"
-            class="flex items-center px-6 py-3 bg-white text-gray-700 rounded-xl hover:bg-gray-50 transition shadow-sm">
-            <i class='bx bx-arrow-back mr-2'></i>
-            Voltar
-        </a>
-        
-        <!-- Botão Ver Formulário/Documento -->
-        <?php
-        $formUrl = '';
-        $btnIcon = 'bx-file';
-        $btnText = 'Ver Formulário';
-        
-        switch($tipo) {
-            case 'defesa_previa':
-            case 'JARI':
-                // Alteração aqui - Criar form dinâmico para POST
-                $formUrl = "javascript:void(0);";
-                $btnIcon = 'bx-file-blank';
-                $btnText = 'Gerar Defesa';
-                
-                // Adicionar JavaScript para envio via POST
-                echo "<script>
-                function enviarParaFormulario() {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '../utils/form/gerar_formulario.php';
-                    form.target = '_blank';
+                    <div class="flex space-x-4">
+                        <a href="formularios.php"
+                            class="flex items-center px-6 py-3 bg-white text-gray-700 rounded-xl hover:bg-gray-50 transition shadow-sm">
+                            <i class='bx bx-arrow-back mr-2'></i>
+                            Voltar
+                        </a>
+                        <button onclick="openEditModal()"
+                            class="flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition shadow-sm">
+                            <i class='bx bx-edit-alt mr-2'></i>
+                            Editar
+                        </button>
+                        <button onclick="openConfirmModal()"
+                            class="flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition shadow-sm">
+                            <i class='bx bx-check mr-2'></i>
+                            Concluir
+                        </button>
+                    </div>
+                    <button onclick="openDeleteModal()"
+                        class="flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition shadow-sm">
+                        <i class='bx bx-trash mr-2'></i>
+                        Excluir
+                    </button>
+                </div>
+            </main>
 
-                    // Adicionar dados do formulário
-                    const dados = " . json_encode($formulario) . ";
-                    
-                    for (const [key, value] of Object.entries(dados)) {
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = key;
-                        input.value = value;
-                        form.appendChild(input);
-                    }
-
-                    // Adicionar tipo_solicitacao
-                    const inputTipo = document.createElement('input');
-                    inputTipo.type = 'hidden';
-                    inputTipo.name = 'tipo_solicitacao';
-                    inputTipo.value = '" . strtolower($tipo) . "';
-                    form.appendChild(inputTipo);
-
-                    document.body.appendChild(form);
-                    form.submit();
-                    document.body.removeChild(form);
-                }
-                </script>";
-                break;
-            case 'apresentacao_condutor':
-                $formUrl = '../utils/form/gerar_formulario_AP.php';
-                $btnIcon = 'bx-car';
-                $btnText = 'Ver Apresentação';
-                break;
-            case 'PCD':
-                $formUrl = '../utils/form/gerar_formulario_cartao.php';
-                $btnIcon = 'bx-id-card';
-                $btnText = 'Ver Cartão';
-                break;
-            case 'DAT':
-                $formUrl = '../utils/form/gerar_formulario.php';
-                $btnIcon = 'bx-file';
-                $btnText = 'Ver DAT';
-                break;
-            case 'Parecer':
-                $formUrl = '../utils/form/gerar_formulario_parecer.php';
-                $btnIcon = 'bx-clipboard';
-                $btnText = 'Ver Parecer';
-                break;
-            case 'SAC':
-                $formUrl = '../utils/form/gerar_formulario.php';
-                $btnIcon = 'bx-message-square-detail';
-                $btnText = 'Ver Atendimento';
-                break;
-        }
-        
-        if ($formUrl): ?>
-        <!-- Botão Ver Documento -->
-        <?php if($tipo == 'defesa_previa' || $tipo == 'JARI'): ?>
-        <a href="#" onclick="enviarParaFormulario()" 
-            class="group relative flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-            <span class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-xl transition-opacity"></span>
-            <i class='bx <?php echo $btnIcon; ?> text-xl mr-2'></i>
-            <span class="font-medium"><?php echo $btnText; ?></span>
-        </a>
-        <?php else: ?>
-        <a href="<?php echo $formUrl . '?id=' . $id . '&tipo=' . strtolower($tipo); ?>" target="_blank"
-            class="group relative flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-            <span class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-xl transition-opacity"></span>
-            <i class='bx <?php echo $btnIcon; ?> text-xl mr-2'></i>
-            <span class="font-medium"><?php echo $btnText; ?></span>
-        </a>
-        <?php endif; ?>
-
-        <!-- Botão Imprimir -->
-        <button onclick="window.open('<?php echo $formUrl . '?id=' . $id . '&tipo=' . strtolower($tipo); ?>&print=true', '_blank')"
-            class="group relative flex items-center px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-            <span class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-xl transition-opacity"></span>
-            <i class='bx bx-printer text-xl mr-2'></i>
-            <span class="font-medium">Imprimir</span>
-        </button>
-        <?php endif; ?>
-
-        <button onclick="openEditModal()"
-            class="flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition shadow-sm">
-            <i class='bx bx-edit-alt mr-2'></i>
-            Editar
-        </button>
-        <button onclick="openConfirmModal()"
-            class="flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition shadow-sm">
-            <i class='bx bx-check mr-2'></i>
-            Concluir
-        </button>
-    </div>
-    <button onclick="openDeleteModal()"
-        class="flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition shadow-sm">
-        <i class='bx bx-trash mr-2'></i>
-        Excluir
-    </button>
-</div>
-
-</main>
             <!-- Footer -->
             <footer class="bg-white shadow-md py-4 px-6">
                 <p class="text-gray-600 text-center">&copy; <?php echo date('Y'); ?> Departamento de Trânsito. Todos os
@@ -977,5 +837,4 @@ function showErrorAlert(message) {
     </div>
 </body>
 
-</html>
-
+</html> 

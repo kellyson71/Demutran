@@ -108,6 +108,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($stmt->execute()) {
         $id_solicitacao = $conn->insert_id;
+        
+        // Gerar o número do cartão no formato 2025XXX
+        $n_cartao = '2025' . str_pad($id_solicitacao, 3, '0', STR_PAD_LEFT);
+        
+        // Atualizar o registro com o número do cartão
+        $update_cartao = "UPDATE solicitacao_cartao SET n_cartao = ? WHERE id = ?";
+        $stmt_cartao = $conn->prepare($update_cartao);
+        $stmt_cartao->bind_param('si', $n_cartao, $id_solicitacao);
+        $stmt_cartao->execute();
 
         // Salvar os valores originais do POST
         $original_post = $_POST;

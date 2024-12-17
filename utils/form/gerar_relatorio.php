@@ -46,6 +46,93 @@ while ($row = $monthlyStats->fetch_assoc()) {
     $datasets['dat'][] = $row['dat'];
     $datasets['parecer'][] = $row['parecer'];
 }
+
+// Adicionar queries para status e comparações
+$statusQuery = $conn->query("
+    SELECT 
+        CASE 
+            WHEN situacao IS NULL THEN 'Pendente'
+            ELSE situacao 
+        END as status,
+        COUNT(*) as total,
+        ROUND((COUNT(*) * 100.0 / SUM(COUNT(*)) OVER()), 1) as percentual
+    FROM (
+        SELECT situacao FROM sac
+        UNION ALL SELECT situacao FROM solicitacoes_demutran
+        UNION ALL SELECT situacao FROM solicitacao_cartao
+        UNION ALL SELECT situacao FROM DAT4
+        UNION ALL SELECT situacao FROM Parecer
+    ) as combined
+    GROUP BY status
+");
+
+// Se mesmo assim der erro, use esta versão simplificada
+if (!$statusQuery) {
+    $statusQuery = $conn->query("
+        SELECT 
+            status,
+            total,
+            ROUND((total * 100.0 / (SELECT COUNT(*) FROM (
+                SELECT 1 FROM sac
+                UNION ALL SELECT 1 FROM solicitacoes_demutran
+                UNION ALL SELECT 1 FROM solicitacao_cartao
+                UNION ALL SELECT 1 FROM DAT4
+                UNION ALL SELECT 1 FROM Parecer
+            ) t)), 1) as percentual
+        FROM (
+            SELECT 
+                'Em Processamento' as status,
+                COUNT(*) as total
+            FROM (
+                SELECT 'sac' FROM sac
+                UNION ALL SELECT 'jari' FROM solicitacoes_demutran
+                UNION ALL SELECT 'pcd' FROM solicitacao_cartao
+                UNION ALL SELECT 'dat' FROM DAT4
+                UNION ALL SELECT 'parecer' FROM Parecer
+            ) t
+        ) stats
+    ");
+}
+
+// Ajustar a exibição do status na view
+$statusData = [];
+if ($statusQuery) {
+    while ($row = $statusQuery->fetch_assoc()) {
+        $statusData[] = $row;
+    }
+} else {
+    // Dados padrão caso não haja informação de status
+    $statusData = [
+        ['status' => 'Em Processamento', 'total' => $sacTotal + $jariTotal + $pcdTotal + $datTotal + $parecerTotal, 'percentual' => 100]
+    ];
+}
+
+// Comparação com período anterior
+$periodoAtual = $conn->query("
+    SELECT COUNT(*) as total 
+    FROM (
+        SELECT data_submissao FROM sac
+        UNION ALL SELECT data_submissao FROM solicitacoes_demutran
+        UNION ALL SELECT data_submissao FROM solicitacao_cartao
+        UNION ALL SELECT data_submissao FROM DAT4
+        UNION ALL SELECT data_submissao FROM Parecer
+    ) as combined
+    WHERE data_submissao >= DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH)
+")->fetch_assoc()['total'];
+
+$periodoAnterior = $conn->query("
+    SELECT COUNT(*) as total 
+    FROM (
+        SELECT data_submissao FROM sac
+        UNION ALL SELECT data_submissao FROM solicitacoes_demutran
+        UNION ALL SELECT data_submissao FROM solicitacao_cartao
+        UNION ALL SELECT data_submissao FROM DAT4
+        UNION ALL SELECT data_submissao FROM Parecer
+    ) as combined
+    WHERE data_submissao BETWEEN DATE_SUB(CURRENT_DATE, INTERVAL 2 MONTH) AND DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH)
+")->fetch_assoc()['total'];
+
+$variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 100 / $periodoAnterior, 1) : 100;
 ?>
 
 <!DOCTYPE html>
@@ -117,35 +204,70 @@ while ($row = $monthlyStats->fetch_assoc()) {
         @media print {
             body {
                 background: #fff;
+                width: 100%;
+                margin: 0;
+                padding: 15px;
             }
             .no-print {
                 display: none;
             }
             .container {
-                width: 100%;
-                max-width: 100%;
-                padding: 0;
-                margin: 0;
+                width: 100% !important;
+                max-width: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            /* Corrigir para manter layout em grid */
+            .row {
+                display: flex !important; /* Forçar flex */
+                flex-wrap: wrap !important;
+                width: 100% !important;
+                page-break-inside: avoid;
+            }
+            
+            /* Manter colunas lado a lado */
+            .col-md-3 {
+                width: 25% !important;
+                flex: 0 0 25% !important;
+            }
+            .col-md-4 {
+                width: 33.333% !important;
+                flex: 0 0 33.333% !important;
+            }
+            .col-md-6 {
+                width: 50% !important;
+                flex: 0 0 50% !important;
+            }
+            
+            /* Manter gráficos lado a lado */
+            .charts-row {
+                display: flex !important;
+                gap: 1rem !important;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            .chart-wrapper {
+                width: 50% !important;
+                flex: 1 !important;
             }
             .chart-container {
+                height: 200px !important;
                 break-inside: avoid;
                 page-break-inside: avoid;
-                box-shadow: none;
-                border: 1px solid #ddd;
             }
-            .stat-card {
+            
+            /* Ajustes para melhorar espaçamento */
+            .stat-card, .detail-table, .table-responsive {
+                margin-bottom: 15px !important;
                 break-inside: avoid;
                 page-break-inside: avoid;
-                box-shadow: none;
-                border: 1px solid #ddd;
             }
-            .row {
-                display: flex;
-                flex-wrap: wrap;
-                page-break-inside: avoid;
-            }
-            .charts-row {
-                page-break-inside: avoid;
+            
+            /* Garantir que cores e backgrounds sejam impressos */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
         }
         .section-title {
@@ -196,6 +318,54 @@ while ($row = $monthlyStats->fetch_assoc()) {
             </button>
         </div>
 
+        <!-- Adicionar novas métricas e comparações -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <small class="text-muted">Solicitações (Últimos 30 dias)</small>
+                    <div class="stat-number"><?php echo $periodoAtual; ?></div>
+                    <div class="small <?php echo $variacao >= 0 ? 'text-success' : 'text-danger'; ?>">
+                        <?php echo $variacao >= 0 ? '+' : ''; echo $variacao; ?>% vs período anterior
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <small class="text-muted">Média por Dia Útil</small>
+                    <div class="stat-number"><?php echo round($periodoAtual / 22, 1); ?></div>
+                    <div class="small text-muted">Base: 22 dias úteis</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="stat-card">
+                    <small class="text-muted">Status das Solicitações</small>
+                    <div class="progress mt-2" style="height: 20px;">
+                        <?php
+                        $cores = [
+                            'Concluído' => 'bg-success',
+                            'Em Andamento' => 'bg-warning',
+                            'Em Processamento' => 'bg-info',
+                            'Pendente' => 'bg-secondary'
+                        ];
+                        foreach ($statusData as $status) {
+                            $cor = $cores[$status['status']] ?? 'bg-secondary';
+                            echo "<div class='{$cor}' style='width: {$status['percentual']}%' 
+                                  title='{$status['status']}: {$status['total']} ({$status['percentual']}%)'>
+                                  </div>";
+                        }
+                        ?>
+                    </div>
+                    <div class="d-flex justify-content-between mt-1">
+                        <?php
+                        foreach ($statusData as $status) {
+                            echo "<small>{$status['status']}: {$status['percentual']}%</small>";
+                        }
+                        ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Detalhamento por Tipo -->
         <div class="section-title">DETALHAMENTO POR TIPO DE SOLICITAÇÃO</div>
         <table class="detail-table">
@@ -203,14 +373,44 @@ while ($row = $monthlyStats->fetch_assoc()) {
                 <td width="70%">Serviço de Atendimento ao Cidadão (SAC)</td>
                 <td class="text-right"><strong><?php echo $sacTotal; ?></strong> solicitações</td>
             </tr>
-            <tr>
-                <td>Junta Administrativa de Recursos de Infrações (JARI)</td>
-                <td class="text-right"><strong><?php echo $jariTotal; ?></strong> solicitações</td>
+            
+            <!-- Grupo JARI/Defesas com subcategorias -->
+            <tr style="background-color: #f8f9fa;">
+                <td colspan="2"><strong>Solicitações e Defesas</strong></td>
             </tr>
-            <tr>
-                <td>Cartão de Estacionamento (PCD)</td>
-                <td class="text-right"><strong><?php echo $pcdTotal; ?></strong> solicitações</td>
+            <?php
+            $defesaStats = $conn->query("SELECT tipo_solicitacao, COUNT(*) as total FROM solicitacoes_demutran GROUP BY tipo_solicitacao");
+            $tipos = [
+                'apresentacao_condutor' => 'Apresentação de Condutor',
+                'defesa_previa' => 'Defesa Prévia',
+                'jari' => 'Recurso JARI'
+            ];
+            while ($row = $defesaStats->fetch_assoc()) {
+                echo "<tr>
+                    <td style='padding-left: 2rem;'>" . $tipos[$row['tipo_solicitacao']] . "</td>
+                    <td class='text-right'><strong>" . $row['total'] . "</strong> solicitações</td>
+                </tr>";
+            }
+            ?>
+            
+            <!-- Grupo PCD/Idoso com subcategorias -->
+            <tr style="background-color: #f8f9fa;">
+                <td colspan="2"><strong>Credenciais Especiais</strong></td>
             </tr>
+            <?php
+            $pcdStats = $conn->query("SELECT tipo_solicitacao, COUNT(*) as total FROM solicitacao_cartao GROUP BY tipo_solicitacao");
+            $tiposPcd = [
+                'pcd' => 'Pessoa com Deficiência (PCD)',
+                'idoso' => 'Credencial para Idoso'
+            ];
+            while ($row = $pcdStats->fetch_assoc()) {
+                echo "<tr>
+                    <td style='padding-left: 2rem;'>" . $tiposPcd[$row['tipo_solicitacao']] . "</td>
+                    <td class='text-right'><strong>" . $row['total'] . "</strong> solicitações</td>
+                </tr>";
+            }
+            ?>
+            
             <tr>
                 <td>Declaração de Acidente de Trânsito (DAT)</td>
                 <td class="text-right"><strong><?php echo $datTotal; ?></strong> solicitações</td>
@@ -246,6 +446,46 @@ while ($row = $monthlyStats->fetch_assoc()) {
                     <div class="stat-number"><?php echo round(($sacTotal + $jariTotal + $pcdTotal + $datTotal + $parecerTotal) / 6); ?></div>
                 </div>
             </div>
+        </div>
+
+        <!-- Adicionar seção de Comparativos -->
+        <div class="section-title">ANÁLISE COMPARATIVA</div>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Tipo de Solicitação</th>
+                        <th class="text-right">Mês Atual</th>
+                        <th class="text-right">Mês Anterior</th>
+                        <th class="text-right">Variação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $tiposSolicitacao = [
+                        'SAC' => ['atual' => end($datasets['sac']), 'anterior' => prev($datasets['sac'])],
+                        'JARI' => ['atual' => end($datasets['jari']), 'anterior' => prev($datasets['jari'])],
+                        'PCD' => ['atual' => end($datasets['pcd']), 'anterior' => prev($datasets['pcd'])],
+                        'DAT' => ['atual' => end($datasets['dat']), 'anterior' => prev($datasets['dat'])],
+                        'Parecer' => ['atual' => end($datasets['parecer']), 'anterior' => prev($datasets['parecer'])]
+                    ];
+
+                    foreach ($tiposSolicitacao as $tipo => $dados) {
+                        $variacao = $dados['anterior'] > 0 ? 
+                            round(($dados['atual'] - $dados['anterior']) * 100 / $dados['anterior'], 1) : 100;
+                        $variacaoClass = $variacao >= 0 ? 'text-success' : 'text-danger';
+                        
+                        echo "<tr>
+                            <td>{$tipo}</td>
+                            <td class='text-right'>{$dados['atual']}</td>
+                            <td class='text-right'>{$dados['anterior']}</td>
+                            <td class='text-right {$variacaoClass}'>" . 
+                            ($variacao >= 0 ? '+' : '') . "{$variacao}%</td>
+                        </tr>";
+                    }
+                    ?>
+                </tbody>
+            </table>
         </div>
 
         <!-- Gráficos em 2 colunas -->

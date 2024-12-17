@@ -14,16 +14,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $assunto = $_POST['assunto'];
     $mensagem = isset($_POST['mensagem']) ? $_POST['mensagem'] : null;
+    $tipo_contato = isset($_POST['tipo_contato']) ? $_POST['tipo_contato'] : 'solicitacao';
 
     // Prepara a query de inserção
-    $sql = "INSERT INTO sac (nome, telefone, email, assunto, mensagem) VALUES (?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO sac (nome, telefone, email, assunto, mensagem, tipo_contato) VALUES (?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         die("Erro na preparação da declaração: " . $conn->error);
     }
 
-    $stmt->bind_param("sssss", $nome, $telefone, $email, $assunto, $mensagem);
+    $stmt->bind_param("ssssss", $nome, $telefone, $email, $assunto, $mensagem, $tipo_contato);
 
     if ($stmt->execute()) {
         // Salvar os valores originais do POST

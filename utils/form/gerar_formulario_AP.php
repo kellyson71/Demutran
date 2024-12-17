@@ -250,47 +250,6 @@ if (isset($_SESSION['form_data'])) {
         }
     }
 
-    /* Adicionar estilo para o recibo destacável */
-    .receipt {
-        margin-top: 40px;
-        padding: 20px;
-        border-top: 2px solid #2196F3;
-        background-color: #FAFAFA;
-    }
-
-    .receipt .logo {
-        max-width: 60px;
-        /* Logos menores no recibo */
-    }
-
-    .receipt .logo-container {
-        height: 80px;
-        /* Altura menor para o container no recibo */
-    }
-
-    .receipt .centered-title p {
-        font-size: 0.9em;
-        /* Texto menor no recibo */
-        margin: 1px 0;
-    }
-
-    .receipt-title {
-        background-color: #E3F2FD;
-        padding: 8px;
-        margin: 15px 0;
-        font-weight: bold;
-        text-align: center;
-        border-left: 4px solid #2196F3;
-    }
-
-    .receipt-table {
-        width: 100%;
-        margin-top: 15px;
-        background-color: #FFF;
-        padding: 15px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
     /* Estilo para as duas assinaturas lado a lado */
     .double-signature {
         display: flex;
@@ -409,35 +368,6 @@ if (isset($_SESSION['form_data'])) {
                 </div>
             </div>
 
-            <!-- Recibo destacável -->
-            <div class="receipt">
-                <div class="logo-container">
-                    <img src="image1.png" alt="Logo Esquerda" class="logo logo-left">
-                    <img src="image3.png" alt="Logo Direita" class="logo logo-right">
-                    <div class="centered-title text-center">
-                        <p>Estado do Rio Grande do Norte</p>
-                        <p>Prefeitura Municipal de Pau dos Ferros</p>
-                        <p>Secretaria de Governo – SEGOV</p>
-                        <p>Departamento Municipal de Trânsito – DEMUTRAN</p>
-                    </div>
-                </div>
-
-                <div class="receipt-title">
-                    FORMULÁRIO DE IDENTIFICAÇÃO DE CONDUTOR INFRATOR
-                </div>
-
-                <div class="receipt-table">
-                    <table class="data-table">
-                        <tr>
-                            <td><strong>Recebido em:</strong> _____/_____/_____</td>
-                            <td><strong>Auto de Infração nº:</strong> <?php echo $autoInfracao; ?></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2"><strong>Assinatura do Responsável:</strong> ________________________</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
         </div>
     </div>
 

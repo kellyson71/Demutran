@@ -1,7 +1,19 @@
 <?php
 function contarNotificacoesNaoLidas($conn) {
-    $sql = "SELECT COUNT(*) AS total FROM sac WHERE assunto = 0";
-    $result = $conn->query($sql);
+    // Obter data de 3 dias atrás
+    $tresDiasAtras = date('Y-m-d H:i:s', strtotime('-3 days'));
+    
+    $sql = "SELECT 
+        (SELECT COUNT(*) FROM DAT4 WHERE data_submissao >= ? AND is_read = 0) +
+        (SELECT COUNT(*) FROM Parecer WHERE data_submissao >= ? AND is_read = 0) +
+        (SELECT COUNT(*) FROM sac WHERE data_submissao >= ? AND is_read = 0) +
+        (SELECT COUNT(*) FROM solicitacao_cartao WHERE data_submissao >= ? AND is_read = 0) +
+        (SELECT COUNT(*) FROM solicitacoes_demutran WHERE data_submissao >= ? AND is_read = 0) as total";
+    
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sssss", $tresDiasAtras, $tresDiasAtras, $tresDiasAtras, $tresDiasAtras, $tresDiasAtras);
+    $stmt->execute();
+    $result = $stmt->get_result();
     $row = $result->fetch_assoc();
     return $row['total'];
 }
@@ -22,7 +34,7 @@ function getAvatarHtml($usuario_nome, $usuario_avatar = '') {
 
 function getSidebarHtml($currentPage) {
     $menuItems = [
-        'dashboard' => ['icon' => 'dashboard', 'text' => 'Dashboard'],
+        'index' => ['icon' => 'dashboard', 'text' => 'Dashboard'],
         'formularios' => ['icon' => 'assignment', 'text' => 'Formulários'],
         'gerenciar_noticias' => ['icon' => 'article', 'text' => 'Notícias'],
         'analytics' => ['icon' => 'analytics', 'text' => 'Estatísticas'],
@@ -46,44 +58,186 @@ function getSidebarHtml($currentPage) {
     return $html;
 }
 
-function getTopbarHtml($pageTitle, $notificacoesNaoLidas) {
+
+function getNotificacoesNaoLidas($conn, $usuario_id) {
+    // Obter data de 3 dias atrás
+    $tresDiasAtras = date('Y-m-d H:i:s', strtotime('-3 days'));
+    
+    $sql = "SELECT * FROM (
+        SELECT 
+            'DAT4' as tipo,
+            d.id,
+            d.token as titulo,
+            d.situacao,
+            d.data_submissao,
+            dat1.nome as nome,
+            dat1.email as email,
+            dat1.cidade as cidade,
+            dat1.tipo_acidente as subtipo,
+            d.is_read
+        FROM DAT4 d
+        LEFT JOIN DAT1 dat1 ON dat1.token = d.token
+        WHERE d.data_submissao >= ? AND d.is_read = 0
+        
+        UNION ALL
+        
+        SELECT 
+            'Parecer' as tipo,
+            p.id,
+            p.protocolo as titulo,
+            p.situacao,
+            p.data_submissao,
+            p.nome,
+            p.email,
+            p.local as cidade,
+            p.evento as subtipo,
+            p.is_read
+        FROM Parecer p
+        WHERE p.data_submissao >= ? AND p.is_read = 0
+        
+        UNION ALL
+        
+        SELECT 
+            'SAC' as tipo,
+            s.id,
+            s.assunto as titulo,
+            s.situacao,
+            s.data_submissao,
+            s.nome,
+            s.email,
+            NULL as cidade,
+            s.tipo_contato as subtipo,
+            s.is_read
+        FROM sac s
+        WHERE s.data_submissao >= ? AND s.is_read = 0
+        
+        UNION ALL
+        
+        SELECT 
+            'Cartao' as tipo,
+            sc.id,
+            CONCAT(sc.tipo_solicitacao, ' - ', sc.n_cartao) as titulo,
+            sc.situacao,
+            sc.data_submissao,
+            sc.nome,
+            sc.email,
+            SUBSTRING_INDEX(sc.endereco, ',', -2) as cidade,
+            sc.tipo_solicitacao as subtipo,
+            sc.is_read
+        FROM solicitacao_cartao sc
+        WHERE sc.data_submissao >= ? AND sc.is_read = 0
+        
+        UNION ALL
+        
+        SELECT 
+            'Demutran' as tipo,
+            sd.id,
+            sd.tipo_solicitacao as titulo,
+            sd.situacao,
+            sd.data_submissao,
+            sd.nome,
+            sd.email,
+            sd.municipio as cidade,
+            sd.tipo_solicitacao as subtipo,
+            sd.is_read
+        FROM solicitacoes_demutran sd
+        WHERE sd.data_submissao >= ? AND sd.is_read = 0
+        
+    ) AS combined_results 
+    ORDER BY data_submissao DESC 
+    LIMIT 20";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sssss", $tresDiasAtras, $tresDiasAtras, $tresDiasAtras, $tresDiasAtras, $tresDiasAtras);
+    $stmt->execute();
+    return $stmt->get_result();
+}
+
+function marcarComoLido($conn, $tipo, $registro_id) {
+    $tabela = match($tipo) {
+        'DAT4' => 'DAT4',
+        'Parecer' => 'Parecer',
+        'SAC' => 'sac',
+        'Cartao' => 'solicitacao_cartao',
+        'Demutran' => 'solicitacoes_demutran',
+        default => null
+    };
+
+    if (!$tabela) return false;
+
+    $sql = "UPDATE {$tabela} SET is_read = 1 WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $registro_id);
+    return $stmt->execute();
+}
+
+// ...existing code...
+
+function getFormularioStyle($tipo_formulario, $subtipo = null) {
+    $styles = [
+        'DAT' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-600', 'border' => 'border-yellow-500', 'icon' => 'description'],
+        'SAC' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-600', 'border' => 'border-blue-500', 'icon' => 'support'],
+        'JARI' => ['bg' => 'bg-green-100', 'text' => 'text-green-600', 'border' => 'border-green-500', 'icon' => 'gavel'],
+        'PCD' => ['bg' => 'bg-purple-100', 'text' => 'text-purple-600', 'border' => 'border-purple-500', 'icon' => 'accessible'],
+        'IDOSO' => ['bg' => 'bg-orange-100', 'text' => 'text-orange-600', 'border' => 'border-orange-500', 'icon' => 'elderly'],
+        'Cartao' => ['bg' => 'bg-purple-100', 'text' => 'text-purple-600', 'border' => 'border-purple-500', 'icon' => 'credit_card'],
+        'Parecer' => ['bg' => 'bg-red-100', 'text' => 'text-red-600', 'border' => 'border-red-500', 'icon' => 'assignment']
+    ];
+
+    // Se for PCD ou IDOSO, verificar se veio do tipo_solicitacao
+    if ($tipo_formulario === 'PCD' || $tipo_formulario === 'IDOSO') {
+        return $styles[$tipo_formulario];
+    }
+
+    return $styles[$tipo_formulario] ?? ['bg' => 'bg-gray-100', 'text' => 'text-gray-600', 'border' => 'border-gray-500', 'icon' => 'description'];
+}
+
+function getTopbarHtml($pageTitle, $usuario_id) {
     global $conn;
     
-    // Buscar as últimas 4 notificações do SAC com mais detalhes
-    $notificacoes = $conn->query("
-        SELECT 
-            id,
-            nome,
-            assunto,
-            mensagem,
-            data_submissao 
-        FROM sac 
-        WHERE assunto = 0 
-        ORDER BY data_submissao DESC 
-        LIMIT 4
-    ");
-
+    $notificacoes = getNotificacoesNaoLidas($conn, $usuario_id);
+    $notificacoesNaoLidas = $notificacoes->num_rows;
+    
     $notificacoesHtml = '';
-    if ($notificacoes && $notificacoes->num_rows > 0) {
-        while ($notif = $notificacoes->fetch_assoc()) {
-            $data = date('d/m/Y H:i', strtotime($notif['data_submissao']));
-            $mensagemResumida = mb_substr($notif['mensagem'], 0, 50) . '...';
-            
-            $notificacoesHtml .= "
-            <li class='p-4 border-b hover:bg-gray-50'>
-                <a href='detalhes_formulario.php?id={$notif['id']}&tipo=SAC' class='block'>
-                    <div class='flex items-center space-x-3'>
-                        <span class='material-icons text-blue-500 bg-blue-50 p-2 rounded-full'>message</span>
-                        <div class='flex-1'>
-                            <p class='font-medium text-gray-800'>{$notif['nome']}</p>
-                            <p class='text-sm text-gray-600'>{$mensagemResumida}</p>
-                            <p class='text-xs text-gray-500 mt-1'>{$data}</p>
-                        </div>
+    while ($notif = $notificacoes->fetch_assoc()) {
+        $style = getFormularioStyle($notif['tipo'], $notif['subtipo'] ?? null);
+        $data = date('d/m H:i', strtotime($notif['data_submissao'])); // Formato mais curto de data
+        $titulo = htmlspecialchars((string)($notif['titulo'] ?? ''));
+        $nome = htmlspecialchars((string)($notif['nome'] ?? 'Não informado'));
+        
+        // Mapear tipo para redirecionamento
+        $tipoRedirect = match($notif['tipo']) {
+            'DAT4' => 'DAT',
+            'Cartao' => 'PCD',
+            'Demutran' => 'JARI',
+            default => $notif['tipo']
+        };
+
+        $link = "detalhes_formulario.php?id={$notif['id']}&tipo={$tipoRedirect}";
+
+        $notificacoesHtml .= "
+        <li class='p-3 border-b hover:bg-gray-50'> <!-- Reduzido padding -->
+            <a href='{$link}' class='block' onclick='marcarComoLido(\"{$notif['tipo']}\", {$notif['id']})'>
+                <div class='flex items-center gap-3'>
+                    <div class='{$style['bg']} p-2 rounded'>
+                        <span class='material-icons {$style['text']} text-lg'>{$style['icon']}</span>
                     </div>
-                </a>
-            </li>";
-        }
-    } else {
+                    <div class='flex-1 min-w-0'> <!-- min-w-0 para permitir truncamento -->
+                        <div class='flex items-center gap-2 mb-0.5'>
+                            <p class='font-medium text-gray-900 truncate'>{$nome}</p>
+                            <span class='px-1.5 py-0.5 text-xs rounded {$style['bg']} {$style['text']} whitespace-nowrap'>
+                                {$notif['tipo']}
+                            </span>
+                        </div>
+                        <p class='text-sm text-gray-600 truncate'>{$titulo}</p>
+                        <p class='text-xs text-gray-400 mt-0.5'>{$data}</p>
+                    </div>
+                </div>
+            </a>
+        </li>";
+    }
+
+    if ($notificacoesHtml === '') {
         $notificacoesHtml = "
         <li class='p-4 text-center text-gray-500'>
             Nenhuma notificação nova

@@ -108,18 +108,7 @@
         </p>
 
         <form id="SoliForm" method="post" enctype="multipart/form-data">
-          <!-- Checkbox de Residente -->
-          <div class="mb-4 flex items-center">
-            <i class="fas fa-home mr-2"></i>
-            <input
-              type="checkbox"
-              id="resident_check"
-              name="resident_check"
-              class="mr-2" />
-            <label for="resident_check" class="text-gray-700"
-              >Eu sou residente de Pau dos Ferros</label
-            >
-          </div>
+
 
           <!-- Tipo de Solicitação -->
           <div class="mb-4">
@@ -200,6 +189,19 @@
           </div>
 
           <div class="mb-4">
+            <label for="cep" class="block text-gray-700 mb-2">
+              CEP:
+            </label>
+            <input
+              type="text"
+              id="cep"
+              name="cep"
+              value="59900-000"
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+              onchange="validarCEP(this.value)" />
+          </div>
+
+          <div class="mb-4">
             <label for="endereco" class="block text-gray-700 mb-2">
               Endereço:
             </label>
@@ -234,13 +236,13 @@
 
           <div class="mb-4">
             <label for="email" class="block text-gray-700 mb-2">
-              <i class="fas fa-envelope"></i> Gmail para Contato:
+              <i class="fas fa-envelope"></i> Email para Contato:
             </label>
             <input
               type="email"
               id="email"
               name="email"
-              placeholder="exemplo@gmail.com"
+              placeholder="exemplo@Email.com"
               required
               class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
             <p class="text-sm text-gray-500 mt-1">Você receberá atualizações sobre sua solicitação neste e-mail</p>
@@ -549,6 +551,24 @@
               feedback.classList.add("hidden");
             }, 5000);
           });
+      }
+
+      function validarCEP(cep) {
+        const cepLimpo = cep.replace(/\D/g, '');
+        const feedback = document.getElementById('feedback');
+        
+        if (cepLimpo !== '59900000') {
+          feedback.innerHTML = "Atenção: Este serviço é exclusivo para moradores de Pau dos Ferros (CEP: 59900-000)";
+          feedback.classList.remove('hidden');
+          feedback.classList.add('bg-red-100', 'text-red-700', 'p-4', 'rounded', 'mb-4');
+          document.getElementById('submitButton').disabled = true;
+          document.getElementById('submitButton').classList.add('opacity-50');
+        } else {
+          feedback.classList.add('hidden');
+          feedback.classList.remove('bg-red-100', 'text-red-700', 'p-4', 'rounded', 'mb-4');
+          document.getElementById('submitButton').disabled = false;
+          document.getElementById('submitButton').classList.remove('opacity-50');
+        }
       }
     </script>
   </body>

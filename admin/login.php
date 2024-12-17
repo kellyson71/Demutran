@@ -3,7 +3,7 @@ session_start();
 include '../env/config.php';
 
 if (isset($_SESSION['usuario_id'])) {
-    header('Location: dashboard.php');
+    header('Location: index.php');
     exit();
 }
 
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if (password_verify($senha, $usuario['senha'])) {
                     $_SESSION['usuario_id'] = $usuario['id'];
                     $_SESSION['usuario_nome'] = $usuario['nome'];
-                    header('Location: dashboard.php');
+                    header('Location: index.php');
                     exit();
                 } else {
                     $erro = 'Senha incorreta.';

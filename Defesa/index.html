@@ -251,6 +251,17 @@
                 class="w-full border rounded-md p-2 bg-gray-100 text-gray-600"
                 disabled />
             </div>
+            <div class="mb-4">
+                <label for="registro_cnh_infrator" class="block text-gray-700 mb-2">
+                    <i class="fas fa-id-card"></i> Nº Registro CNH do Infrator:
+                </label>
+                <input
+                    type="text"
+                    id="registro_cnh_infrator"
+                    name="registro_cnh_infrator"
+                    placeholder="Exemplo: 12345678901"
+                    class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+            </div>
           </div>
 
           <!-- Campos específicos para Defesa Prévia -->
@@ -419,12 +430,64 @@
             <label for="especie" class="block text-gray-700 mb-2">
               <i class="fas fa-car-side"></i> Espécie:
             </label>
-            <input
-              type="text"
+            <select
               id="especie"
               name="especie"
-              placeholder="Exemplo: Automóvel"
-              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+              <option value="">Selecione a espécie do veículo</option>
+              <optgroup label="De Passageiros">
+                <option value="BICICLETA">Bicicleta</option>
+                <option value="CICLOMOTOR">Ciclomotor</option>
+                <option value="MOTONETA_PASSAGEIRO">Motoneta</option>
+                <option value="MOTOCICLETA_PASSAGEIRO">Motocicleta</option>
+                <option value="TRICICLO_PASSAGEIRO">Triciclo</option>
+                <option value="QUADRICICLO_PASSAGEIRO">Quadriciclo</option>
+                <option value="AUTOMOVEL">Automóvel</option>
+                <option value="MICROONIBUS">Microônibus</option>
+                <option value="ONIBUS">Ônibus</option>
+                <option value="BONDE">Bonde</option>
+                <option value="REBOQUE_PASSAGEIRO">Reboque/Semi-reboque</option>
+                <option value="CHARRETE">Charrete</option>
+              </optgroup>
+              <optgroup label="De Carga">
+                <option value="MOTONETA_CARGA">Motoneta</option>
+                <option value="MOTOCICLETA_CARGA">Motocicleta</option>
+                <option value="TRICICLO_CARGA">Triciclo</option>
+                <option value="QUADRICICLO_CARGA">Quadriciclo</option>
+                <option value="CAMINHONETE">Caminhonete</option>
+                <option value="CAMINHAO">Caminhão</option>
+                <option value="REBOQUE_CARGA">Reboque/Semi-reboque</option>
+                <option value="CARROCA">Carroça</option>
+                <option value="CARRO_MAO">Carro-de-mão</option>
+              </optgroup>
+              <optgroup label="Misto">
+                <option value="CAMIONETA">Camioneta</option>
+                <option value="UTILITARIO">Utilitário</option>
+                <option value="OUTROS_MISTO">Outros</option>
+              </optgroup>
+              <option value="COMPETICAO">De Competição</option>
+              <optgroup label="De Tração">
+                <option value="CAMINHAO_TRATOR">Caminhão-trator</option>
+                <option value="TRATOR_RODAS">Trator de rodas</option>
+                <option value="TRATOR_ESTEIRAS">Trator de esteiras</option>
+                <option value="TRATOR_MISTO">Trator misto</option>
+              </optgroup>
+              <optgroup label="Especial">
+                <option value="MOTOCICLETA_ESPECIAL">Motocicleta</option>
+                <option value="TRICICLO_ESPECIAL">Triciclo</option>
+                <option value="AUTOMOVEL_ESPECIAL">Automóvel</option>
+                <option value="MICROONIBUS_ESPECIAL">Micro-ônibus</option>
+                <option value="ONIBUS_ESPECIAL">Ônibus</option>
+                <option value="REBOQUE_ESPECIAL">Reboque/Semirreboque</option>
+                <option value="CAMIONETA_ESPECIAL">Camioneta</option>
+                <option value="CAMINHAO_ESPECIAL">Caminhão</option>
+                <option value="CAMINHAO_TRATOR_ESPECIAL">Caminhão-trator</option>
+                <option value="CAMINHONETE_ESPECIAL">Caminhonete</option>
+                <option value="UTILITARIO_ESPECIAL">Utilitário</option>
+                <option value="MOTOR_CASA">Motor-casa</option>
+              </optgroup>
+              <option value="COLECAO">De Coleção</option>
+            </select>
           </div>
 
           <!-- Categoria -->
@@ -432,12 +495,17 @@
             <label for="categoria" class="block text-gray-700 mb-2">
               <i class="fas fa-tags"></i> Categoria:
             </label>
-            <input
-              type="text"
+            <select
               id="categoria"
               name="categoria"
-              placeholder="Exemplo: Particular"
-              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+              class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+              <option value="">Selecione a categoria do veículo</option>
+              <option value="OFICIAL">Oficial</option>
+              <option value="DIPLOMATICO">Representação Diplomática/Consular</option>
+              <option value="PARTICULAR">Particular</option>
+              <option value="ALUGUEL">Aluguel</option>
+              <option value="APRENDIZAGEM">Aprendizagem</option>
+            </select>
           </div>
 
           <!-- Ano -->
@@ -532,7 +600,7 @@
           <!-- Campo Gmail -->
           <div class="mb-4">
             <label for="gmail" class="block text-gray-700 mb-2">
-              <i class="fas fa-envelope"></i> Gmail:
+              <i class="fas fa-envelope"></i> Email:
             </label>
             <input
               type="email"
@@ -546,7 +614,7 @@
           <!-- Campo Confirmar Gmail -->
           <div class="mb-4">
             <label for="confirm_gmail" class="block text-gray-700 mb-2">
-              <i class="fas fa-envelope"></i> Confirme seu Gmail:
+              <i class="fas fa-envelope"></i> Confirme seu Email:
             </label>
             <input
               type="email"
@@ -991,56 +1059,70 @@
       function handleFinalSubmission(event) {
         event.preventDefault();
 
-        // Toggle buttons
         const submitButton = document.getElementById("submitButton");
         const loadingButton = document.getElementById("loadingButton");
+        
+        // Validar arquivos obrigatórios
+        const requiredFiles = ['doc_requerimento', 'cnh'];
+        const missingFiles = [];
+        
+        requiredFiles.forEach(fileId => {
+            const fileInput = document.getElementById(fileId);
+            if (!fileInput.files || !fileInput.files[0]) {
+                missingFiles.push(fileId.replace('_', ' ').toUpperCase());
+            }
+        });
+        
+        if (missingFiles.length > 0) {
+            showAlert(`Por favor, envie os arquivos obrigatórios: ${missingFiles.join(', ')}`, 
+                     "bg-red-100 text-red-700 border border-red-400");
+            return;
+        }
+
+        // Mostrar loading
         submitButton.classList.add("hidden");
         loadingButton.classList.remove("hidden");
 
-        // Create FormData from the original form
+        // Criar FormData com todos os campos
+        const formData = new FormData();
+        
+        // Adicionar campos do primeiro formulário
         const defesaForm = document.getElementById("DefesaForm");
-        const formData = new FormData(defesaForm);
+        new FormData(defesaForm).forEach((value, key) => {
+            formData.append(key, value);
+        });
 
-        // Add the signed document
+        // Adicionar arquivo assinado
         const signedDoc = document.querySelector("#signedDocument");
         if (signedDoc.files[0]) {
-          formData.append("signedDocument", signedDoc.files[0]);
+            formData.append("signedDocument", signedDoc.files[0]);
         }
 
-        // Send the form data
+        // Enviar requisição
         fetch("processa_formulario.php", {
-          method: "POST",
-          body: formData,
+            method: "POST",
+            body: formData
         })
-          .then((response) => response.json())
-          .then((data) => {
-            let message, className;
-
+        .then(response => response.json())
+        .then(data => {
             if (data.success) {
-              message = data.message;
-              className = "bg-green-100 text-green-700 border border-green-400";
+                showAlert(data.message, "bg-green-100 text-green-700 border border-green-400");
+                // Limpar formulário após sucesso
+                defesaForm.reset();
             } else {
-              message = data.error
-                ? data.message
-                : "Erro ao processar a solicitação";
-              className = "bg-red-100 text-red-700 border border-red-400";
+                throw new Error(data.message || "Erro ao processar a solicitação");
             }
-
-            showAlert(message, className);
-          })
-          .catch((error) => {
+        })
+        .catch(error => {
             console.error("Erro:", error);
-            showAlert(
-              "Erro ao concluir a solicitação",
-              "bg-red-100 text-red-700 border border-red-400"
-            );
-          })
-          .finally(() => {
-            // Restore buttons
+            showAlert(error.message || "Erro ao concluir a solicitação. Por favor, tente novamente.", 
+                     "bg-red-100 text-red-700 border border-red-400");
+        })
+        .finally(() => {
             submitButton.classList.remove("hidden");
             loadingButton.classList.add("hidden");
-          });
-      }
+        });
+    }
 
       function showAlert(message, classes) {
         const alertSpace = document.getElementById("alert-space");
@@ -1151,17 +1233,13 @@
       }
 
       // Adicione esta função ao seu JavaScript existente
-      document
-        .getElementById("tipo_solicitacao")
-        .addEventListener("change", function () {
-          const tipoSelecionado = this.value;
-          const camposApresentacao = document.getElementById(
-            "campos_apresentacao"
-          );
-          const camposDefesa = document.getElementById("campos_defesa");
-
-          // Campos que devem ser escondidos para Apresentação do Condutor
-          const camposEsconder = [
+      document.getElementById("tipo_solicitacao").addEventListener("change", function() {
+        const tipoSelecionado = this.value;
+        const camposApresentacao = document.getElementById("campos_apresentacao");
+        const camposDefesa = document.getElementById("campos_defesa");
+        
+        // Lista de campos para esconder/mostrar
+        const camposEsconder = [
             "cor",
             "especie",
             "categoria",
@@ -1170,24 +1248,35 @@
             "horaInfracao",
             "localInfracao",
             "enquadramento",
-            "defesa",
-          ].forEach((id) => {
-            const elemento = document.getElementById(id)?.closest(".mb-4");
-            if (elemento) {
-              elemento.style.display =
-                tipoSelecionado === "apresentacao_condutor" ? "none" : "block";
-            }
-          });
-
-          // Mostrar/esconder campos específicos
-          if (tipoSelecionado === "apresentacao_condutor") {
-            camposApresentacao.classList.remove("hidden");
-            camposDefesa.classList.add("hidden");
-          } else if (tipoSelecionado === "defesa_previa") {
-            camposApresentacao.classList.add("hidden");
-            camposDefesa.classList.remove("hidden");
-          }
-        });
+            "defesa"
+        ];
+    
+        // Mostrar/esconder campos baseado no tipo de solicitação
+        if (tipoSelecionado === "apresentacao_condutor") {
+            camposApresentacao.classList.remove("hidden"); // Mostra campos de apresentação
+            if (camposDefesa) camposDefesa.classList.add("hidden");
+            
+            // Esconde os campos não necessários
+            camposEsconder.forEach(id => {
+                const elemento = document.getElementById(id)?.closest(".mb-4");
+                if (elemento) elemento.style.display = "none";
+            });
+    
+            // Certifica que o campo de registro CNH do infrator está visível
+            const registroCNH = document.getElementById("registro_cnh_infrator")?.closest(".mb-4");
+            if (registroCNH) registroCNH.style.display = "block";
+            
+        } else {
+            camposApresentacao.classList.add("hidden"); // Esconde campos de apresentação
+            if (camposDefesa) camposDefesa.classList.remove("hidden");
+            
+            // Mostra todos os campos
+            camposEsconder.forEach(id => {
+                const elemento = document.getElementById(id)?.closest(".mb-4");
+                if (elemento) elemento.style.display = "block";
+            });
+        }
+    });
     </script>
   </body>
 </html>

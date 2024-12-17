@@ -1,13 +1,22 @@
 <?php
 include '../env/config.php';
 
-// Enable error reporting and increase memory limit
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// Enable error reporting but don't display errors directly
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 error_reporting(E_ALL);
-ini_set('memory_limit', '256M');
 
-header('Content-Type: application/json');
+// Ensure JSON response
+header('Content-Type: application/json; charset=utf-8');
+
+// Error handler function
+function returnError($message) {
+    echo json_encode([
+        'success' => false,
+        'message' => $message
+    ]);
+    exit;
+}
 
 // Debug logging
 error_log("Raw POST data: " . file_get_contents("php://input"));
@@ -16,10 +25,12 @@ error_log("FILES array: " . print_r($_FILES, true));
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
-    die(json_encode([
-        'error' => true,
-        'message' => "Conexão falhou: " . $conn->connect_error
-    ]));
+    returnError("Conexão falhou: " . $conn->connect_error);
+}
+
+// Verify POST data
+if ($_SERVER["REQUEST_METHOD"] != "POST") {
+    returnError("Método inválido");
 }
 
 // Get tipo_solicitacao from POST data
@@ -35,15 +46,7 @@ if (isset($_POST['tipo_solicitacao'])) {
 }
 
 if (empty($tipo_solicitacao)) {
-    http_response_code(400);
-    die(json_encode([
-        'error' => true,
-        'message' => 'Tipo de solicitação não informado.',
-        'debug' => [
-            'post' => $_POST,
-            'raw' => file_get_contents("php://input")
-        ]
-    ]));
+    returnError('Tipo de solicitação não informado.');
 }
 
 // Função para verificar campos de texto e atribuir "não informado" se não receber valor
@@ -53,20 +56,46 @@ function verificaTexto($valor) {
 
 // Função para fazer upload de arquivo
 function uploadFile($file_key, $upload_dir, $base_url, $id_solicitacao) {
-    if (isset($_FILES[$file_key]) && $_FILES[$file_key]['error'] === UPLOAD_ERR_OK) {
-        // Sanitizar o nome do arquivo para evitar problemas de segurança
+    error_log("Tentando fazer upload do arquivo: " . $file_key);
+    
+    if (!isset($_FILES[$file_key])) {
+        error_log("Arquivo não encontrado para: " . $file_key);
+        return null;
+    }
+
+    if ($_FILES[$file_key]['error'] === UPLOAD_ERR_OK) {
+        // Validar o tipo do arquivo
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($finfo, $_FILES[$file_key]['tmp_name']);
+        finfo_close($finfo);
+
+        if ($mime_type !== 'application/pdf') {
+            error_log("Tipo de arquivo inválido para {$file_key}: {$mime_type}");
+            return null;
+        }
+
         $file_name = basename($_FILES[$file_key]['name']);
         $file_name = preg_replace('/[^A-Za-z0-9\-_\.]/', '_', $file_name);
         
-        // Criar o diretório com o ID da solicitação se ainda não existir
         $dir_with_id = $upload_dir . $id_solicitacao . '/';
         if (!is_dir($dir_with_id)) {
-            mkdir($dir_with_id, 0777, true);
+            if (!mkdir($dir_with_id, 0777, true)) {
+                error_log("Falha ao criar diretório: " . $dir_with_id);
+                return null;
+            }
         }
+
         $target_path = $dir_with_id . $file_name;
+        
         if (move_uploaded_file($_FILES[$file_key]['tmp_name'], $target_path)) {
-            return $base_url . $dir_with_id . $file_name;
+            error_log("Upload bem sucedido para: " . $target_path);
+            return $base_url . $id_solicitacao . '/' . $file_name;
+        } else {
+            error_log("Falha no upload para: " . $target_path);
+            error_log("Erro de upload: " . $_FILES[$file_key]['error']);
         }
+    } else {
+        error_log("Erro no arquivo {$file_key}: " . $_FILES[$file_key]['error']);
     }
     return null;
 }
@@ -109,7 +138,8 @@ $columns = [
     'crlv_url',
     'comprovante_residencia_url',
     'doc_complementares_urls',
-    'signed_document_url' // New column for the signed document URL
+    'signed_document_url', // New column for the signed document URL
+    'registro_cnh_infrator' // Nova coluna
 ];
 
 foreach ($columns as $column) {
@@ -118,13 +148,28 @@ foreach ($columns as $column) {
     }
 }
 
+// Modifique a validação inicial
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Validar se os arquivos obrigatórios foram enviados
+    $required_files = ['doc_requerimento', 'cnh'];
+    $missing_files = [];
+
+    foreach ($required_files as $file) {
+        if (!isset($_FILES[$file]) || $_FILES[$file]['error'] === UPLOAD_ERR_NO_FILE) {
+            $missing_files[] = $file;
+        }
+    }
+
+    if (!empty($missing_files)) {
+        returnError("Arquivos obrigatórios não enviados: " . implode(", ", $missing_files));
+    }
+
     // Captura o tipo de solicitação
     $tipo_solicitacao = isset($_POST['tipo_solicitacao']) ? $_POST['tipo_solicitacao'] : null;
 
     // Verifica se está vazio
     if (empty($tipo_solicitacao)) {
-        die("Tipo de solicitação não informado.");
+        returnError("Tipo de solicitação não informado.");
     }
 
     // Se chegou aqui, temos um tipo de solicitação válido
@@ -150,12 +195,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Verificar se ambos os campos foram preenchidos
     if (empty($gmail) || empty($confirm_gmail)) {
-        die("Por favor, preencha ambos os campos de email.");
+        returnError("Por favor, preencha ambos os campos de email.");
     }
 
     // Verificar se os emails são iguais
     if ($gmail !== $confirm_gmail) {
-        die("Os emails informados não são iguais.");
+        returnError("Os emails informados não são iguais.");
     }
 
     // Sanitizar o email
@@ -193,7 +238,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt = $conn->prepare($sql);
 
     if (!$stmt) {
-        die("Erro na preparação da declaração: " . $conn->error);
+        returnError("Erro na preparação da declaração: " . $conn->error);
     }
 
     // Inserimos valores temporários; as URLs serão atualizadas após o upload
@@ -259,15 +304,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (move_uploaded_file($_FILES['signedDocument']['tmp_name'], $target_path)) {
                 $signed_document_url = $base_url . $id_solicitacao . '/' . $file_name;
             } else {
-                echo "Erro ao enviar o arquivo.";
+                returnError("Erro ao enviar o arquivo.");
             }
         } else {
-            echo "Nenhum arquivo enviado ou erro no upload.";
+            returnError("Nenhum arquivo enviado ou erro no upload.");
         }
 
         // Adicione ao trecho onde são capturados os dados do formulário
         if ($tipo_solicitacao === 'apresentacao_condutor') {
             $identidade = verificaTexto($_POST['identidade']);
+            $registro_cnh_infrator = verificaTexto($_POST['registro_cnh_infrator']); // Nova linha
             
             // Adicione os campos de assinatura
             $assinatura_condutor_url = uploadFile('assinatura_condutor', $upload_dir, $base_url, $id_solicitacao);
@@ -276,13 +322,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Modifique a query SQL removendo o orgao_emissor
             $sql = "UPDATE solicitacoes_demutran SET 
                     identidade = ?,
+                    registro_cnh_infrator = ?,
                     assinatura_condutor_url = ?,
                     assinatura_proprietario_url = ?
                     WHERE id = ?";
                     
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sssi", 
+            $stmt->bind_param("ssssi", 
                 $identidade,
+                $registro_cnh_infrator,
                 $assinatura_condutor_url,
                 $assinatura_proprietario_url,
                 $id_solicitacao
@@ -303,7 +351,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $update_stmt = $conn->prepare($update_sql);
         if (!$update_stmt) {
-            die("Erro na preparação da atualização: " . $conn->error);
+            returnError("Erro na preparação da atualização: " . $conn->error);
         }
 
         $update_stmt->bind_param(
@@ -343,7 +391,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_POST = $original_post;
 
             // Retornar mensagem de sucesso com codificação correta
-            header('Content-Type: application/json; charset=utf-8');
             echo json_encode([
                 'success' => true,
                 'message' => 'Dados inseridos com sucesso! Um email de confirmação foi enviado.'
@@ -385,15 +432,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             mail($to, $subject, $message, $headers);
         } else {
-            echo json_encode([
-                'error' => true,
-                'message' => "Erro ao atualizar os arquivos: " . $update_stmt->error
-            ]);
+            returnError("Erro ao atualizar os arquivos: " . $update_stmt->error);
         }
 
         $update_stmt->close();
     } else {
-        echo "Erro ao inserir os dados: " . $stmt->error;
+        returnError("Erro ao inserir os dados: " . $stmt->error);
+    }
+
+    // Após o upload, verifique se pelo menos um arquivo foi enviado com sucesso
+    if (!$doc_requerimento_url && !$cnh_url && !$cnh_condutor_url && 
+        !$notif_DEMUTRAN_url && !$crlv_url && !$comprovante_residencia_url) {
+        returnError("Nenhum arquivo foi enviado com sucesso. Por favor, tente novamente.");
     }
 
     $stmt->close();

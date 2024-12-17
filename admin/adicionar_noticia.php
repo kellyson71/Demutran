@@ -62,11 +62,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Adicionar Notícia</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tiny.cloud/1/djvd4vhwlkk5pio6pmjhmqd0a0j0iwziovpy9rz7k4jvzboi/tinymce/6/tinymce.min.js"
-        referrerpolicy="origin"></script>
-    <!-- Adicionar language pack do TinyMCE -->
-    <script src="https://cdn.tiny.cloud/1/djvd4vhwlkk5pio6pmjhmqd0a0j0iwziovpy9rz7k4jvzboi/tinymce/6/langs/pt_BR.js">
-    </script>
+    <!-- Remover scripts do TinyMCE -->
+    <!-- Adicionar Quill.js -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <style>
     body {
         font-family: 'Inter', sans-serif;
@@ -90,6 +89,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .tox .tox-mbtn__select-label {
         font-family: 'Inter', sans-serif !important;
     }
+
+    /* Estilos para o Quill */
+    .ql-editor {
+        min-height: 200px;
+        font-family: 'Inter', sans-serif;
+    }
     </style>
 </head>
 
@@ -101,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="p-6 flex flex-col h-full">
                 <h1 class="text-2xl font-bold text-blue-600 mb-6">Painel Admin</h1>
                 <nav class="space-y-2 flex-1">
-                    <a href="dashboard.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
+                    <a href="index.php" class="flex items-center p-2 text-gray-700 hover:bg-blue-50 rounded">
                         <span class="material-icons">dashboard</span>
                         <span class="ml-3">Dashboard</span>
                     </a>
@@ -196,9 +201,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
 
                             <div>
-                                <label for="conteudo"
-                                    class="block text-sm font-medium text-gray-700 mb-1">Conteúdo</label>
-                                <textarea id="conteudo" name="conteudo"></textarea>
+                                <label for="editor" class="block text-sm font-medium text-gray-700 mb-1">Conteúdo</label>
+                                <div id="editor"></div>
+                                <input type="hidden" name="conteudo" id="conteudo">
                             </div>
 
                             <div class="space-y-2">
@@ -244,94 +249,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="//unpkg.com/alpinejs" defer></script>
 
     <script>
-    // Inicialização do TinyMCE
-    tinymce.init({
-        selector: '#conteudo',
-        language: 'pt_BR',
-        height: 500,
-        plugins: [
-            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-            'insertdatetime', 'media', 'table', 'help', 'wordcount'
-        ],
-        toolbar: 'undo redo | formatselect | ' +
-            'bold italic backcolor | alignleft aligncenter ' +
-            'alignright alignjustify | bullist numlist outdent indent | ' +
-            'removeformat | image media link table | help',
-        content_style: "body { font-family: 'Inter', sans-serif; }",
-
-        // Configurações em português
-        language_url: 'pt_BR',
-
-        // Configurações de imagem
-        image_title: true,
-        automatic_uploads: true,
-        file_picker_types: 'image',
-        images_upload_handler: function(blobInfo, progress) {
-            return new Promise((resolve, reject) => {
-                let formData = new FormData();
-                formData.append('file', blobInfo.blob(), blobInfo.filename());
-
-                fetch('upload_image.php', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Erro no upload: ' + response.statusText);
-                        }
-                        return response.json();
-                    })
-                    .then(result => {
-                        if (result.location) {
-                            resolve(result.location);
-                        } else {
-                            reject(result.error || 'Erro no upload da imagem');
-                        }
-                    })
-                    .catch(error => {
-                        reject('Erro no upload: ' + error.message);
-                    });
-            });
+    // Inicializar Quill
+    var quill = new Quill('#editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],
+                ['blockquote', 'code-block'],
+                [{ 'header': 1 }, { 'header': 2 }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'script': 'sub'}, { 'script': 'super' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                [{ 'size': ['small', false, 'large', 'huge'] }],
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'align': [] }],
+                ['link', 'image'],
+                ['clean']
+            ]
         },
-
-        // Adicionar configurações adicionais para melhor tratamento de imagens
-        image_uploadtab: true,
-        images_reuse_filename: true,
-        automatic_uploads: true,
-        images_file_types: 'jpg,jpeg,png,gif,webp',
-        max_file_size: '5mb',
-
-        // Configurações de formato
-        formats: {
-            alignleft: {
-                selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img',
-                classes: 'text-left'
-            },
-            aligncenter: {
-                selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img',
-                classes: 'text-center'
-            },
-            alignright: {
-                selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img',
-                classes: 'text-right'
-            },
-            bold: {
-                inline: 'span',
-                classes: 'font-bold'
-            },
-            italic: {
-                inline: 'span',
-                classes: 'italic'
-            }
-        },
-
-        // Menu de contexto em português
-        contextmenu: "link image table",
-
-        // Permitir tags HTML específicas e seus atributos
-        extended_valid_elements: "img[class|src|border=0|alt|title|hspace|vspace|width|height|align|onmouseover|onmouseout|name|style],hr[class|width|size|noshade],font[face|size|color|style],span[class|align|style]"
+        placeholder: 'Digite o conteúdo da notícia aqui...'
     });
+
+    // Atualizar o campo hidden antes do envio do formulário
+    document.querySelector('form').onsubmit = function() {
+        document.getElementById('conteudo').value = quill.root.innerHTML;
+        return true;
+    };
 
     // Preview da imagem
     const dropzone = document.getElementById('dropzone');
