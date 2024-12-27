@@ -60,6 +60,42 @@ $monthlyStats = $conn->query("
     ORDER BY month ASC
 ");
 
+$periodoAtualQuery = $conn->query("
+    SELECT COUNT(*) as total FROM (
+        SELECT data_submissao FROM sac WHERE MONTH(data_submissao) = MONTH(CURRENT_DATE)
+        UNION ALL
+        SELECT data_submissao FROM solicitacoes_demutran WHERE MONTH(data_submissao) = MONTH(CURRENT_DATE)
+        UNION ALL
+        SELECT data_submissao FROM solicitacao_cartao WHERE MONTH(data_submissao) = MONTH(CURRENT_DATE)
+        UNION ALL
+        SELECT data_submissao FROM DAT4 WHERE MONTH(data_submissao) = MONTH(CURRENT_DATE)
+        UNION ALL
+        SELECT data_submissao FROM Parecer WHERE MONTH(data_submissao) = MONTH(CURRENT_DATE)
+    ) as atual
+");
+
+$periodoAnteriorQuery = $conn->query("
+    SELECT COUNT(*) as total FROM (
+        SELECT data_submissao FROM sac WHERE MONTH(data_submissao) = MONTH(DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH))
+        UNION ALL
+        SELECT data_submissao FROM solicitacoes_demutran WHERE MONTH(data_submissao) = MONTH(DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH))
+        UNION ALL
+        SELECT data_submissao FROM solicitacao_cartao WHERE MONTH(data_submissao) = MONTH(DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH))
+        UNION ALL
+        SELECT data_submissao FROM DAT4 WHERE MONTH(data_submissao) = MONTH(DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH))
+        UNION ALL
+        SELECT data_submissao FROM Parecer WHERE MONTH(data_submissao) = MONTH(DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH))
+    ) as anterior
+");
+
+$periodoAtual = $periodoAtualQuery->fetch_assoc()['total'];
+$periodoAnterior = $periodoAnteriorQuery->fetch_assoc()['total'];
+
+// Calcula a variação percentual
+$variacao = $periodoAnterior > 0 ? 
+    round((($periodoAtual - $periodoAnterior) / $periodoAnterior) * 100, 1) : 
+    0;
+
 function renderEmptyStateCard($title, $message = 'Nenhum dado disponível para exibição') {
     ?>
     <div class="bg-white rounded-lg p-6 shadow-sm">

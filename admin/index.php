@@ -263,6 +263,18 @@ function renderEmptyState() {
                     </div>
                 </div>
 
+                <?php
+                if (isset($_SESSION['error_message'])) {
+                    echo '<div class="fixed top-4 right-4 z-50 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg">';
+                    echo '<div class="flex items-center">';
+                    echo '<span class="material-icons text-red-600 mr-2">error</span>';
+                    echo '<p><strong>Erro:</strong> ' . htmlspecialchars($_SESSION['error_message']) . '</p>';
+                    echo '</div>';
+                    echo '</div>';
+                    unset($_SESSION['error_message']); // Remove a mensagem após exibir
+                }
+                ?>
+
                 <!-- Stats Overview -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
                     <!-- SAC Card -->

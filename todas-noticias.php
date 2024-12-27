@@ -12,16 +12,19 @@ if ($pagina_atual < 1) $pagina_atual = 1;
 // Calcular o offset para a consulta SQL
 $offset = ($pagina_atual - 1) * $noticias_por_pagina;
 
-// Buscar o total de notícias
-$sql_total = "SELECT COUNT(*) as total FROM noticias";
+// Buscar o total de notícias (apenas publicadas)
+$sql_total = "SELECT COUNT(*) as total FROM noticias WHERE data_publicacao <= CURDATE()";
 $result_total = $conn->query($sql_total);
 $total_noticias = $result_total->fetch_assoc()['total'];
 
 // Calcular o número total de páginas
 $total_paginas = ceil($total_noticias / $noticias_por_pagina);
 
-// Buscar as notícias para a página atual
-$sql_noticias = "SELECT * FROM noticias ORDER BY data_publicacao DESC LIMIT $offset, $noticias_por_pagina";
+// Buscar as notícias para a página atual (apenas publicadas)
+$sql_noticias = "SELECT * FROM noticias 
+                 WHERE data_publicacao <= CURDATE() 
+                 ORDER BY data_publicacao DESC 
+                 LIMIT $offset, $noticias_por_pagina";
 $result_noticias = $conn->query($sql_noticias);
 
 $noticias = [];
@@ -135,7 +138,7 @@ $conn->close();
             <?php foreach ($noticias as $noticia): ?>
             <div class="bg-white shadow-lg rounded-lg overflow-hidden">
                 <div class="h-48">
-                    <img src="<?php echo $noticia['imagem_url']; ?>"
+                    <img src="<?php echo get_image_path($noticia['imagem_url']); ?>"
                         alt="<?php echo htmlspecialchars($noticia['titulo'], ENT_QUOTES, 'UTF-8'); ?>"
                         class="object-cover w-full h-full">
                 </div>

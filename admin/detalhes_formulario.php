@@ -235,8 +235,8 @@ if ($tabela) {
         display: none;
     }
 
-    .gradient-bg {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .title-header {
+        background-color: #2563eb; /* bg-blue-600 sólido */
     }
 
     .card-hover {
@@ -264,8 +264,8 @@ if ($tabela) {
     }
 
     .glass-effect {
-        background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(5px);
+        background: white;
+        border: 1px solid #e5e7eb;
     }
 
     .backdrop-blur {
@@ -540,6 +540,36 @@ function showErrorAlert(message) {
     document.body.appendChild(alertDiv);
     setTimeout(() => alertDiv.remove(), 8000); // Aumentar tempo para 8 segundos
 }
+
+// Modificar a função enviarParaFormulario()
+function enviarParaFormulario() {
+    const tipo = '<?php echo $tipo; ?>';
+    const id = <?php echo $id; ?>;
+    const subtipo = '<?php echo $formulario['tipo_solicitacao'] ?? ''; ?>';
+    let url;
+
+    // Mapear os tipos de defesa corretamente
+    if (tipo === 'JARI') {
+        if (subtipo === 'apresentacao_condutor') {
+            // Se for apresentação de condutor, usar gerar_formulario_AP.php
+            url = '../utils/form/gerar_formulario_AP.php?id=' + id;
+        } else {
+            // Para outros tipos (jari e defesa_previa), usar gerar_formulario.php
+            const data = {
+                id: id,
+                tipo_solicitacao: subtipo
+            };
+            url = '../utils/form/gerar_formulario.php?' + new URLSearchParams(data).toString();
+        }
+
+        if (url) {
+            window.open(url, '_blank');
+        } else {
+            showErrorAlert('Tipo de formulário não suportado');
+        }
+    }
+}
+
     </script>
 </head>
 
@@ -599,17 +629,47 @@ function showErrorAlert(message) {
             <main class="flex-1 overflow-y-auto p-6 bg-gradient-to-br from-gray-50 to-gray-100">
                 <!-- Cabeçalho do formulário -->
                 <div class="mb-8 title-animation">
-                    <div class="gradient-bg rounded-2xl p-6 text-white">
+                    <div class="title-header rounded-lg p-6 text-white">
                         <h2 class="text-4xl font-bold mb-2">
                             <?php
-                            $tipoFormatado = [
-                                'DAT' => 'Declaração de Acidente de Trânsito',
-                                'PCD' => 'Solicitação de Cartão PCD',
-                                'SAC' => 'Atendimento ao Cidadão',
-                                'JARI' => 'Recurso JARI',
-                                'Parecer' => 'Parecer Técnico'
-                            ][$tipo] ?? $tipo;
-                            echo $tipoFormatado;
+                            if ($tipo == 'JARI') {
+                                // Para formulários da tabela solicitacoes_demutran
+                                $subtipo = $formulario['tipo_solicitacao'] ?? '';
+                                switch($subtipo) {
+                                    case 'defesa_previa':
+                                        echo 'Defesa Prévia';
+                                        break;
+                                    case 'jari':
+                                        echo 'Recurso JARI';
+                                        break;
+                                    case 'apresentacao_condutor':
+                                        echo 'Apresentação de Condutor';
+                                        break;
+                                    default:
+                                        echo 'Formulário de Defesa';
+                                }
+                            } elseif ($tipo == 'PCD') {
+                                // Para formulários da tabela solicitacao_cartao
+                                $subtipo = $formulario['tipo_solicitacao'] ?? '';
+                                switch($subtipo) {
+                                    case 'pcd':
+                                        echo 'Cartão PCD';
+                                        break;
+                                    case 'idoso':
+                                        echo 'Cartão Idoso';
+                                        break;
+                                    default:
+                                        echo 'Solicitação de Cartão';
+                                }
+                            } else {
+                                // Para outros tipos de formulário
+                                $tipoFormatado = [
+                                    'DAT' => 'Declaração de Acidente de Trânsito',
+                                    'SAC' => 'Atendimento ao Cidadão',
+                                    'Parecer' => 'Parecer Técnico'
+                                ][$tipo] ?? $tipo;
+                                echo $tipoFormatado;
+                            }
                             ?>
                         </h2>
                         <p class="text-white/80 flex items-center">
@@ -765,44 +825,25 @@ function showErrorAlert(message) {
         $btnText = 'Ver Formulário';
         
         switch($tipo) {
-            case 'defesa_previa':
             case 'JARI':
-                // Alteração aqui - Criar form dinâmico para POST
+                // Se for JARI, verificar o subtipo
+                $subtipo = $formulario['tipo_solicitacao'] ?? '';
                 $formUrl = "javascript:void(0);";
                 $btnIcon = 'bx-file-blank';
-                $btnText = 'Gerar Defesa';
                 
-                // Adicionar JavaScript para envio via POST
-                echo "<script>
-                function enviarParaFormulario() {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '../utils/form/gerar_formulario.php';
-                    form.target = '_blank';
-
-                    // Adicionar dados do formulário
-                    const dados = " . json_encode($formulario) . ";
-                    
-                    for (const [key, value] of Object.entries(dados)) {
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = key;
-                        input.value = value;
-                        form.appendChild(input);
-                    }
-
-                    // Adicionar tipo_solicitacao
-                    const inputTipo = document.createElement('input');
-                    inputTipo.type = 'hidden';
-                    inputTipo.name = 'tipo_solicitacao';
-                    inputTipo.value = '" . strtolower($tipo) . "';
-                    form.appendChild(inputTipo);
-
-                    document.body.appendChild(form);
-                    form.submit();
-                    document.body.removeChild(form);
+                switch($subtipo) {
+                    case 'jari':
+                        $btnText = 'Gerar JARI';
+                        break;
+                    case 'defesa_previa':
+                        $btnText = 'Gerar Defesa Prévia';
+                        break;
+                    case 'apresentacao_condutor':
+                        $btnText = 'Gerar Apresentação de Condutor';
+                        break;
+                    default:
+                        $btnText = 'Gerar Defesa';
                 }
-                </script>";
                 break;
             case 'apresentacao_condutor':
                 $formUrl = '../utils/form/gerar_formulario_AP.php';
@@ -815,7 +856,7 @@ function showErrorAlert(message) {
                 $btnText = 'Ver Cartão';
                 break;
             case 'DAT':
-                $formUrl = '../utils/form/gerar_formulario.php';
+                $formUrl = '../utils/form/gerar_formulario_DAT.php';
                 $btnIcon = 'bx-file';
                 $btnText = 'Ver DAT';
                 break;
@@ -833,44 +874,34 @@ function showErrorAlert(message) {
         
         if ($formUrl): ?>
         <!-- Botão Ver Documento -->
-        <?php if($tipo == 'defesa_previa' || $tipo == 'JARI'): ?>
+        <?php if($tipo == 'JARI'): ?>
         <a href="#" onclick="enviarParaFormulario()" 
-            class="group relative flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-            <span class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-xl transition-opacity"></span>
+            class="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
             <i class='bx <?php echo $btnIcon; ?> text-xl mr-2'></i>
             <span class="font-medium"><?php echo $btnText; ?></span>
         </a>
         <?php else: ?>
         <a href="<?php echo $formUrl . '?id=' . $id . '&tipo=' . strtolower($tipo); ?>" target="_blank"
-            class="group relative flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-            <span class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-xl transition-opacity"></span>
+            class="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
             <i class='bx <?php echo $btnIcon; ?> text-xl mr-2'></i>
             <span class="font-medium"><?php echo $btnText; ?></span>
         </a>
         <?php endif; ?>
-
-        <!-- Botão Imprimir -->
-        <button onclick="window.open('<?php echo $formUrl . '?id=' . $id . '&tipo=' . strtolower($tipo); ?>&print=true', '_blank')"
-            class="group relative flex items-center px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-            <span class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-xl transition-opacity"></span>
-            <i class='bx bx-printer text-xl mr-2'></i>
-            <span class="font-medium">Imprimir</span>
-        </button>
         <?php endif; ?>
 
         <button onclick="openEditModal()"
-            class="flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition shadow-sm">
+            class="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
             <i class='bx bx-edit-alt mr-2'></i>
             Editar
         </button>
         <button onclick="openConfirmModal()"
-            class="flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition shadow-sm">
+            class="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
             <i class='bx bx-check mr-2'></i>
             Concluir
         </button>
     </div>
     <button onclick="openDeleteModal()"
-        class="flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition shadow-sm">
+        class="flex items-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
         <i class='bx bx-trash mr-2'></i>
         Excluir
     </button>

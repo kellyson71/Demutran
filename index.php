@@ -2,8 +2,10 @@
 // index.php
 include 'env/config.php';
 
-// Buscar todas as notícias para o carrossel
-$sql_carousel = "SELECT * FROM noticias ORDER BY data_publicacao DESC";
+// Buscar todas as notícias para o carrossel (apenas publicadas)
+$sql_carousel = "SELECT * FROM noticias 
+                WHERE data_publicacao <= CURDATE() 
+                ORDER BY data_publicacao DESC";
 $result_carousel = $conn->query($sql_carousel);
 
 $carouselItems = [];
@@ -14,8 +16,11 @@ if ($result_carousel->num_rows > 0) {
     }
 }
 
-// Buscar as 3 últimas notícias para a lista
-$sql_latest = "SELECT * FROM noticias ORDER BY data_publicacao DESC LIMIT 3";
+// Buscar as 3 últimas notícias para a lista (apenas publicadas)
+$sql_latest = "SELECT * FROM noticias 
+               WHERE data_publicacao <= CURDATE() 
+               ORDER BY data_publicacao DESC 
+               LIMIT 3";
 $result_latest = $conn->query($sql_latest);
 
 $latestNews = [];
@@ -385,7 +390,7 @@ $conn->close();
                     <div class="relative w-full h-0 pb-[66.67%] overflow-hidden rounded-lg">
                         <?php foreach ($carouselItems as $index => $item): ?>
                         <div class="hidden duration-700 ease-in-out absolute inset-0" data-carousel-item>
-                            <img src="<?php echo $item['imagem_url']; ?>"
+                            <img src="<?php echo get_image_path($item['imagem_url']); ?>"
                                 alt="<?php echo htmlspecialchars($item['titulo'], ENT_QUOTES, 'UTF-8'); ?>"
                                 class="absolute block w-full h-full object-cover">
                         </div>
@@ -439,7 +444,7 @@ $conn->close();
                     class="flex bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100">
                     <div class="relative w-[200px] h-[150px] flex-shrink-0">
                         <!-- Proporção 4:3 fixa -->
-                        <img src="<?php echo $news['imagem_url']; ?>"
+                        <img src="<?php echo get_image_path($news['imagem_url']); ?>"
                             alt="<?php echo htmlspecialchars($news['titulo'], ENT_QUOTES, 'UTF-8'); ?>"
                             class="absolute inset-0 w-full h-full object-cover rounded-l-lg"
                             onerror="this.onerror=null; this.src='./assets/placeholder.jpg';" loading="lazy">

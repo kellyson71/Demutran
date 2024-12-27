@@ -1,5 +1,5 @@
 <?php
-include '../scr/config.php';
+require_once(__DIR__ . '/../../env/config.php');
 
 if ($conn->connect_error) {
     die("Falha na conexão: " . $conn->connect_error);
@@ -8,23 +8,26 @@ if ($conn->connect_error) {
 // Obtém o token via POST
 $token = $_POST['token'];
 
-// Consultas nas tabelas 'DAT1', 'DAT2' e 'vehicles'
-$tables = ['DAT1', 'DAT2', 'vehicles'];
+// Consultas nas tabelas 'DAT1', 'DAT2' e nova estrutura de veículos
+$tables = ['DAT1', 'DAT2'];
 $results = [];
 
 // Mapeamento de colunas para nomes amigáveis
 $columnNames = [
-    'vehicles' => [
-        'damage_system' => 'Teve parte danificada?',
-        'damaged_parts' => 'Partes danificadas',
-        'load_damage' => 'Danos à carga',
+    'vehicle_damages' => [
+        'dianteira_direita' => 'Dianteira Direita Danificada',
+        'dianteira_esquerda' => 'Dianteira Esquerda Danificada',
+        'lateral_direita' => 'Lateral Direita Danificada',
+        'lateral_esquerda' => 'Lateral Esquerda Danificada',
+        'traseira_direita' => 'Traseira Direita Danificada',
+        'traseira_esquerda' => 'Traseira Esquerda Danificada',
+        'has_load_damage' => 'Possui Danos na Carga',
         'nota_fiscal' => 'Nota Fiscal',
         'tipo_mercadoria' => 'Tipo de Mercadoria',
         'valor_total' => 'Valor Total',
         'estimativa_danos' => 'Estimativa de Danos',
-        'has_insurance' => 'Possui seguro?',
-        'seguradora' => 'Seguradora',
-        'created_at' => 'Criado em'
+        'has_insurance' => 'Possui Seguro',
+        'seguradora' => 'Seguradora'
     ],
     'DAT2' => [
         'situacao_veiculo' => 'Situação do Veículo',
@@ -113,70 +116,103 @@ $columnNames = [
     ]
 ];
 
-// Percorre cada tabela e coleta os resultados
+// Consulta as tabelas DAT1 e DAT2
 foreach ($tables as $table) {
-    $sql = "SELECT * FROM $table WHERE token = '$token'";
-    $result = $conn->query($sql);
+    $sql = "SELECT * FROM $table WHERE token = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('s', $token);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        $rows = [];
-        while ($row = $result->fetch_assoc()) {
-            $rows[] = $row;
-        }
-        $results[$table] = $rows;
+        $results[$table] = $result->fetch_all(MYSQLI_ASSOC);
     }
+    $stmt->close();
 }
 
-// Função para tratar e exibir a coluna damaged_parts
-function displayDamagedParts($json) {
-    $parts = json_decode($json, true);
-    $output = "<ul class='list-disc pl-5'>";
-    foreach ($parts as $part) {
-        $status = $part['checked'] ? 'DANIFICADA' : 'INTEIRA';
-        $output .= "<li>" . $part['name'] . ": " . $status . "</li>";
-    }
-    $output .= "</ul>";
-    return $output;
-}
+// Consulta a nova estrutura de veículos
+$sql = "SELECT uv.id as user_vehicles_id, uv.total_vehicles, vd.* 
+        FROM user_vehicles uv 
+        LEFT JOIN vehicle_damages vd ON uv.id = vd.user_vehicles_id 
+        WHERE uv.token = ?
+        ORDER BY vd.vehicle_index";
 
-// Função para exibir "Sim" ou "Não" em colunas binárias
+$stmt = $conn->prepare($sql);
+$stmt->bind_param('s', $token);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $vehicleData = [];
+    while ($row = $result->fetch_assoc()) {
+        // Formata os dados do veículo
+        $vehicle = [
+            'Número do Veículo' => $row['vehicle_index'],
+            'Partes Danificadas' => array_filter([
+                'Dianteira Direita' => $row['dianteira_direita'] ? 'Sim' : 'Não',
+                'Dianteira Esquerda' => $row['dianteira_esquerda'] ? 'Sim' : 'Não',
+                'Lateral Direita' => $row['lateral_direita'] ? 'Sim' : 'Não',
+                'Lateral Esquerda' => $row['lateral_esquerda'] ? 'Sim' : 'Não',
+                'Traseira Direita' => $row['traseira_direita'] ? 'Sim' : 'Não',
+                'Traseira Esquerda' => $row['traseira_esquerda'] ? 'Sim' : 'Não'
+            ]),
+            'Informações de Carga' => [
+                'Possui Danos' => $row['has_load_damage'] ? 'Sim' : 'Não',
+                'Nota Fiscal' => $row['nota_fiscal'],
+                'Tipo de Mercadoria' => $row['tipo_mercadoria'],
+                'Valor Total' => $row['valor_total'],
+                'Estimativa de Danos' => $row['estimativa_danos'],
+                'Possui Seguro' => $row['has_insurance'] ? 'Sim' : 'Não',
+                'Seguradora' => $row['seguradora']
+            ]
+        ];
+        $vehicleData[] = $vehicle;
+    }
+    $results['vehicles'] = $vehicleData;
+}
+$stmt->close();
+
+// Adicionar esta função antes do if (!empty($results))
 function displayBinaryValue($value) {
-    return $value == 1 ? 'Sim' : ($value == 0 ? 'Não' : $value);
+    if (is_null($value)) return '';
+    if (is_bool($value)) return $value ? 'Sim' : 'Não';
+    if ($value === '1' || $value === 1) return 'Sim';
+    if ($value === '0' || $value === 0) return 'Não';
+    return $value;
 }
 
 if (!empty($results)) {
-    echo "<div class='max-w-6xl mx-auto p-6 space-y-8'>"; // Aumentado para max-w-6xl
-    
-    foreach ($results as $table => $rows) {
-        echo "<div class='bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100'>";
-        // Novo cabeçalho mais suave
-        echo "<div class='bg-gray-50 border-b border-gray-200 p-4 flex items-center space-x-3'>";
-        echo "<svg class='w-5 h-5 text-gray-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' />
-              </svg>";
-        echo "<span class='text-lg text-gray-700 font-medium'>Formulário {$table}</span>";
-        echo "</div>";
-        
-        echo "<div class='max-h-[700px] overflow-y-auto'>";  // Aumentada altura máxima
-        echo "<table class='w-full table-fixed'><tbody>";
-        
-        foreach (array_keys($rows[0]) as $column) {
-            if ($column !== 'token' && $column !== 'id') {
-                $columnName = $columnNames[$table][$column] ?? $column;
-                $value = $rows[0][$column];
-                
-                echo "<tr class='border-b border-gray-100 transition-colors hover:bg-blue-50'>";
-                echo "<td class='py-4 px-6 font-medium text-gray-700 w-2/5 bg-gray-50'>";
-                echo "<div class='flex items-center space-x-2'>";
-                echo "<span class='text-blue-600'>•</span>";
-                echo "<span>{$columnName}</span>";
-                echo "</div>";
-                echo "</td>";
-                
-                echo "<td class='py-4 px-6 text-gray-600'>";
-                if ($table === 'vehicles' && $column === 'damaged_parts') {
-                    echo displayDamagedParts($value);
-                } else {
+    echo "<div class='max-w-6xl mx-auto p-6 space-y-8'>";
+
+    // Exibe dados das tabelas DAT1 e DAT2
+    foreach ($tables as $table) {
+        if (isset($results[$table])) {
+            echo "<div class='bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100'>";
+            // Novo cabeçalho mais suave
+            echo "<div class='bg-gray-50 border-b border-gray-200 p-4 flex items-center space-x-3'>";
+            echo "<svg class='w-5 h-5 text-gray-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' />
+                  </svg>";
+            echo "<span class='text-lg text-gray-700 font-medium'>Formulário {$table}</span>";
+            echo "</div>";
+
+            echo "<div class='max-h-[700px] overflow-y-auto'>";  // Aumentada altura máxima
+            echo "<table class='w-full table-fixed'><tbody>";
+
+            foreach (array_keys($results[$table][0]) as $column) {
+                if ($column !== 'token' && $column !== 'id') {
+                    $columnName = $columnNames[$table][$column] ?? $column;
+                    $value = $results[$table][0][$column];
+
+                    echo "<tr class='border-b border-gray-100 transition-colors hover:bg-blue-50'>";
+                    echo "<td class='py-4 px-6 font-medium text-gray-700 w-2/5 bg-gray-50'>";
+                    echo "<div class='flex items-center space-x-2'>";
+                    echo "<span class='text-blue-600'>•</span>";
+                    echo "<span>{$columnName}</span>";
+                    echo "</div>";
+                    echo "</td>";
+
+                    echo "<td class='py-4 px-6 text-gray-600'>";
                     $displayValue = displayBinaryValue($value);
                     // Adiciona classes especiais para Sim/Não
                     if ($displayValue === 'Sim') {
@@ -186,17 +222,64 @@ if (!empty($results)) {
                     } else {
                         echo "<span class='text-gray-700'>{$displayValue}</span>";
                     }
+                    echo "</td>";
+                    echo "</tr>";
                 }
-                echo "</td>";
-                echo "</tr>";
             }
+
+            echo "</tbody></table>";
+            echo "</div></div>";
         }
-        
-        echo "</tbody></table>";
+    }
+
+    // Exibe dados dos veículos
+    if (isset($results['vehicles'])) {
+        echo "<div class='bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100'>";
+        echo "<div class='bg-gray-50 border-b border-gray-200 p-4 flex items-center space-x-3'>";
+        echo "<svg class='w-5 h-5 text-gray-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'></path>
+              </svg>";
+        echo "<span class='text-lg text-gray-700 font-medium'>Veículos Envolvidos</span>";
+        echo "</div>";
+
+        echo "<div class='max-h-[700px] overflow-y-auto'>";
+        foreach ($results['vehicles'] as $index => $vehicle) {
+            echo "<div class='p-4 border-b border-gray-100'>";
+            echo "<h3 class='font-medium text-lg text-gray-800 mb-3'>Veículo " . $vehicle['Número do Veículo'] . "</h3>";
+
+            // Exibe partes danificadas
+            echo "<div class='mb-4'>";
+            echo "<h4 class='font-medium text-gray-700 mb-2'>Partes Danificadas:</h4>";
+            echo "<div class='grid grid-cols-2 gap-2'>";
+            foreach ($vehicle['Partes Danificadas'] as $parte => $status) {
+                $statusClass = $status === 'Sim' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700';
+                echo "<div class='flex justify-between items-center p-2 rounded-lg {$statusClass}'>";
+                echo "<span>{$parte}</span>";
+                echo "<span class='font-medium'>{$status}</span>";
+                echo "</div>";
+            }
+            echo "</div>";
+            echo "</div>";
+
+            // Exibe informações de carga
+            echo "<div class='mt-4'>";
+            echo "<h4 class='font-medium text-gray-700 mb-2'>Informações de Carga:</h4>";
+            foreach ($vehicle['Informações de Carga'] as $campo => $valor) {
+                if ($valor) {
+                    echo "<div class='flex justify-between items-center py-2 border-b border-gray-100'>";
+                    echo "<span class='text-gray-600'>{$campo}:</span>";
+                    echo "<span class='font-medium text-gray-800'>{$valor}</span>";
+                    echo "</div>";
+                }
+            }
+            echo "</div>";
+            echo "</div>";
+        }
         echo "</div></div>";
     }
+    
     echo "</div>";
-
+    
     echo "<style>
         .max-h-[700px]::-webkit-scrollbar {
             width: 10px;

@@ -9,51 +9,46 @@ if (!isset($_SESSION['usuario_id'])) {
     exit();
 }
 
-$notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
-
-// Obter usuários pendentes
-$sql = "SELECT * FROM usuarios_pendentes ORDER BY data_registro DESC";
-$result = $conn->query($sql);
-$usuariosPendentes = [];
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $usuariosPendentes[] = $row;
-    }
+// Verificação de admin com mensagem de erro
+if (!isset($_SESSION['is_admin']) || !$_SESSION['is_admin']) {
+    // Salvar mensagem de erro na sessão
+    $_SESSION['error_message'] = 'Acesso negado. Esta página é restrita a administradores.';
+    header('Location: index.php');
+    exit();
 }
+
+$notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 
 // Configuração da paginação
 $itens_por_pagina = 10;
 $pagina_atual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
 $offset = ($pagina_atual - 1) * $itens_por_pagina;
 
-// Modificar a query para incluir LIMIT e OFFSET
-$sql_todos = "SELECT id, nome, email, data_registro FROM usuarios ORDER BY nome ASC LIMIT ? OFFSET ?";
-$stmt = $conn->prepare($sql_todos);
-$stmt->bind_param("ii", $itens_por_pagina, $offset);
-$stmt->execute();
-$result_todos = $stmt->get_result();
-
-// Contar total de registros
+// Query para buscar TODOS os usuários primeiro
 $sql_total = "SELECT COUNT(*) as total FROM usuarios";
 $result_total = $conn->query($sql_total);
 $total_registros = $result_total->fetch_assoc()['total'];
 $total_paginas = ceil($total_registros / $itens_por_pagina);
 
+// Query para buscar usuários com paginação
+$sql_todos = "SELECT id, nome, email, data_registro, is_admin FROM usuarios ORDER BY nome ASC";
+$result_todos = $conn->query($sql_todos);
+
 $todosUsuarios = [];
 if ($result_todos->num_rows > 0) {
     while ($row = $result_todos->fetch_assoc()) {
-        // Formatar os dados para o JavaScript
         $todosUsuarios[] = [
             'id' => $row['id'],
             'nome' => htmlspecialchars($row['nome']),
             'email' => htmlspecialchars($row['email']),
             'data_registro' => date('d/m/Y', strtotime($row['data_registro'])),
-            'status' => 'ativo' // Valor padrão para usuários já aceitos
+            'status' => 'ativo',
+            'is_admin' => $row['is_admin']
         ];
     }
 }
 
-// Converter para JSON com opções de formatação adequadas
+// Remova o LIMIT e OFFSET da query principal para mostrar todos os usuários
 $todosUsuariosJson = json_encode($todosUsuarios, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_UNESCAPED_UNICODE);
 ?>
 <!DOCTYPE html>
@@ -61,11 +56,12 @@ $todosUsuariosJson = json_encode($todosUsuarios, JSON_HEX_APOS | JSON_HEX_QUOT |
 
 <head>
     <meta charset="UTF-8">
-    <title>Gerenciar Usuários Pendentes</title>
+    <title>Gerenciar Usuários</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Ou melhor ainda, use uma versão local do Tailwind -->
 
     <!-- Google Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -78,16 +74,22 @@ $todosUsuariosJson = json_encode($todosUsuarios, JSON_HEX_APOS | JSON_HEX_QUOT |
 
     <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('userData', () => ({
-            activeTab: 'pending',
+        // Criar o store global primeiro
+        Alpine.store('mainData', {
+            usuarios: <?php echo $todosUsuariosJson; ?>
+        });
+
+        Alpine.data('mainData', () => ({
             searchTerm: '',
-            todosUsuarios: <?php echo $todosUsuariosJson; ?>,
-            filteredUsers() {
-                if (!this.searchTerm) return this.todosUsuarios;
-                const searchTerm = this.searchTerm.toLowerCase();
-                return this.todosUsuarios.filter(user =>
-                    user.nome.toLowerCase().includes(searchTerm) ||
-                    user.email.toLowerCase().includes(searchTerm)
+            get usuarios() {
+                return Alpine.store('mainData').usuarios;
+            },
+            get filteredUsers() {
+                if (!this.searchTerm) return this.usuarios;
+                const term = this.searchTerm.toLowerCase();
+                return this.usuarios.filter(user => 
+                    user.nome.toLowerCase().includes(term) || 
+                    user.email.toLowerCase().includes(term)
                 );
             },
             editarUsuario(usuario) {
@@ -96,8 +98,8 @@ $todosUsuariosJson = json_encode($todosUsuarios, JSON_HEX_APOS | JSON_HEX_QUOT |
                 document.getElementById('editar-email').value = usuario.email;
                 document.getElementById('modal-editar').classList.remove('hidden');
             }
-        }))
-    })
+        }));
+    });
     </script>
 
     <style>
@@ -150,24 +152,21 @@ $todosUsuariosJson = json_encode($todosUsuarios, JSON_HEX_APOS | JSON_HEX_QUOT |
 
             <!-- Main -->
             <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+                <!-- Botão Criar Usuário -->
+                <div class="mb-6 flex justify-end">
+                    <button onclick="document.getElementById('modal-criar').classList.remove('hidden')"
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <span class="material-icons text-sm mr-2">person_add</span>
+                        Criar Usuário
+                    </button>
+                </div>
+
                 <!-- Header Stats -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <div class="flex items-center">
                             <div class="p-3 rounded-full bg-blue-50">
-                                <span class="material-icons text-blue-600">person_add</span>
-                            </div>
-                            <div class="ml-4">
-                                <h3 class="text-sm font-medium text-gray-500">Usuários Pendentes</h3>
-                                <p class="text-2xl font-semibold text-gray-900"><?php echo count($usuariosPendentes); ?>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex items-center">
-                            <div class="p-3 rounded-full bg-green-50">
-                                <span class="material-icons text-green-600">groups</span>
+                                <span class="material-icons text-blue-600">groups</span>
                             </div>
                             <div class="ml-4">
                                 <h3 class="text-sm font-medium text-gray-500">Total de Usuários</h3>
@@ -177,8 +176,8 @@ $todosUsuariosJson = json_encode($todosUsuarios, JSON_HEX_APOS | JSON_HEX_QUOT |
                     </div>
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <div class="flex items-center">
-                            <div class="p-3 rounded-full bg-purple-50">
-                                <span class="material-icons text-purple-600">verified_user</span>
+                            <div class="p-3 rounded-full bg-green-50">
+                                <span class="material-icons text-green-600">verified_user</span>
                             </div>
                             <div class="ml-4">
                                 <h3 class="text-sm font-medium text-gray-500">Usuários Ativos</h3>
@@ -188,263 +187,155 @@ $todosUsuariosJson = json_encode($todosUsuarios, JSON_HEX_APOS | JSON_HEX_QUOT |
                     </div>
                 </div>
 
-                <!-- Tabs -->
-                <div class="mb-6" x-data="userData">
-                    <div class="bg-white rounded-xl shadow-sm">
-                        <div class="border-b border-gray-200">
-                            <nav class="flex space-x-8 px-6" aria-label="Tabs">
-                                <button @click="activeTab = 'pending'"
-                                    :class="{ 'border-blue-500 text-blue-600': activeTab === 'pending' }"
-                                    class="border-b-2 py-4 px-1 text-sm font-medium hover:text-gray-700 hover:border-gray-300 whitespace-nowrap focus:outline-none transition-colors">
-                                    <span class="inline-flex items-center">
-                                        <span class="material-icons text-sm mr-2">assignment_ind</span>
-                                        Pendentes
-                                        <?php if (count($usuariosPendentes) > 0): ?>
-                                        <span class="ml-2 bg-blue-100 text-blue-600 py-0.5 px-2.5 rounded-full text-xs">
-                                            <?php echo count($usuariosPendentes); ?>
-                                        </span>
-                                        <?php endif; ?>
-                                    </span>
+                <!-- Lista de Usuários -->
+                <div x-data="mainData" class="bg-white rounded-xl shadow-sm">
+                    <!-- Search and Filters -->
+                    <div class="p-4 bg-gray-50 border-b">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div class="relative flex-1 w-full">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                                    <span class="material-icons text-gray-400 text-sm">search</span>
+                                </span>
+                                <input type="text" x-model="searchTerm"
+                                    class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                    placeholder="Buscar usuários...">
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button
+                                    class="inline-flex items-center px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50">
+                                    <span class="material-icons text-sm mr-2">download</span>
+                                    Exportar
                                 </button>
-                                <button @click="activeTab = 'all'"
-                                    :class="{ 'border-blue-500 text-blue-600': activeTab === 'all' }"
-                                    class="border-b-2 py-4 px-1 text-sm font-medium hover:text-gray-700 hover:border-gray-300 whitespace-nowrap focus:outline-none transition-colors">
-                                    <span class="inline-flex items-center">
-                                        <span class="material-icons text-sm mr-2">group</span>
-                                        Todos os Usuários
-                                    </span>
-                                </button>
-                            </nav>
-                        </div>
-
-                        <!-- Search and Filters -->
-                        <div class="p-4 bg-gray-50 border-b">
-                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                                <div class="relative flex-1 w-full">
-                                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center">
-                                        <span class="material-icons text-gray-400 text-sm">search</span>
-                                    </span>
-                                    <input type="text" x-model="searchTerm"
-                                        class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                        placeholder="Buscar usuários...">
-                                </div>
-                                <div class="flex items-center space-x-2">
-                                    <button
-                                        class="inline-flex items-center px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50">
-                                        <span class="material-icons text-sm mr-2">filter_list</span>
-                                        Filtros
-                                    </button>
-                                    <button
-                                        class="inline-flex items-center px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50">
-                                        <span class="material-icons text-sm mr-2">download</span>
-                                        Exportar
-                                    </button>
-                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Table Contents -->
-                        <div x-show="activeTab === 'pending'">
-                            <?php if (count($usuariosPendentes) > 0): ?>
-                            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                                <div class="px-6 py-4 border-b border-gray-100">
-                                    <div class="flex items-center justify-between">
-                                        <h2 class="text-xl font-semibold text-gray-800">Usuários Pendentes</h2>
-                                        <span
-                                            class="px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full"><?php echo count($usuariosPendentes); ?>
-                                            pendentes</span>
-                                    </div>
-                                </div>
-
-                                <div class="overflow-x-auto">
-                                    <table class="w-full">
-                                        <thead class="bg-gray-50">
-                                            <tr>
-                                                <th class="px-6 py-3 text-left">
+                    <!-- Tabela de Usuários -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left">
+                                        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</span>
+                                    </th>
+                                    <th class="px-6 py-3 text-left">
+                                        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Email</span>
+                                    </th>
+                                    <th class="px-6 py-3 text-left">
+                                        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Data de Registro</span>
+                                    </th>
+                                    <th class="px-6 py-3 text-left">
+                                        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</span>
+                                    </th>
+                                    <th class="px-6 py-3 text-right">
+                                        <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <template x-for="usuario in filteredUsers" :key="usuario.id">
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center">
+                                                <div class="h-10 w-10 flex-shrink-0">
                                                     <span
-                                                        class="text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</span>
-                                                </th>
-                                                <th class="px-6 py-3 text-left">
-                                                    <span
-                                                        class="text-xs font-medium text-gray-500 uppercase tracking-wider">Email</span>
-                                                </th>
-                                                <th class="px-6 py-3 text-left">
-                                                    <span
-                                                        class="text-xs font-medium text-gray-500 uppercase tracking-wider">Data</span>
-                                                </th>
-                                                <th class="px-6 py-3 text-right">
-                                                    <span
-                                                        class="text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</span>
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-gray-100">
-                                            <?php foreach ($usuariosPendentes as $usuario): ?>
-                                            <tr class="hover:bg-gray-50 transition-colors">
-                                                <td class="px-6 py-4">
-                                                    <div class="flex items-center">
-                                                        <div class="h-10 w-10 flex-shrink-0">
-                                                            <span
-                                                                class="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                                                                <span
-                                                                    class="text-xl text-gray-600"><?php echo substr($usuario['nome'], 0, 1); ?></span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="ml-4">
-                                                            <div class="text-sm font-medium text-gray-900">
-                                                                <?php echo htmlspecialchars($usuario['nome']); ?></div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    <div class="text-sm text-gray-900">
-                                                        <?php echo htmlspecialchars($usuario['email']); ?></div>
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    <div class="text-sm text-gray-500">
-                                                        <?php echo date('d/m/Y', strtotime($usuario['data_registro'])); ?>
-                                                    </div>
-                                                </td>
-                                                <td class="px-6 py-4 text-right">
-                                                    <button onclick="aceitarUsuario(<?php echo $usuario['id']; ?>)"
-                                                        class="inline-flex items-center px-3 py-1 bg-green-50 text-green-700 text-sm font-medium rounded-md hover:bg-green-100 transition-colors mr-2">
-                                                        <span class="material-icons text-sm mr-1">check_circle</span>
-                                                        Aceitar
-                                                    </button>
-                                                    <button onclick="recusarUsuario(<?php echo $usuario['id']; ?>)"
-                                                        class="inline-flex items-center px-3 py-1 bg-red-50 text-red-700 text-sm font-medium rounded-md hover:bg-red-100 transition-colors">
-                                                        <span class="material-icons text-sm mr-1">cancel</span>
-                                                        Recusar
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <?php else: ?>
-                            <div class="bg-white rounded-xl shadow-sm p-6 text-center">
-                                <div
-                                    class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                                    <span class="material-icons text-gray-400 text-2xl">people</span>
-                                </div>
-                                <h2 class="text-xl font-semibold text-gray-800 mb-2">Nenhum Usuário Pendente</h2>
-                                <p class="text-gray-500">Não há usuários aguardando aprovação no momento.</p>
-                            </div>
-                            <?php endif; ?>
-                        </div>
-
-                        <div x-show="activeTab === 'all'" x-cloak>
-                            <div class="overflow-x-auto">
-                                <table class="w-full">
-                                    <thead class="bg-gray-50">
-                                        <tr>
-                                            <th class="px-6 py-3 text-left">
-                                                <span
-                                                    class="text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</span>
-                                            </th>
-                                            <th class="px-6 py-3 text-left">
-                                                <span
-                                                    class="text-xs font-medium text-gray-500 uppercase tracking-wider">Email</span>
-                                            </th>
-                                            <th class="px-6 py-3 text-left">
-                                                <span
-                                                    class="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</span>
-                                            </th>
-                                            <th class="px-6 py-3 text-right">
-                                                <span
-                                                    class="text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</span>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-100">
-                                        <template x-for="usuario in filteredUsers()" :key="usuario.id">
-                                            <tr class="hover:bg-gray-50 transition-colors">
-                                                <td class="px-6 py-4">
-                                                    <div class="flex items-center">
-                                                        <div class="h-10 w-10 flex-shrink-0">
-                                                            <span
-                                                                class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                                                <span class="text-xl text-blue-600"
-                                                                    x-text="usuario.nome.charAt(0)"></span>
-                                                            </span>
-                                                        </div>
-                                                        <div class="ml-4">
-                                                            <div class="text-sm font-medium text-gray-900"
-                                                                x-text="usuario.nome"></div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    <div class="text-sm text-gray-900" x-text="usuario.email"></div>
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    <span
-                                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                                        :class="{
-                                                            'bg-green-100 text-green-800': usuario.status === 'ativo',
-                                                            'bg-yellow-100 text-yellow-800': usuario.status === 'pendente',
-                                                            'bg-red-100 text-red-800': usuario.status === 'inativo'
-                                                        }"
-                                                        x-text="usuario.status ? usuario.status.charAt(0).toUpperCase() + usuario.status.slice(1) : 'Ativo'">
+                                                        class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                                        <span class="text-xl text-blue-600"
+                                                            x-text="usuario.nome.charAt(0)"></span>
                                                     </span>
-                                                </td>
-                                                <td class="px-6 py-4 text-right">
-                                                    <button @click="editarUsuario(usuario)"
-                                                        class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition-colors">
-                                                        <span class="material-icons text-sm mr-1">edit</span>
-                                                        Editar
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900"
+                                                        x-text="usuario.nome"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm text-gray-900" x-text="usuario.email"></div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm text-gray-500" x-text="usuario.data_registro"></div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span x-show="usuario.is_admin == 1" 
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                <span class="material-icons text-sm mr-1">admin_panel_settings</span>
+                                                Administrador
+                                            </span>
+                                            <span x-show="usuario.is_admin == 0" 
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                <span class="material-icons text-sm mr-1">person</span>
+                                                Usuário
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div class="relative inline-block text-left" x-data="{ open: false }">
+                                                <button @click="open = !open" type="button" class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition-colors">
+                                                    <span class="material-icons text-sm mr-1">more_vert</span>
+                                                    Ações
+                                                </button>
+
+                                                <div x-show="open" 
+                                                     @click.away="open = false"
+                                                     class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+                                                     x-cloak>
+                                                    <div class="py-1">
+                                                        <!-- Editar -->
+                                                        <button @click="editarUsuario(usuario); open = false"
+                                                            class="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                            <span class="material-icons text-sm mr-3">edit</span>
+                                                            Editar Usuário
+                                                        </button>
+
+                                                        <!-- Tornar Admin (apenas para não-admin) -->
+                                                        <template x-if="usuario.is_admin == 0">
+                                                            <button @click="tornarAdmin(usuario.id); open = false"
+                                                                class="flex w-full items-center px-4 py-2 text-sm text-purple-700 hover:bg-purple-50">
+                                                                <span class="material-icons text-sm mr-3">admin_panel_settings</span>
+                                                                Tornar Administrador
+                                                            </button>
+                                                        </template>
+
+                                                        <!-- Deletar -->
+                                                        <button @click="deletarUsuario(usuario.id); open = false"
+                                                            class="flex w-full items-center px-4 py-2 text-sm text-red-700 hover:bg-red-50">
+                                                            <span class="material-icons text-sm mr-3">delete</span>
+                                                            Apagar Usuário
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
                 <!-- Pagination -->
-                <div
-                    class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 rounded-lg shadow-sm">
-                    <div class="flex-1 flex justify-between sm:hidden">
-                        <button
-                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                            Anterior
-                        </button>
-                        <button
-                            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                            Próximo
-                        </button>
-                    </div>
+                <div x-data="mainData" class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 rounded-lg shadow-sm mt-4">
                     <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                         <div>
                             <p class="text-sm text-gray-700">
-                                Mostrando <span class="font-medium">1</span> até <span class="font-medium">10</span> de
-                                <span class="font-medium"><?php echo $total_registros; ?></span> resultados
+                                Mostrando 
+                                <span class="font-medium" x-text="usuarios.length"></span> 
+                                usuários
                             </p>
                         </div>
                         <div>
-                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-                                aria-label="Pagination">
-                                <button
-                                    class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                                <button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                                     <span class="material-icons text-sm">chevron_left</span>
                                 </button>
-                                <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
-                                <a href="?pagina=<?php echo $i; ?>"
-                                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"><?php echo $i; ?></a>
-                                <?php endfor; ?>
-                                <button
-                                    class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                                     <span class="material-icons text-sm">chevron_right</span>
                                 </button>
                             </nav>
                         </div>
                     </div>
                 </div>
+
             </main>
 
             <!-- Footer -->
@@ -456,34 +347,6 @@ $todosUsuariosJson = json_encode($todosUsuarios, JSON_HEX_APOS | JSON_HEX_QUOT |
     </div>
 
     <!-- Modais -->
-    <!-- Modal de Confirmação de Aceite -->
-    <div id="modal-aceitar" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
-        <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-            <h2 class="text-xl font-bold mb-4">Confirmar Aceitação</h2>
-            <p>Tem certeza que deseja aceitar este usuário?</p>
-            <div class="mt-6 flex justify-end space-x-4">
-                <button id="cancelar-aceitar"
-                    class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">Cancelar</button>
-                <button id="confirmar-aceitar"
-                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Aceitar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de Confirmação de Recusa -->
-    <div id="modal-recusar" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
-        <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-            <h2 class="text-xl font-bold mb-4">Confirmar Recusa</h2>
-            <p>Tem certeza que deseja recusar este usuário?</p>
-            <div class="mt-6 flex justify-end space-x-4">
-                <button id="cancelar-recusar"
-                    class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">Cancelar</button>
-                <button id="confirmar-recusar"
-                    class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Recusar</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal de Edição de Usuário -->
     <div id="modal-editar" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
         <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
@@ -513,100 +376,64 @@ $todosUsuariosJson = json_encode($todosUsuarios, JSON_HEX_APOS | JSON_HEX_QUOT |
         </div>
     </div>
 
+    <!-- Modal de Criação de Usuário -->
+    <div id="modal-criar" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
+    <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+        <h2 class="text-xl font-bold mb-4">Criar Novo Usuário</h2>
+        <form id="form-criar" class="space-y-4">
+            <!-- Avatar Upload -->
+            <div class="flex justify-center mb-6">
+                <div class="relative group">
+                    <div id="avatar-preview" class="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-4xl">
+                        <span class="material-icons">person</span>
+                    </div>
+                    <label for="criar-avatar" class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                        <span class="material-icons text-white">photo_camera</span>
+                    </label>
+                    <input type="file" id="criar-avatar" name="avatar" accept="image/*" class="hidden">
+                </div>
+            </div>
+
+            <div>
+                <label for="criar-nome" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                <input type="text" id="criar-nome" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="criar-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="criar-email" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="criar-senha" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                <input type="password" id="criar-senha" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="criar-confirmar-senha" class="block text-sm font-medium text-gray-700 mb-1">Confirmar Senha</label>
+                <input type="password" id="criar-confirmar-senha" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus-border-blue-500">
+            </div>
+            <div class="flex items-center space-x-2 mt-4">
+                <input type="checkbox" id="criar-admin" name="is_admin" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                <label for="criar-admin" class="text-sm text-gray-700">Usuário é administrador</label>
+            </div>
+            <div class="mt-6 flex justify-end space-x-4">
+                <button type="button" onclick="document.getElementById('modal-criar').classList.add('hidden')"
+                    class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">
+                    Cancelar
+                </button>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    Criar Usuário
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
     <script>
-    let usuarioIdParaAceitar = null;
-    let usuarioIdParaRecusar = null;
-
-    // Função para aceitar usuário
-    function aceitarUsuario(id) {
-        usuarioIdParaAceitar = id;
-        document.getElementById('modal-aceitar').classList.remove('hidden');
-    }
-
-    document.getElementById('confirmar-aceitar').addEventListener('click', function() {
-        if (usuarioIdParaAceitar) {
-            fetch('./aceitar_usuario_ajax.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        id: usuarioIdParaAceitar
-                    })
-                })
-                .then(response => response.text().then(text => {
-                    try {
-                        const data = JSON.parse(text);
-                        if (data.success) {
-                            window.location.reload();
-                        } else {
-                            alert('Erro ao aceitar usuário: ' + data.message);
-                        }
-                    } catch (error) {
-                        console.error('Erro ao analisar JSON:', error);
-                        console.error('Resposta do servidor:', text);
-                        alert('Erro ao processar a resposta do servidor.');
-                    }
-                }))
-                .catch(error => {
-                    console.error('Erro na requisição:', error);
-                    alert('Erro na requisição: ' + error);
-                });
-        }
-    });
-
-
-    function recusarUsuario(id) {
-        usuarioIdParaRecusar = id;
-        document.getElementById('modal-recusar').classList.remove('hidden');
-    }
-
-    document.getElementById('confirmar-recusar').addEventListener('click', function() {
-        if (usuarioIdParaRecusar) {
-            fetch('./recusar_usuario_ajax.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        id: usuarioIdParaRecusar
-                    })
-                })
-                .then(response => response.text().then(text => {
-                    try {
-                        const data = JSON.parse(text);
-                        if (data.success) {
-                            window.location.reload();
-                        } else {
-                            alert('Erro ao recusar usuário: ' + data.message);
-                        }
-                    } catch (error) {
-                        console.error('Erro ao analisar JSON:', error);
-                        console.error('Resposta do servidor:', text);
-                        alert('Erro ao processar a resposta do servidor.');
-                    }
-                }))
-                .catch(error => {
-                    console.error('Erro na requisição:', error);
-                    alert('Erro na requisição: ' + error);
-                });
-        }
-    });
-
-    // Cancelar Aceitação
-    document.getElementById('cancelar-aceitar').addEventListener('click', function() {
-        document.getElementById('modal-aceitar').classList.add('hidden');
-    });
-
-    // Confirmar Aceitação
-
-
-    // Cancelar Recusa
-    document.getElementById('cancelar-recusar').addEventListener('click', function() {
-        document.getElementById('modal-recusar').classList.add('hidden');
-    });
-
-    // Confirmar Recusa
+    // Remover código relacionado a aceitar/recusar
+    // Manter apenas as funções de edição e criação
 
     // Editar Usuário
     document.getElementById('form-editar').addEventListener('submit', function(e) {
@@ -643,6 +470,177 @@ $todosUsuariosJson = json_encode($todosUsuarios, JSON_HEX_APOS | JSON_HEX_QUOT |
     document.getElementById('cancelar-editar').addEventListener('click', function() {
         document.getElementById('modal-editar').classList.add('hidden');
     });
+
+    // Adicionar ao JavaScript existente
+    function showSuccessAlert(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'fixed top-4 right-4 z-50 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-lg';
+        alertDiv.innerHTML = `
+            <div class="flex items-center">
+                <span class="material-icons text-green-600 mr-2">check_circle</span>
+                <div>
+                    <p class="font-bold">Sucesso!</p>
+                    <p>${message}</p>
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-4">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+        `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 3000);
+    }
+
+    // Modificar o event listener do form-criar para melhor tratamento de erros
+    document.getElementById('form-criar').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Pegar o arquivo de avatar se existir
+        const avatarInput = document.getElementById('criar-avatar');
+        let avatarPromise = Promise.resolve(null);
+        
+        if (avatarInput.files[0]) {
+            avatarPromise = new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(avatarInput.files[0]);
+            });
+        }
+
+        // Quando o avatar estiver pronto (ou não existir), enviar o formulário
+        avatarPromise.then(avatarBase64 => {
+            const formData = {
+                nome: document.getElementById('criar-nome').value,
+                email: document.getElementById('criar-email').value,
+                senha: document.getElementById('criar-senha').value,
+                is_admin: document.getElementById('criar-admin').checked,
+                avatar: avatarBase64
+            };
+
+            // Validar senha
+            if (formData.senha !== document.getElementById('criar-confirmar-senha').value) {
+                alert('As senhas não coincidem');
+                return;
+            }
+
+            fetch('criar_usuario_ajax.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Adicionar novo usuário à lista sem recarregar a página
+                    Alpine.store('mainData').usuarios.push({
+                        id: data.usuario.id,
+                        nome: data.usuario.nome,
+                        email: data.usuario.email,
+                        data_registro: data.usuario.data_registro,
+                        status: 'ativo',
+                        is_admin: data.usuario.is_admin,
+                        avatar: data.usuario.avatar
+                    });
+
+                    // Limpar formulário
+                    document.getElementById('form-criar').reset();
+                    document.getElementById('avatar-preview').innerHTML = '<span class="material-icons">person</span>';
+                    
+                    // Mostrar mensagem de sucesso
+                    showSuccessAlert('Usuário criado com sucesso!');
+                    
+                    // Fechar modal
+                    document.getElementById('modal-criar').classList.add('hidden');
+                } else {
+                    alert(data.message || 'Erro ao criar usuário');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao processar a requisição');
+            });
+        });
+    });
+
+    // Função para preview da imagem
+    function setupAvatarPreview() {
+        const fileInput = document.getElementById('criar-avatar');
+        const preview = document.getElementById('avatar-preview');
+
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" class="w-full h-full rounded-full object-cover">`;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Inicializar preview
+    setupAvatarPreview();
+
+    // Adicionar função para tornar usuário administrador
+    function tornarAdmin(userId) {
+        if (confirm('Tem certeza que deseja tornar este usuário um administrador?')) {
+            fetch('tornar_admin_ajax.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: userId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccessAlert('Usuário promovido a administrador com sucesso!');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    alert('Erro ao promover usuário: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao processar a requisição');
+            });
+        }
+    }
+
+    function deletarUsuario(userId) {
+        if (confirm('Tem certeza que deseja apagar este usuário? Esta ação não pode ser desfeita.')) {
+            fetch('deletar_usuario_ajax.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: userId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remover usuário da lista no Alpine.js store
+                    Alpine.store('mainData').usuarios = Alpine.store('mainData').usuarios.filter(u => u.id !== userId);
+                    showSuccessAlert('Usuário apagado com sucesso!');
+                } else {
+                    alert('Erro ao apagar usuário: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao processar a requisição');
+            });
+        }
+    }
     </script>
 </body>
 

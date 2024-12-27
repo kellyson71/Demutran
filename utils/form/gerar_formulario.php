@@ -1,95 +1,72 @@
 <?php
 session_start();
+require_once '../../env/config.php';
+
+// Obter dados do formulário via POST ou GET
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['form_data'] = $_POST;
-    header('Location: gerar_formulario.php');
-    exit;
-}
-// Verifica se o formulário foi enviado
-if (isset($_SESSION['form_data'])) {
-    $formData = $_SESSION['form_data'];
-    // Alteração aqui: usar tipo_solicitacao ao invés de tipoRequerente
-    $tipoRequerente = $formData['tipo_solicitacao'] ?? '';
-    
-    // Formatar o texto do tipo de solicitação para exibição
-    switch($tipoRequerente) {
-        case 'defesa_previa':
-            $tipoRequerente = 'Defesa Prévia';
-            break;
-        case 'apresentacao_condutor':
-            $tipoRequerente = 'Apresentação do Condutor';
-            break;
-        case 'jari':
-            $tipoRequerente = 'JARI';
-            break;
-        default:
-            $tipoRequerente = 'Não informado';
-    }
-
-    $nome = $formData['nome'] ?? '';
-    $cpf = $formData['cpf'] ?? '';
-    $endereco = $formData['endereco'] ?? '';
-    $numero = $formData['numero'] ?? '';
-    $complemento = $formData['complemento'] ?? '';
-    $bairro = $formData['bairro'] ?? '';
-    $cep = $formData['cep'] ?? '';
-    $municipio = $formData['municipio'] ?? '';
-    $telefone = $formData['telefone'] ?? '';
-    $placa = $formData['placa'] ?? '';
-    $marcaModelo = $formData['marcaModelo'] ?? '';
-    $cor = $formData['cor'] ?? '';
-    $especie = $formData['especie'] ?? '';
-    $categoria = $formData['categoria'] ?? '';
-    $ano = $formData['ano'] ?? '';
-    $autoInfracao = $formData['autoInfracao'] ?? '';
-    $dataInfracao = $formData['dataInfracao'] ?? '';
-    $horaInfracao = $formData['horaInfracao'] ?? '';
-    $localInfracao = $formData['localInfracao'] ?? '';
-    $enquadramento = $formData['enquadramento'] ?? '';
-    $defesa = $formData['defesa'] ?? '';
-
-    // Processar o arquivo enviado
-    if (isset($_FILES['signedDocument'])) {
-        $arquivoTmp = $_FILES['signedDocument']['tmp_name'];
-        $nomeArquivo = $_FILES['signedDocument']['name'];
-        $destino = 'uploads/' . $nomeArquivo;
-
-        // Verifica se o diretório existe, senão cria
-        if (!is_dir('uploads')) {
-            mkdir('uploads', 0777, true);
-        }
-
-        // Move o arquivo para o diretório de destino
-        move_uploaded_file($arquivoTmp, $destino);
-    }
-
-    // Formatar data para exibição
-    $dataAtual = date('d') . ' de ' . date('F') . ' de ' . date('Y');
-
-    // Mapear os meses para português
-    $meses = array(
-        'January' => 'janeiro',
-        'February' => 'fevereiro',
-        'March' => 'março',
-        'April' => 'abril',
-        'May' => 'maio',
-        'June' => 'junho',
-        'July' => 'julho',
-        'August' => 'agosto',
-        'September' => 'setembro',
-        'October' => 'outubro',
-        'November' => 'novembro',
-        'December' => 'dezembro'
-    );
-    $mesIngles = date('F');
-    $mesPortugues = $meses[$mesIngles];
-    $dataAtual = date('d') . ' de ' . $mesPortugues . ' de ' . date('Y');
+    $formData = $_POST;
 } else {
-    echo 'Dados do formulário não encontrados na sessão.';
-    exit;
+    // Verificar se temos ID e tipo na URL
+    $id = $_GET['id'] ?? '';
+    $tipo = $_GET['tipo_solicitacao'] ?? '';
+    
+    if ($id && $tipo) {
+        // Consultar banco de dados
+        $sql = "SELECT * FROM solicitacoes_demutran WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $formData = $result->fetch_assoc();
+        
+        if (!$formData) {
+            die('Formulário não encontrado');
+        }
+    } else if (isset($_SESSION['form_data'])) {
+        $formData = $_SESSION['form_data'];
+    } else {
+        die('Dados do formulário não encontrados');
+    }
 }
 
-// Determinar configurações baseadas no tipo de solicitação
+// Formatar o texto do tipo de solicitação para exibição
+$tipoRequerente = $formData['tipo_solicitacao'] ?? '';
+switch($tipoRequerente) {
+    case 'defesa_previa':
+        $tipoRequerente = 'Defesa Prévia';
+        break;
+    case 'jari':
+        $tipoRequerente = 'JARI';
+        break;
+    default:
+        $tipoRequerente = 'Não informado';
+}
+
+// Extrair dados do formulário
+$nome = $formData['nome'] ?? '';
+$cpf = $formData['cpf'] ?? '';
+$endereco = $formData['endereco'] ?? '';
+$numero = $formData['numero'] ?? '';
+$complemento = $formData['complemento'] ?? '';
+$bairro = $formData['bairro'] ?? '';
+$cep = $formData['cep'] ?? '';
+$municipio = $formData['municipio'] ?? '';
+$telefone = $formData['telefone'] ?? '';
+$placa = $formData['placa'] ?? '';
+$marcaModelo = $formData['marcaModelo'] ?? '';
+$cor = $formData['cor'] ?? '';
+$especie = $formData['especie'] ?? '';
+$categoria = $formData['categoria'] ?? '';
+$ano = $formData['ano'] ?? '';
+$autoInfracao = $formData['autoInfracao'] ?? '';
+$dataInfracao = $formData['dataInfracao'] ?? '';
+$horaInfracao = $formData['horaInfracao'] ?? '';
+$localInfracao = $formData['localInfracao'] ?? '';
+$enquadramento = $formData['enquadramento'] ?? '';
+$defesa = $formData['defesa'] ?? '';
+
+// Configurações baseadas no tipo de solicitação
 $tipoSolicitacao = $formData['tipo_solicitacao'] ?? '';
 $configs = [
     'titulo' => '',
@@ -103,8 +80,8 @@ switch($tipoSolicitacao) {
     case 'defesa_previa':
         $configs = [
             'titulo' => 'REQUERIMENTO PARA APRESENTAÇÃO DE DEFESA PRÉVIA',
-            'bg_color' => '#E3F2FD',  // Azul claro
-            'border_color' => '#2196F3', // Azul escuro
+            'bg_color' => '#E3F2FD',
+            'border_color' => '#2196F3',
             'destinatario' => 'Ilustríssimo Senhor Gerente Executivo do Departamento Municipal de Trânsito – DEMUTRAN de Pau dos Ferros/RN',
             'texto_acao' => 'Vem interpor Defesa Prévia'
         ];
@@ -112,13 +89,34 @@ switch($tipoSolicitacao) {
     case 'jari':
         $configs = [
             'titulo' => 'REQUERIMENTO PARA APRESENTAÇÃO DE RECURSO À JARI',
-            'bg_color' => '#FFF3E0',  // Laranja claro
-            'border_color' => '#FF9800', // Laranja escuro
+            'bg_color' => '#FFF3E0',
+            'border_color' => '#FF9800',
             'destinatario' => 'Ilustríssimo Senhor Presidente da Junta Administrativa de Recursos de Infrações - JARI',
             'texto_acao' => 'Vem interpor Recurso'
         ];
         break;
+    default:
+        die('Tipo de solicitação inválido');
 }
+
+// Formatar data atual para português
+$meses = array(
+    'January' => 'janeiro',
+    'February' => 'fevereiro',
+    'March' => 'março',
+    'April' => 'abril',
+    'May' => 'maio',
+    'June' => 'junho',
+    'July' => 'julho',
+    'August' => 'agosto',
+    'September' => 'setembro',
+    'October' => 'outubro',
+    'November' => 'novembro',
+    'December' => 'dezembro'
+);
+$mesIngles = date('F');
+$mesPortugues = $meses[$mesIngles];
+$dataAtual = date('d') . ' de ' . $mesPortugues . ' de ' . date('Y');
 ?>
 
 <!DOCTYPE html>

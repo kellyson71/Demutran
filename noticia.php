@@ -135,7 +135,7 @@ $conn->close();
 
         <!-- Imagem Principal -->
         <div class="flex justify-center mb-8">
-            <img src="<?php echo $news['imagem_url']; ?>"
+            <img src="<?php echo get_image_path($news['imagem_url']); ?>"
                 alt="<?php echo htmlspecialchars($news['titulo'], ENT_QUOTES, 'UTF-8'); ?>"
                 class="w-full md:w-2/3 rounded-lg shadow-lg">
         </div>

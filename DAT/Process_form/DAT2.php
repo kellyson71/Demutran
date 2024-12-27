@@ -1,9 +1,14 @@
 <?php
-include '../scr/config.php';
+header('Content-Type: application/json');
+require_once(__DIR__ . '/../../env/config.php'); // Corrigindo o caminho para apontar para o config.php no diretório env
 
 // Verifica a conexão
 if ($conn->connect_error) {
-    die("Conexão falhou: " . $conn->connect_error); // Se der erro, mostra uma mensagem.
+    echo json_encode([
+        'success' => false,
+        'message' => "Erro de conexão com o banco de dados: " . $conn->connect_error
+    ]);
+    exit;
 }
 
 // Função para verificar campos de texto e atribuir "não informado" se não receber valor
@@ -43,9 +48,15 @@ $stmt->bind_param($tipos, ...$valores);
 
 // Executar a query
 if ($stmt->execute()) {
-    echo "Dados inseridos com sucesso!";
+    echo json_encode([
+        'success' => true,
+        'message' => "Dados inseridos com sucesso!"
+    ]);
 } else {
-    echo "Erro: " . $stmt->error; // Se der erro, mostra a mensagem de erro.
+    echo json_encode([
+        'success' => false,
+        'message' => "Erro ao inserir dados: " . $stmt->error
+    ]);
 }
 
 // Fechar a conexão

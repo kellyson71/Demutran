@@ -414,27 +414,6 @@ CREATE TABLE `usuarios_pendentes` (
 -- --------------------------------------------------------
 
 --
--- Estrutura para tabela `vehicles`
---
-
-CREATE TABLE `vehicles` (
-  `id` int(11) NOT NULL,
-  `token` varchar(255) NOT NULL,
-  `damage_system` tinyint(1) NOT NULL,
-  `damaged_parts` text DEFAULT NULL,
-  `load_damage` tinyint(1) NOT NULL,
-  `nota_fiscal` varchar(255) DEFAULT NULL,
-  `tipo_mercadoria` varchar(255) DEFAULT NULL,
-  `valor_total` decimal(10,2) DEFAULT NULL,
-  `estimativa_danos` decimal(10,2) DEFAULT NULL,
-  `has_insurance` tinyint(1) DEFAULT NULL,
-  `seguradora` varchar(255) DEFAULT NULL,
-  `data_submissao` timestamp NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Estrutura para tabela `vehicles_incidents`
 --
 
@@ -563,12 +542,6 @@ ALTER TABLE `usuarios_pendentes`
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- Índices de tabela `vehicles`
---
-ALTER TABLE `vehicles`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Índices de tabela `vehicles_incidents`
 --
 ALTER TABLE `vehicles_incidents`
@@ -663,16 +636,54 @@ ALTER TABLE `usuarios_pendentes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT de tabela `vehicles`
---
-ALTER TABLE `vehicles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
-
---
 -- AUTO_INCREMENT de tabela `vehicles_incidents`
 --
 ALTER TABLE `vehicles_incidents`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+-- Remover tabelas antigas
+DROP TABLE IF EXISTS vehicle_damaged_parts;
+DROP TABLE IF EXISTS vehicles;
+
+-- Criar tabela principal de veículos por usuário
+CREATE TABLE user_vehicles (
+    id INT NOT NULL AUTO_INCREMENT,
+    token VARCHAR(255) NOT NULL,
+    total_vehicles INT NOT NULL DEFAULT 1,
+    data_submissao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_token (token)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Criar tabela de danos dos veículos
+CREATE TABLE vehicle_damages (
+    id INT NOT NULL AUTO_INCREMENT,
+    user_vehicles_id INT NOT NULL,
+    vehicle_index INT NOT NULL, -- Número do veículo (1, 2, 3, etc)
+    
+    -- Partes danificadas (booleanos)
+    dianteira_direita BOOLEAN DEFAULT FALSE,
+    dianteira_esquerda BOOLEAN DEFAULT FALSE,
+    lateral_direita BOOLEAN DEFAULT FALSE,
+    lateral_esquerda BOOLEAN DEFAULT FALSE,
+    traseira_direita BOOLEAN DEFAULT FALSE,
+    traseira_esquerda BOOLEAN DEFAULT FALSE,
+    
+    -- Informações de carga
+    has_load_damage BOOLEAN DEFAULT FALSE,
+    nota_fiscal VARCHAR(255) DEFAULT NULL,
+    tipo_mercadoria VARCHAR(255) DEFAULT NULL,
+    valor_total DECIMAL(10,2) DEFAULT NULL,
+    estimativa_danos DECIMAL(10,2) DEFAULT NULL,
+    has_insurance BOOLEAN DEFAULT FALSE,
+    seguradora VARCHAR(255) DEFAULT NULL,
+    
+    data_submissao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_vehicles_id) REFERENCES user_vehicles(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_vehicle (user_vehicles_id, vehicle_index)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

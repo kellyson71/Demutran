@@ -1,5 +1,5 @@
 <?php
-include '../scr/config.php';
+require_once(__DIR__ . '/../../env/config.php'); // Corrigindo o caminho para apontar para o config.php no diretório env
 
 // Verifica a conexão
 if ($conn->connect_error) {

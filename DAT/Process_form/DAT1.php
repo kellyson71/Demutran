@@ -1,10 +1,24 @@
 <?php
-include '../scr/config.php';
+header('Content-Type: application/json');
+require_once(__DIR__ . '/../../env/config.php');
 
-// Verifica a conexão
 if ($conn->connect_error) {
-    die("Conexão falhou: " . $conn->connect_error); // Se der erro, mostra uma mensagem.
+    echo json_encode([
+        'success' => false,
+        'message' => "Erro de conexão com o banco de dados: " . $conn->connect_error
+    ]);
+    exit;
 }
+
+// Recebendo o token
+$token = $_POST['token'];
+
+// Primeiro, verificar se o token já existe
+$check_sql = "SELECT id FROM DAT1 WHERE token = ?";
+$check_stmt = $conn->prepare($check_sql);
+$check_stmt->bind_param("s", $token);
+$check_stmt->execute();
+$check_result = $check_stmt->get_result();
 
 // Recebendo os dados via POST
 $relacao_com_veiculo = $_POST['relacao_com_veiculo'];
@@ -42,37 +56,58 @@ $tracado_via = $_POST['tracado_via'];
 $condicoes_meteorologicas = $_POST['condicoes_meteorologicas'];
 $tipo_acidente = $_POST['tipo_acidente'];
 
-$token = $_POST['token'];
-
-// Preparar a query de inserção
-$sql = "INSERT INTO DAT1 (
-    relacao_com_veiculo, estrangeiro, tipo_documento, numero_documento, pais, nome, cpf, profissao, sexo, data_nascimento, email, celular, 
-    cep, logradouro, numero, complemento, bairro_localidade, cidade, uf, 
-    data, horario, cidade_acidente, uf_acidente, cep_acidente, logradouro_acidente, numero_acidente, complemento_acidente, bairro_localidade_acidente, 
-    ponto_referencia_acidente, condicoes_via, sinalizacao_horizontal_vertical, tracado_via, condicoes_meteorologicas, tipo_acidente, token
-) 
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-// Preparar a declaração (statement) para evitar SQL Injection
-$stmt = $conn->prepare($sql);
-
-// Ligar os parâmetros
-$stmt->bind_param(
-    "sisssssssssssssssssssssssssssssssss", 
-    $relacao_com_veiculo, $estrangeiro, $tipo_documento, $numero_documento, $pais, $nome, $cpf, $profissao, $sexo, $data_nascimento, $email, $celular, 
-    $cep, $logradouro, $numero, $complemento, $bairro_localidade, $cidade, $uf, 
-    $data, $horario, $cidade_acidente, $uf_acidente, $cep_acidente, $logradouro_acidente, $numero_acidente, $complemento_acidente, $bairro_localidade_acidente, 
-    $ponto_referencia_acidente, $condicoes_via, $sinalizacao_horizontal_vertical, $tracado_via, $condicoes_meteorologicas, $tipo_acidente, $token
-);
-
-// Executar a query
-if ($stmt->execute()) {
-    echo "Dados inseridos com sucesso!";
+if ($check_result->num_rows > 0) {
+    // Se o token existe, fazer UPDATE
+    $sql = "UPDATE DAT1 SET 
+        relacao_com_veiculo=?, estrangeiro=?, tipo_documento=?, numero_documento=?, 
+        pais=?, nome=?, cpf=?, profissao=?, sexo=?, data_nascimento=?, 
+        email=?, celular=?, cep=?, logradouro=?, numero=?, complemento=?, 
+        bairro_localidade=?, cidade=?, uf=?, data=?, horario=?, 
+        cidade_acidente=?, uf_acidente=?, cep_acidente=?, logradouro_acidente=?, 
+        numero_acidente=?, complemento_acidente=?, bairro_localidade_acidente=?, 
+        ponto_referencia_acidente=?, condicoes_via=?, sinalizacao_horizontal_vertical=?, 
+        tracado_via=?, condicoes_meteorologicas=?, tipo_acidente=?
+        WHERE token=?";
 } else {
-    echo "Erro: " . $stmt->error; // Se der erro, mostra a mensagem de erro.
+    // Se o token não existe, fazer INSERT
+    $sql = "INSERT INTO DAT1 (
+        relacao_com_veiculo, estrangeiro, tipo_documento, numero_documento, 
+        pais, nome, cpf, profissao, sexo, data_nascimento, email, celular, 
+        cep, logradouro, numero, complemento, bairro_localidade, cidade, uf, 
+        data, horario, cidade_acidente, uf_acidente, cep_acidente, logradouro_acidente, 
+        numero_acidente, complemento_acidente, bairro_localidade_acidente, 
+        ponto_referencia_acidente, condicoes_via, sinalizacao_horizontal_vertical, 
+        tracado_via, condicoes_meteorologicas, tipo_acidente, token
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 }
 
-// Fechar a conexão
+$stmt = $conn->prepare($sql);
+
+// Bind parameters
+$stmt->bind_param(
+    "sisssssssssssssssssssssssssssssssss",
+    $relacao_com_veiculo, $estrangeiro, $tipo_documento, $numero_documento, 
+    $pais, $nome, $cpf, $profissao, $sexo, $data_nascimento, $email, $celular, 
+    $cep, $logradouro, $numero, $complemento, $bairro_localidade, $cidade, $uf, 
+    $data, $horario, $cidade_acidente, $uf_acidente, $cep_acidente, $logradouro_acidente, 
+    $numero_acidente, $complemento_acidente, $bairro_localidade_acidente, 
+    $ponto_referencia_acidente, $condicoes_via, $sinalizacao_horizontal_vertical, 
+    $tracado_via, $condicoes_meteorologicas, $tipo_acidente, $token
+);
+
+if ($stmt->execute()) {
+    echo json_encode([
+        'success' => true,
+        'message' => "Dados " . ($check_result->num_rows > 0 ? "atualizados" : "inseridos") . " com sucesso!"
+    ]);
+} else {
+    echo json_encode([
+        'success' => false,
+        'message' => "Erro ao " . ($check_result->num_rows > 0 ? "atualizar" : "inserir") . " dados: " . $stmt->error
+    ]);
+}
+
+$check_stmt->close();
 $stmt->close();
 $conn->close();
 ?>
