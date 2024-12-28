@@ -14,15 +14,23 @@ if ($requestData) {
     $conn->begin_transaction();
 
     try {
-        // Inserir registro principal do usuário
-        $stmt = $conn->prepare("INSERT INTO user_vehicles (token, total_vehicles) VALUES (?, ?)");
-        $stmt->bind_param('si', $token, $totalVehicles);
+        // Buscar o ID do formulário central
+        $stmt_form = $conn->prepare("SELECT id FROM formularios_dat_central WHERE token = ?");
+        $stmt_form->bind_param("s", $token);
+        $stmt_form->execute();
+        $result_form = $stmt_form->get_result();
+        $formulario_id = $result_form->fetch_object()->id;
+        $stmt_form->close();
+
+        // Inserir registro principal do usuário com formulario_id
+        $stmt = $conn->prepare("INSERT INTO user_vehicles (token, total_vehicles, formulario_id) VALUES (?, ?, ?)");
+        $stmt->bind_param('sii', $token, $totalVehicles, $formulario_id);
 
         if ($stmt->execute()) {
             $userVehiclesId = $stmt->insert_id;
             $stmt->close();
 
-            // Inserir dados de cada veículo
+            // Inserir dados de cada veículo incluindo formulario_id
             $stmtDamages = $conn->prepare("
                 INSERT INTO vehicle_damages (
                     user_vehicles_id, 
@@ -39,8 +47,9 @@ if ($requestData) {
                     valor_total,
                     estimativa_danos,
                     has_insurance,
-                    seguradora
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    seguradora,
+                    formulario_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             foreach ($vehiclesData as $index => $vehicle) {
@@ -90,7 +99,7 @@ if ($requestData) {
                 $seguradora = isset($vehicle['seguradora']) ? $vehicle['seguradora'] : null;
 
                 $stmtDamages->bind_param(
-                    'iiiiiiiiissddis',
+                    'iiiiiiiiissddsii',
                     $userVehiclesId,
                     $vehicleIndex,
                     $dianteiraDireita,
@@ -105,7 +114,8 @@ if ($requestData) {
                     $valorTotal,
                     $estimativaDanos,
                     $hasInsurance,
-                    $seguradora
+                    $seguradora,
+                    $formulario_id
                 );
 
                 $stmtDamages->execute();

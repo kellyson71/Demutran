@@ -38,6 +38,9 @@ $currentStep = 1;
                             </div>
                         </label>
                     </div>
+                    <div id="error-question1"
+                        class="hidden mt-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                    </div>
                 </div>
 
                 <!-- Pergunta 2 -->
@@ -60,6 +63,9 @@ $currentStep = 1;
                                 Não
                             </div>
                         </label>
+                    </div>
+                    <div id="error-question2"
+                        class="hidden mt-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
                     </div>
                 </div>
 
@@ -84,6 +90,9 @@ $currentStep = 1;
                             </div>
                         </label>
                     </div>
+                    <div id="error-question3"
+                        class="hidden mt-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                    </div>
                 </div>
 
                 <!-- Pergunta 4 -->
@@ -106,6 +115,9 @@ $currentStep = 1;
                                 Não
                             </div>
                         </label>
+                    </div>
+                    <div id="error-question4"
+                        class="hidden mt-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
                     </div>
                 </div>
 
@@ -132,10 +144,10 @@ $currentStep = 1;
                             </div>
                         </label>
                     </div>
+                    <div id="error-question5"
+                        class="hidden mt-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                    </div>
                 </div>
-
-                <!-- Mensagem de erro -->
-                <div id="error-message" class="hidden"></div>
 
                 <!-- Botão de Próximo -->
                 <button id="next-button" type="button"
@@ -148,101 +160,197 @@ $currentStep = 1;
     </div>
 </div>
 
+<!-- Modal para Solicitar o Email -->
+<div class="modal fade" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="emailModalLabel">Informe seu email</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label for="userEmail" class="form-label">Digite seu E-mail:</label>
+                <input type="email" class="form-control" id="userEmail" placeholder="exemplo@email.com" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="submitEmailBtn">Enviar e Continuar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Token -->
+<div class="modal fade" id="tokenModal" tabindex="-1" aria-labelledby="tokenModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tokenModalLabel">Código de Preenchimento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Guarde este código, ele será usado para retomar o preenchimento do formulário:</p>
+                <div class="alert alert-primary" role="alert">
+                    <strong id="tokenDisplay"></strong>
+                </div>
+                <p>Tenha em mente que ao prosseguir, você concorda com os termos de uso mencionados anteriormente.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="startFormBtn">Iniciar Formulário</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-document.querySelectorAll('input[type="radio"]').forEach((input) => {
-    input.addEventListener("change", validateAllQuestions);
-});
+    const mensagensErro = {
+        question1: 'Para esta declaração de acidente, clique <a href="https://declarante.prf.gov.br/declarante/" class="text-green-500 underline" target="_blank">aqui</a> para ser direcionado para o Sistema de Declaração de Acidente de Trânsito - DAT da PRF.',
+        question2: 'Somente pessoas emancipadas ou maiores de 18 anos podem realizar a declaração do acidente.',
+        question3: 'Este boletim não pode ser feito eletronicamente. Favor entrar em contato com Secretaria de Segurança Pública, Defesa Civil, Mobilidade Urbana e Trânsito - SESDEM.',
+        question4: 'Este boletim não pode ser feito eletronicamente. Favor entrar em contato com Secretaria de Segurança Pública, Defesa Civil, Mobilidade Urbana e Trânsito - SESDEM.',
+        question5: 'Este boletim não pode ser feito eletronicamente. Favor entrar em contato com Secretaria de Segurança Pública, Defesa Civil, Mobilidade Urbana e Trânsito - SESDEM.'
+    };
 
-function validateAllQuestions() {
-    const errorMessage = document.getElementById("error-message");
-    const nextButton = document.getElementById("next-button");
+    const respostasInvalidas = {
+        question1: 'Sim',
+        question2: 'Não',
+        question3: 'Sim',
+        question4: 'Sim',
+        question5: 'Sim'
+    };
 
-    // Array de validações em ordem de prioridade
-    const validations = [{
-            question: 'question1',
-            value: 'Sim',
-            message: 'Para esta declaração de acidente, clique <a href="https://declarante.prf.gov.br/declarante/" class="text-green-500 underline" target="_blank">aqui</a> para ser direcionado para o Sistema de Declaração de Acidente de Trânsito - DAT da PRF.'
-        },
-        {
-            question: 'question2',
-            value: 'Não',
-            message: 'Somente pessoas emancipadas ou maiores de 18 anos podem realizar a declaração do acidente.'
-        },
-        {
-            question: 'question3',
-            value: 'Sim',
-            message: 'Este boletim não pode ser feito eletronicamente. Favor entrar em contato com Secretaria de Segurança Pública, Defesa Civil, Mobilidade Urbana e Trânsito - SESDEM.'
-        },
-        {
-            question: 'question4',
-            value: 'Sim',
-            message: 'Este boletim não pode ser feito eletronicamente. Favor entrar em contato com Secretaria de Segurança Pública, Defesa Civil, Mobilidade Urbana e Trânsito - SESDEM.'
-        },
-        {
-            question: 'question5',
-            value: 'Sim',
-            message: 'Este boletim não pode ser feito eletronicamente. Favor entrar em contato com Secretaria de Segurança Pública, Defesa Civil, Mobilidade Urbana e Trânsito - SESDEM.'
-        }
-    ];
+    function verificarResposta(questao) {
+        const resposta = document.querySelector(`input[name="${questao}"]:checked`);
+        const errorDiv = document.getElementById(`error-${questao}`);
 
-    let lastErrorMessage = "";
-    let isValid = true;
-
-    // Verifica cada questão em ordem
-    for (const validation of validations) {
-        const answer = document.querySelector(`input[name="${validation.question}"]:checked`);
-        if (answer && answer.value === validation.value) {
-            lastErrorMessage = validation.message;
-            isValid = false;
-            break;
-        }
-    }
-
-    // Se não houver respostas inválidas, verifica se todas foram respondidas
-    if (isValid) {
-        const allAnswers = Array.from(document.querySelectorAll('input[type="radio"]:checked'));
-
-        // Verifica se todas as 5 perguntas foram respondidas
-        if (allAnswers.length === 5) {
-            // Verifica se Q1 é "Não", Q2 é "Sim", e Q3, Q4, Q5 são "Não"
-            const responses = {
-                question1: document.querySelector('input[name="question1"]:checked')?.value,
-                question2: document.querySelector('input[name="question2"]:checked')?.value,
-                question3: document.querySelector('input[name="question3"]:checked')?.value,
-                question4: document.querySelector('input[name="question4"]:checked')?.value,
-                question5: document.querySelector('input[name="question5"]:checked')?.value
-            };
-
-            if (responses.question1 === "Não" &&
-                responses.question2 === "Sim" &&
-                responses.question3 === "Não" &&
-                responses.question4 === "Não" &&
-                responses.question5 === "Não") {
-                errorMessage.classList.add("hidden");
-                nextButton.disabled = false;
-                return;
+        if (resposta) {
+            if (resposta.value === respostasInvalidas[questao]) {
+                errorDiv.innerHTML = mensagensErro[questao];
+                errorDiv.classList.remove('hidden');
+            } else {
+                errorDiv.classList.add('hidden');
             }
         }
+
+        verificarTodasRespostas();
     }
 
-    // Se chegou aqui, ou tem erro ou faltam respostas
-    if (lastErrorMessage) {
-        errorMessage.innerHTML = `
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <span class="block sm:inline">${lastErrorMessage}</span>
-            </div>`;
-        errorMessage.classList.remove("hidden");
-    }
-    nextButton.disabled = true;
-}
+    function verificarTodasRespostas() {
+        const todasQuestoes = ['question1', 'question2', 'question3', 'question4', 'question5'];
+        const nextButton = document.getElementById('next-button');
 
-// Evento do botão próximo
-document.getElementById('next-button').addEventListener('click', function() {
-    if (!this.disabled) {
-        const token = new URLSearchParams(window.location.search).get('token');
+        const todasRespondidas = todasQuestoes.every(questao => {
+            const resposta = document.querySelector(`input[name="${questao}"]:checked`);
+            return resposta && resposta.value !== respostasInvalidas[questao];
+        });
+
+        nextButton.disabled = !todasRespondidas;
+    }
+
+    // Adiciona os event listeners
+    document.querySelectorAll('input[type="radio"]').forEach(input => {
+        input.addEventListener('change', () => verificarResposta(input.name));
+    });
+
+    // Event listener do botão próximo
+    document.getElementById('next-button').addEventListener('click', function() {
+        if (!this.disabled) {
+            var emailModal = new bootstrap.Modal(document.getElementById('emailModal'));
+            emailModal.show();
+        }
+    });
+
+    // Enviar o e-mail e gerar o token
+    document.getElementById('submitEmailBtn').addEventListener('click', async function() {
+        const submitBtn = document.getElementById('submitEmailBtn');
+        const email = document.getElementById('userEmail').value;
+        const nome = "Usuário";
+
+        if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+            alert('Por favor, insira um endereço de e-mail válido.');
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Enviando...';
+
+        try {
+            const tokenResponse = await fetch('../../DAT/Process_form/generate_token.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    gmail: email,
+                    nome: nome
+                })
+            });
+
+            const data = await tokenResponse.json();
+
+            if (data.success) {
+                // Enviar email
+                await fetch('../../utils/mail.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'email': email,
+                        'nome': nome,
+                        'assunto': 'Seu Token de Acesso DEMUTRAN',
+                        'mensagem': `
+                    <html>
+                    <body style='font-family: Arial, sans-serif;'>
+                        <div style='background-color: #f5f5f5; padding: 20px;'>
+                            <h2 style='color: #2c5282;'>Token de Acesso Gerado</h2>
+                            <p>Prezado(a) usuário(a),</p>
+                            <p>Seu token de acesso foi gerado com sucesso para continuar o preenchimento do Sistema de Declaração de Acidente de Trânsito - DAT!</p>
+                            <p style='word-break: break-all;'><strong>Seu Email:</strong> ${email}</p>
+                            <p><strong>Token:</strong> ${data.token}</p>
+                            <div style='margin: 20px 0; text-align: center;'>
+                                <a href='http://localhost/demutran/DAT/index.php?token=${data.token}' 
+                                   style='background-color: #48bb78; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                                    Continuar Preenchimento
+                                </a>
+                            </div>
+                            <hr style='border: 1px solid #e2e8f0;'>
+                            <p><strong>IMPORTANTE:</strong></p>
+                            <ul style='margin-left: 20px; color: #e53e3e;'>
+                                <li>Guarde este token com segurança</li>
+                                <li>Este token é exclusivo para seu preenchimento</li>
+                                <li>Este é um e-mail automático, não responda</li>
+                                <li>O token é válido por 48 horas</li>
+                                <li>Clique no botão acima ou use o token para continuar seu preenchimento</li>
+                            </ul>
+                        </div>
+                    </body>
+                    </html>`
+                    })
+                });
+
+                var emailModal = bootstrap.Modal.getInstance(document.getElementById('emailModal'));
+                emailModal.hide();
+                document.getElementById('tokenDisplay').innerText = data.token;
+                var tokenModal = new bootstrap.Modal(document.getElementById('tokenModal'));
+                tokenModal.show();
+            } else {
+                throw new Error('Erro ao gerar token');
+            }
+        } catch (error) {
+            alert('Erro ao processar sua solicitação');
+            console.error('Erro:', error);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Enviar e Continuar';
+        }
+    });
+
+    // Redirecionar para o formulário com o token
+    document.getElementById('startFormBtn').addEventListener('click', function() {
+        const token = document.getElementById('tokenDisplay').innerText;
         window.location.href = `dados_gerais.php?token=${token}`;
-    }
-});
+    });
 </script>
 
 <?php

@@ -1,0 +1,19 @@
+{
+  "sqltools.connections": [
+    {
+      "mysqlOptions": {
+        "authProtocol": "default",
+        "enableSsl": "Disabled"
+      },
+      "previewLimit": 50,
+      "server": "srv1078.hstgr.io",
+      "port": 3306,
+      "driver": "MySQL",
+      "name": "u492577848_protocolo",
+      "group": "Demutran Server",
+      "database": "u492577848_demutran",
+      "username": "u492577848_protocolo",
+      "password": "WRVGAxCbrJ8wdM$"
+    }
+  ]
+}

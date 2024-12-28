@@ -35,6 +35,20 @@ foreach ($colunas as $coluna) {
     $valores[] = verificaTexto($_POST[$coluna] ?? null);
 }
 
+// Buscar o ID do formulário central
+$token = $_POST['token'];
+$sql_form = "SELECT id FROM formularios_dat_central WHERE token = ?";
+$stmt_form = $conn->prepare($sql_form);
+$stmt_form->bind_param("s", $token);
+$stmt_form->execute();
+$result_form = $stmt_form->get_result();
+$formulario_id = $result_form->fetch_object()->id;
+$stmt_form->close();
+
+// Adicionar formulario_id às colunas
+$colunas[] = 'formulario_id';
+$valores[] = $formulario_id;
+
 // Preparar a query de inserção com placeholders
 $placeholders = implode(', ', array_fill(0, count($colunas), '?'));
 $sql = "INSERT INTO DAT2 (" . implode(', ', $colunas) . ") VALUES ($placeholders)";
