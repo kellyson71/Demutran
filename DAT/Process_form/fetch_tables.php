@@ -131,11 +131,11 @@ foreach ($tables as $table) {
 }
 
 // Consulta a nova estrutura de veículos
-$sql = "SELECT uv.id as user_vehicles_id, uv.total_vehicles, vd.* 
+$sql =
+"SELECT uv.id as user_vehicles_id, uv.total_vehicles, vd.* 
         FROM user_vehicles uv 
         LEFT JOIN vehicle_damages vd ON uv.id = vd.user_vehicles_id 
-        WHERE uv.token = ?
-        ORDER BY vd.vehicle_index";
+        WHERE uv.token = ?";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param('s', $token);
@@ -144,10 +144,11 @@ $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
     $vehicleData = [];
+    $vehicleIndex = 1; // Inicializa um contador manual
     while ($row = $result->fetch_assoc()) {
         // Formata os dados do veículo
         $vehicle = [
-            'Número do Veículo' => $row['vehicle_index'],
+            'Número do Veículo' => $vehicleIndex, // Usa o contador ao invés de vehicle_index
             'Partes Danificadas' => array_filter([
                 'Dianteira Direita' => $row['dianteira_direita'] ? 'Sim' : 'Não',
                 'Dianteira Esquerda' => $row['dianteira_esquerda'] ? 'Sim' : 'Não',
@@ -167,6 +168,7 @@ if ($result->num_rows > 0) {
             ]
         ];
         $vehicleData[] = $vehicle;
+        $vehicleIndex++; // Incrementa o contador
     }
     $results['vehicles'] = $vehicleData;
 }

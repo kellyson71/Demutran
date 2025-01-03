@@ -40,16 +40,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $lastId = $conn->insert_id;
 
-        // Processar arquivos
-        $uploadDir = './midia/' . $lastId . '/';
+        // Nova estrutura de diretório para uploads
+        $uploadDir = '../midia/parecer/' . $lastId . '/';
         if (!file_exists($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
 
-        // Processar uploads
+        // Mapeamento de inputs para nomes de arquivo
         $arquivos = [
-            'doc_identificacao' => 'documento',
-            'comp_residencia' => 'comprovante'
+            'doc_identificacao' => 'documento_identificacao',
+            'comp_residencia' => 'comprovante_residencia'
         ];
 
         $uploadedFiles = [];
@@ -77,10 +77,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 throw new Exception("Erro ao mover arquivo $input");
             }
 
-            $uploadedFiles[$input] = $fileName;
+            // Construir URL completa para o banco de dados
+            $fileUrl = "https://{$base_url}/midia/parecer/{$lastId}/{$fileName}";
+            $uploadedFiles[$input] = $fileUrl;
         }
 
-        // Atualizar registro com arquivos
+        // Atualizar registro com URLs completas dos arquivos
         $stmt = $conn->prepare("UPDATE Parecer SET documento_identificacao = ?, comprovante_residencia = ? WHERE id = ?");
         $stmt->bind_param("ssi", 
             $uploadedFiles['doc_identificacao'],

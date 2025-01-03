@@ -63,11 +63,14 @@ function exibirDetalhesParecer($conn, $id)
         <!-- Documentos Anexados -->
         <div class="border-b pb-6 mb-6">
             <h3 class="text-2xl font-semibold text-gray-800 mb-4">Documentos Anexados</h3>
+            <?php
+            $baseUrl = "https://{$_SERVER['HTTP_HOST']}/midia/parecer/{$parecer['id']}";
+            ?>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <?php if ($parecer['documento_identificacao']): ?>
                     <div class="flex items-center">
                         <i class="material-icons text-blue-600 mr-2">description</i>
-                        <a href="<?php echo htmlspecialchars($parecer['documento_identificacao']); ?>" target="_blank"
+                        <a href="<?php echo $baseUrl . '/' . basename($parecer['documento_identificacao']); ?>" target="_blank"
                             class="text-blue-600 hover:text-blue-800">Documento de Identificação</a>
                     </div>
                 <?php endif; ?>
@@ -75,7 +78,7 @@ function exibirDetalhesParecer($conn, $id)
                 <?php if ($parecer['comprovante_residencia']): ?>
                     <div class="flex items-center">
                         <i class="material-icons text-blue-600 mr-2">home</i>
-                        <a href="<?php echo htmlspecialchars($parecer['comprovante_residencia']); ?>" target="_blank"
+                        <a href="<?php echo $baseUrl . '/' . basename($parecer['comprovante_residencia']); ?>" target="_blank"
                             class="text-blue-600 hover:text-blue-800">Comprovante de Residência</a>
                     </div>
                 <?php endif; ?>
@@ -83,7 +86,7 @@ function exibirDetalhesParecer($conn, $id)
                 <?php if ($parecer['signed_form_path']): ?>
                     <div class="flex items-center">
                         <i class="material-icons text-blue-600 mr-2">draw</i>
-                        <a href="<?php echo htmlspecialchars($parecer['signed_form_path']); ?>" target="_blank"
+                        <a href="<?php echo $baseUrl . '/' . basename($parecer['signed_form_path']); ?>" target="_blank"
                             class="text-blue-600 hover:text-blue-800">Formulário Assinado</a>
                     </div>
                 <?php endif; ?>

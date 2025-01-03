@@ -26,23 +26,23 @@ function exibirDetalhesRecurso($conn, $id)
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <p class="text-gray-600"><span class="font-semibold">Nome:</span>
-                        <?php echo htmlspecialchars($recurso['nome']); ?></p>
+                        <?php echo htmlspecialchars($recurso['nome'] ?? ''); ?></p>
                     <p class="text-gray-600"><span class="font-semibold">CPF:</span>
-                        <?php echo htmlspecialchars($recurso['cpf']); ?></p>
+                        <?php echo htmlspecialchars($recurso['cpf'] ?? ''); ?></p>
                     <p class="text-gray-600"><span class="font-semibold">Endereço:</span>
-                        <?php echo htmlspecialchars($recurso['endereco']); ?></p>
+                        <?php echo htmlspecialchars($recurso['endereco'] ?? ''); ?></p>
                     <p class="text-gray-600"><span class="font-semibold">Número:</span>
-                        <?php echo htmlspecialchars($recurso['numero']); ?></p>
+                        <?php echo htmlspecialchars($recurso['numero'] ?? ''); ?></p>
                 </div>
                 <div>
                     <p class="text-gray-600"><span class="font-semibold">Email:</span>
-                        <?php echo htmlspecialchars($recurso['email']); ?></p>
+                        <?php echo htmlspecialchars($recurso['email'] ?? ''); ?></p>
                     <p class="text-gray-600"><span class="font-semibold">Telefone:</span>
-                        <?php echo htmlspecialchars($recurso['telefone']); ?></p>
+                        <?php echo htmlspecialchars($recurso['telefone'] ?? ''); ?></p>
                     <p class="text-gray-600"><span class="font-semibold">Bairro:</span>
-                        <?php echo htmlspecialchars($recurso['bairro']); ?></p>
+                        <?php echo htmlspecialchars($recurso['bairro'] ?? ''); ?></p>
                     <p class="text-gray-600"><span class="font-semibold">CEP:</span>
-                        <?php echo htmlspecialchars($recurso['cep']); ?></p>
+                        <?php echo htmlspecialchars($recurso['cep'] ?? ''); ?></p>
                 </div>
             </div>
         </div>
@@ -53,19 +53,19 @@ function exibirDetalhesRecurso($conn, $id)
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <p class="text-gray-600"><span class="font-semibold">Placa:</span>
-                        <?php echo htmlspecialchars($recurso['placa']); ?></p>
+                        <?php echo htmlspecialchars($recurso['placa'] ?? ''); ?></p>
                     <p class="text-gray-600"><span class="font-semibold">Marca/Modelo:</span>
-                        <?php echo htmlspecialchars($recurso['marcaModelo']); ?></p>
+                        <?php echo htmlspecialchars($recurso['marcaModelo'] ?? ''); ?></p>
                     <p class="text-gray-600"><span class="font-semibold">Cor:</span>
-                        <?php echo htmlspecialchars($recurso['cor']); ?></p>
+                        <?php echo htmlspecialchars($recurso['cor'] ?? ''); ?></p>
                 </div>
                 <div>
                     <p class="text-gray-600"><span class="font-semibold">Espécie:</span>
-                        <?php echo htmlspecialchars($recurso['especie']); ?></p>
+                        <?php echo htmlspecialchars($recurso['especie'] ?? ''); ?></p>
                     <p class="text-gray-600"><span class="font-semibold">Categoria:</span>
-                        <?php echo htmlspecialchars($recurso['categoria']); ?></p>
+                        <?php echo htmlspecialchars($recurso['categoria'] ?? ''); ?></p>
                     <p class="text-gray-600"><span class="font-semibold">Ano:</span>
-                        <?php echo htmlspecialchars($recurso['ano']); ?></p>
+                        <?php echo htmlspecialchars($recurso['ano'] ?? ''); ?></p>
                 </div>
             </div>
         </div>
@@ -76,23 +76,23 @@ function exibirDetalhesRecurso($conn, $id)
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <p class="text-gray-600"><span class="font-semibold">Auto de Infração:</span>
-                        <?php echo htmlspecialchars($recurso['autoInfracao']); ?></p>
+                        <?php echo htmlspecialchars($recurso['autoInfracao'] ?? ''); ?></p>
                     <p class="text-gray-600"><span class="font-semibold">Data da Infração:</span>
                         <?php echo $recurso['dataInfracao'] ? date('d/m/Y', strtotime($recurso['dataInfracao'])) : ''; ?>
                     </p>
                 </div>
                 <div>
                     <p class="text-gray-600"><span class="font-semibold">Local da Infração:</span>
-                        <?php echo htmlspecialchars($recurso['localInfracao']); ?></p>
+                        <?php echo htmlspecialchars($recurso['localInfracao'] ?? ''); ?></p>
                     <p class="text-gray-600"><span class="font-semibold">Enquadramento:</span>
-                        <?php echo htmlspecialchars($recurso['enquadramento']); ?></p>
+                        <?php echo htmlspecialchars($recurso['enquadramento'] ?? ''); ?></p>
                 </div>
             </div>
             <?php if ($recurso['defesa']): ?>
                 <div class="mt-4">
                     <p class="text-gray-600"><span class="font-semibold">Defesa:</span></p>
                     <div class="mt-2 p-4 bg-gray-50 rounded-lg">
-                        <?php echo nl2br(htmlspecialchars($recurso['defesa'])); ?>
+                        <?php echo nl2br(htmlspecialchars($recurso['defesa'] ?? '')); ?>
                     </div>
                 </div>
             <?php endif; ?>
@@ -102,7 +102,13 @@ function exibirDetalhesRecurso($conn, $id)
         <div class="border-b pb-6 mb-6">
             <h3 class="text-2xl font-semibold text-gray-800 mb-4">Documentos Anexados</h3>
             <?php
+            require_once 'pdf_viewer_modal.php';
+            echo getPdfViewerModal();
+
             $temDocumentos = false;
+            $tipoSolicitacao = strtolower($recurso['tipo_solicitacao']);
+            $pastaDocumentos = "../midia/{$tipoSolicitacao}/{$recurso['id']}";
+
             $documentos = [
                 'doc_requerimento_url' => ['icon' => 'description', 'label' => 'Requerimento'],
                 'cnh_url' => ['icon' => 'card_membership', 'label' => 'CNH'],
@@ -118,11 +124,16 @@ function exibirDetalhesRecurso($conn, $id)
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <?php foreach ($documentos as $campo => $info):
                     if (!empty($recurso[$campo])):
-                        $temDocumentos = true; ?>
+                        $temDocumentos = true;
+                        $nomeArquivo = basename($recurso[$campo]);
+                        $caminhoArquivo = $pastaDocumentos . '/' . $nomeArquivo;
+                        $extensao = strtolower(pathinfo($nomeArquivo, PATHINFO_EXTENSION));
+                ?>
                         <div class="flex items-center">
                             <i class="material-icons text-blue-600 mr-2"><?php echo $info['icon']; ?></i>
-                            <a href="<?php echo htmlspecialchars($recurso[$campo]); ?>" target="_blank"
-                                class="text-blue-600 hover:text-blue-800"><?php echo $info['label']; ?></a>
+                            <button
+                                onclick="mostrarDocumento('<?php echo $caminhoArquivo; ?>', '<?php echo $info['label']; ?>', '<?php echo $extensao; ?>')"
+                                class="text-blue-600 hover:text-blue-800 cursor-pointer"><?php echo $info['label']; ?></button>
                         </div>
                 <?php endif;
                 endforeach; ?>
@@ -138,13 +149,165 @@ function exibirDetalhesRecurso($conn, $id)
             </div>
         </div>
 
+        <!-- Modal para visualização de documentos -->
+        <div id="documentoModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg w-full max-w-6xl mx-4 relative h-[90vh] flex flex-col">
+                <!-- Barra de título e ferramentas -->
+                <div class="flex items-center justify-between p-4 border-b">
+                    <h3 id="modalTitle" class="text-xl font-semibold"></h3>
+                    <div class="flex items-center space-x-4">
+                        <button id="zoomOut" class="p-2 hover:bg-gray-100 rounded-full" title="Diminuir Zoom">
+                            <i class="material-icons">zoom_out</i>
+                        </button>
+                        <span id="zoomLevel" class="text-sm">100%</span>
+                        <button id="zoomIn" class="p-2 hover:bg-gray-100 rounded-full" title="Aumentar Zoom">
+                            <i class="material-icons">zoom_in</i>
+                        </button>
+                        <button onclick="toggleFullscreen()" class="p-2 hover:bg-gray-100 rounded-full" title="Tela Cheia">
+                            <i class="material-icons">fullscreen</i>
+                        </button>
+                        <button onclick="fecharModal()" class="p-2 hover:bg-gray-100 rounded-full" title="Fechar">
+                            <i class="material-icons">close</i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading spinner -->
+                <div id="loadingSpinner"
+                    class="hidden absolute inset-0 flex items-center justify-center bg-white bg-opacity-80">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                </div>
+
+                <!-- Container do PDF -->
+                <div id="documentoContainer" class="flex-1 overflow-auto relative bg-gray-100">
+                    <div id="pdfWrapper" class="min-h-full flex items-center justify-center transform origin-center">
+                        <!-- O PDF será carregado aqui -->
+                    </div>
+                </div>
+
+                <!-- Barra de status -->
+                <div class="border-t p-2 bg-gray-50 flex justify-between items-center text-sm text-gray-600">
+                    <span id="pageInfo">Página: 1/1</span>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="downloadDocument()"
+                            class="flex items-center px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                            <i class="material-icons text-sm mr-1">download</i> Download
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            if (typeof currentDocumentPath === 'undefined') {
+                let currentDocumentPath = '';
+                let currentZoom = 100;
+                const zoomStep = 25;
+                const maxZoom = 200;
+                const minZoom = 50;
+
+                function mostrarDocumento(caminho, titulo) {
+                    currentDocumentPath = caminho;
+                    const modal = document.getElementById('documentoModal');
+                    const container = document.getElementById('pdfWrapper');
+                    const modalTitle = document.getElementById('modalTitle');
+                    const loadingSpinner = document.getElementById('loadingSpinner');
+
+                    modalTitle.textContent = titulo;
+                    loadingSpinner.classList.remove('hidden');
+                    container.innerHTML = '';
+
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+
+                    // Criar o objeto embed para PDF
+                    const embed = document.createElement('embed');
+                    embed.src = caminho;
+                    embed.type = 'application/pdf';
+                    embed.style.width = '100%';
+                    embed.style.height = '100%';
+
+                    // Evento para esconder o loading quando o PDF carregar
+                    embed.onload = () => {
+                        loadingSpinner.classList.add('hidden');
+                    };
+
+                    container.appendChild(embed);
+                    atualizarZoom();
+                }
+
+                function fecharModal() {
+                    const modal = document.getElementById('documentoModal');
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    currentZoom = 100;
+                    atualizarZoom();
+                }
+
+                function atualizarZoom() {
+                    const wrapper = document.getElementById('pdfWrapper');
+                    const zoomLevel = document.getElementById('zoomLevel');
+                    wrapper.style.transform = `scale(${currentZoom / 100})`;
+                    zoomLevel.textContent = `${currentZoom}%`;
+                }
+
+                document.getElementById('zoomIn').addEventListener('click', () => {
+                    if (currentZoom < maxZoom) {
+                        currentZoom += zoomStep;
+                        atualizarZoom();
+                    }
+                });
+
+                document.getElementById('zoomOut').addEventListener('click', () => {
+                    if (currentZoom > minZoom) {
+                        currentZoom -= zoomStep;
+                        atualizarZoom();
+                    }
+                });
+
+                function toggleFullscreen() {
+                    const container = document.getElementById('documentoContainer');
+                    if (!document.fullscreenElement) {
+                        container.requestFullscreen().catch(err => {
+                            console.error(`Erro ao tentar entrar em tela cheia: ${err.message}`);
+                        });
+                    } else {
+                        document.exitFullscreen();
+                    }
+                }
+
+                function downloadDocument() {
+                    if (currentDocumentPath) {
+                        const link = document.createElement('a');
+                        link.href = currentDocumentPath;
+                        link.download = currentDocumentPath.split('/').pop();
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                }
+
+                // Fechar modal ao clicar fora
+                document.getElementById('documentoModal').addEventListener('click', function(e) {
+                    if (e.target === this) fecharModal();
+                });
+
+                // Atalhos de teclado
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && !document.getElementById('documentoModal').classList.contains('hidden')) {
+                        fecharModal();
+                    }
+                });
+            }
+        </script>
+
         <!-- Status do Recurso -->
         <div class="mt-4">
             <h3 class="text-2xl font-semibold text-gray-800 mb-4">Status do <?php echo $tipoRecurso; ?></h3>
             <div
                 class="inline-flex items-center px-4 py-2 rounded-full 
                 <?php echo $recurso['situacao'] == 'Pendente' ? 'bg-yellow-100 text-yellow-800' : ($recurso['situacao'] == 'Aprovado' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'); ?>">
-                <span class="text-sm font-semibold"><?php echo htmlspecialchars($recurso['situacao']); ?></span>
+                <span class="text-sm font-semibold"><?php echo htmlspecialchars($recurso['situacao'] ?? ''); ?></span>
             </div>
         </div>
     </div>

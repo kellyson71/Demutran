@@ -11,21 +11,34 @@ function verificaTexto($valor) {
     return isset($valor) && !empty($valor) ? $valor : "não informado";
 }
 
-// Função para fazer upload de arquivo (será atualizada)
+// Função para fazer upload de arquivo (atualizada com nomes personalizados)
 function uploadFile($file_key, $upload_dir, $base_url, $id_solicitacao) {
     if (isset($_FILES[$file_key]) && $_FILES[$file_key]['error'] === UPLOAD_ERR_OK) {
-        // Sanitizar o nome do arquivo para evitar problemas de segurança
-        $file_name = basename($_FILES[$file_key]['name']);
-        $file_name = preg_replace('/[^A-Za-z0-9\-_\.]/', '_', $file_name);
+        // Obter extensão do arquivo original
+        $ext = strtolower(pathinfo($_FILES[$file_key]['name'], PATHINFO_EXTENSION));
+
+        // Define o nome do arquivo baseado no tipo de documento
+        $nomes_arquivos = [
+            'doc_identidade' => 'rg',
+            'comprovante_residencia' => 'comprovante_residencia',
+            'laudo_medico' => 'laudo_medico',
+            'doc_identidade_representante' => 'rg_representante',
+            'proc_comprovante' => 'procuracao'
+        ];
+
+        // Pega o nome apropriado ou usa o file_key como fallback
+        $novo_nome = isset($nomes_arquivos[$file_key]) ? $nomes_arquivos[$file_key] : $file_key;
+
+        // Criar nome final do arquivo
+        $file_name = $novo_nome . '.' . $ext;
         
-        // Criar o diretório com o ID da solicitação se ainda não existir
         $dir_with_id = $upload_dir . $id_solicitacao . '/';
         if (!is_dir($dir_with_id)) {
             mkdir($dir_with_id, 0777, true);
         }
         $target_path = $dir_with_id . $file_name;
         if (move_uploaded_file($_FILES[$file_key]['tmp_name'], $target_path)) {
-            return $base_url . $target_path;
+            return 'https://' . $base_url . '/midia/cartao/' . $id_solicitacao . '/' . $file_name;
         }
     }
     return null;
@@ -108,9 +121,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($stmt->execute()) {
         $id_solicitacao = $conn->insert_id;
-        
-        // Gerar o número do cartão no formato 2025XXX
-        $n_cartao = '2025' . str_pad($id_solicitacao, 3, '0', STR_PAD_LEFT);
+
+        // Gerar o número do cartão no novo formato
+        $tipo = $_POST['tipo_solicitacao']; // 'pcd' ou 'idoso'
+
+        // Atualizar o contador e obter o próximo número
+        $update_contador = "UPDATE contadores_cartao SET ultimo_numero = ultimo_numero + 1 WHERE tipo = ?";
+        $stmt_contador = $conn->prepare($update_contador);
+        $stmt_contador->bind_param('s', $tipo);
+        $stmt_contador->execute();
+
+        // Obter o número atual
+        $get_numero = "SELECT ultimo_numero FROM contadores_cartao WHERE tipo = ?";
+        $stmt_numero = $conn->prepare($get_numero);
+        $stmt_numero->bind_param('s', $tipo);
+        $stmt_numero->execute();
+        $result = $stmt_numero->get_result();
+        $row = $result->fetch_assoc();
+        $ultimo_numero = $row['ultimo_numero'];
+
+        // Formatar o número do cartão
+        $prefixo = strtoupper(substr($tipo, 0, 1)); // 'P' para PCD ou 'I' para Idoso
+        $n_cartao = $prefixo . '2025' . str_pad($ultimo_numero, 3, '0', STR_PAD_LEFT);
         
         // Atualizar o registro com o número do cartão
         $update_cartao = "UPDATE solicitacao_cartao SET n_cartao = ? WHERE id = ?";
@@ -167,8 +199,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_POST = $original_post;
 
         // Diretório base para upload
-        $upload_dir = 'midia/';
-        $base_url = "https://seusite.com/midia/"; // Atualize com a URL base correta
+        $upload_dir = '../midia/cartao/';
+        // Não precisa mais definir $base_url aqui pois já vem do config.php
 
         // Criar pasta com o ID da solicitação
         $dir_with_id = $upload_dir . $id_solicitacao . '/';

@@ -1,9 +1,9 @@
 <?php
-require_once(__DIR__ . '/../../env/config.php'); // Corrigindo o caminho para apontar para o config.php no diretório env
+require_once(__DIR__ . '/../../env/config.php');
 
 // Verifica a conexão
 if ($conn->connect_error) {
-    die("Conexão falhou: " . $conn->connect_error); // Se der erro, mostra uma mensagem.
+    die("Conexão falhou: " . $conn->connect_error);
 }
 
 function verificaTexto($valor) {
@@ -12,8 +12,10 @@ function verificaTexto($valor) {
 
 // Nomes das colunas da tabela
 $colunas = [
-	'token',	'patrimonio_text',	'meio_ambiente_text',	'informacoes_complementares_text'	
-
+    'token',
+    'patrimonio_text',
+    'meio_ambiente_text',
+    'informacoes_complementares_text'
 ];
 
 // Mapeia os dados do POST para os campos da tabela
@@ -22,20 +24,6 @@ foreach ($colunas as $coluna) {
     $valores[] = verificaTexto($_POST[$coluna] ?? null);
 }
 
-// Buscar o ID do formulário central
-$token = $_POST['token'];
-$sql_form = "SELECT id FROM formularios_dat_central WHERE token = ?";
-$stmt_form = $conn->prepare($sql_form);
-$stmt_form->bind_param("s", $token);
-$stmt_form->execute();
-$result_form = $stmt_form->get_result();
-$formulario_id = $result_form->fetch_object()->id;
-$stmt_form->close();
-
-// Adicionar formulario_id às colunas
-$colunas[] = 'formulario_id';
-$valores[] = $formulario_id;
-
 // Preparar a query de inserção com placeholders
 $placeholders = implode(', ', array_fill(0, count($colunas), '?'));
 $sql = "INSERT INTO DAT4 (" . implode(', ', $colunas) . ") VALUES ($placeholders)";
@@ -43,19 +31,42 @@ $sql = "INSERT INTO DAT4 (" . implode(', ', $colunas) . ") VALUES ($placeholders
 // Preparar a declaração (statement) para evitar SQL Injection
 $stmt = $conn->prepare($sql);
 
-// Define os tipos de dados (assumindo que todos são strings, exceto os inteiros)
+// Define os tipos de dados (todos são strings neste caso)
 $tipos = str_repeat('s', count($valores));
 $stmt->bind_param($tipos, ...$valores);
 
 // Executar a query
 if ($stmt->execute()) {
+    // Atualizar o status do formulário usando o valor correto do ENUM
+    $token = $_POST['token'];
+    $status = 'completo'; // Valor exato do ENUM
+    $sql_update_status = "UPDATE formularios_dat_central SET preenchimento_status = ? WHERE token = ?";
+    $stmt_update = $conn->prepare($sql_update_status);
+    $stmt_update->bind_param("ss", $status, $token);
+
+    if (!$stmt_update->execute()) {
+        error_log("Erro ao atualizar status do formulário: " . $stmt_update->error);
+    }
+    $stmt_update->close();
+
+    // Buscar informações do usuário usando o token
+    $sql_usuario = "SELECT nome, email FROM DAT1 WHERE token = ?";
+    $stmt_usuario = $conn->prepare($sql_usuario);
+    $stmt_usuario->bind_param("s", $token);
+    $stmt_usuario->execute();
+    $result = $stmt_usuario->get_result();
+    $usuario = $result->fetch_assoc();
+
+    $nome = $usuario['nome'] ?? 'Usuário';
+    $email = $usuario['email'] ?? '';
+
     // Salvar os valores originais do POST
     $original_post = $_POST;
 
     // Configurar os dados para envio de email
     $_POST = array(
-        'email' => $email, // Você precisará adicionar um campo de email no formulário DAT4
-        'nome' => $nome,   // Você precisará adicionar um campo de nome no formulário DAT4
+        'email' => $email,
+        'nome' => $nome,
         'assunto' => "Registro de DAT - Protocolo #" . $token,
         'mensagem' => "
         <html>
@@ -93,7 +104,7 @@ if ($stmt->execute()) {
 
     // Incluir e executar o envio de email
     try {
-        require_once '../utils/mail.php';
+        require_once(__DIR__ . '/../../utils/mail.php');
         error_log("Enviando email para DAT: " . $email);
     } catch (Exception $e) {
         error_log("Erro ao enviar email DAT: " . $e->getMessage());
@@ -104,9 +115,9 @@ if ($stmt->execute()) {
 
     echo "Dados inseridos com sucesso!";
 } else {
-    echo "Erro: " . $stmt->error; // Se der erro, mostra a mensagem de erro.
+    echo "Erro: " . $stmt->error;
 }
-// Fechar a conexão
+
 $stmt->close();
 $conn->close();
 ?>

@@ -13,21 +13,30 @@ if ($conn->connect_error) {
 // Recebendo o token
 $token = $_POST['token'];
 
-// Primeiro, verificar se o token já existe
+// Primeiro, verificar se o token existe em formularios_dat_central
+$check_central_sql = "SELECT id FROM formularios_dat_central WHERE token = ?";
+$check_central_stmt = $conn->prepare($check_central_sql);
+$check_central_stmt->bind_param("s", $token);
+$check_central_stmt->execute();
+$check_central_result = $check_central_stmt->get_result();
+
+if ($check_central_result->num_rows === 0) {
+    echo json_encode([
+        'success' => false,
+        'message' => "Token inválido ou formulário não encontrado!"
+    ]);
+    $check_central_stmt->close();
+    $conn->close();
+    exit;
+}
+$check_central_stmt->close();
+
+// Depois, verificar se o token já existe na DAT1
 $check_sql = "SELECT id FROM DAT1 WHERE token = ?";
 $check_stmt = $conn->prepare($check_sql);
 $check_stmt->bind_param("s", $token);
 $check_stmt->execute();
 $check_result = $check_stmt->get_result();
-
-// Buscar o ID do formulário central
-$sql_form = "SELECT id FROM formularios_dat_central WHERE token = ?";
-$stmt_form = $conn->prepare($sql_form);
-$stmt_form->bind_param("s", $token);
-$stmt_form->execute();
-$result_form = $stmt_form->get_result();
-$formulario_id = $result_form->fetch_object()->id;
-$stmt_form->close();
 
 // Recebendo os dados via POST
 $relacao_com_veiculo = $_POST['relacao_com_veiculo'];
@@ -75,7 +84,7 @@ if ($check_result->num_rows > 0) {
         cidade_acidente=?, uf_acidente=?, cep_acidente=?, logradouro_acidente=?, 
         numero_acidente=?, complemento_acidente=?, bairro_localidade_acidente=?, 
         ponto_referencia_acidente=?, condicoes_via=?, sinalizacao_horizontal_vertical=?, 
-        tracado_via=?, condicoes_meteorologicas=?, tipo_acidente=?, formulario_id=?
+        tracado_via=?, condicoes_meteorologicas=?, tipo_acidente=?
         WHERE token=?";
 } else {
     // Se o token não existe, fazer INSERT
@@ -87,29 +96,103 @@ if ($check_result->num_rows > 0) {
         data, horario, cidade_acidente, uf_acidente, cep_acidente, logradouro_acidente, 
         numero_acidente, complemento_acidente, bairro_localidade_acidente, 
         ponto_referencia_acidente, condicoes_via, sinalizacao_horizontal_vertical, 
-        tracado_via, condicoes_meteorologicas, tipo_acidente, token, formulario_id
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        tracado_via, condicoes_meteorologicas, tipo_acidente, token
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 }
 
 $stmt = $conn->prepare($sql);
 
-// Bind parameters
-$stmt->bind_param(
-    "sisssssssssssssssssssssssssssssssssi",
-    $relacao_com_veiculo, $estrangeiro, $tipo_documento, $numero_documento, 
-    $pais, $nome, $cpf, $profissao, $sexo, $data_nascimento, $email, $celular, 
-    $cep, $logradouro, $numero, $complemento, $bairro_localidade, $cidade, $uf, 
-    $data, $horario, $cidade_acidente, $uf_acidente, $cep_acidente, $logradouro_acidente, 
-    $numero_acidente, $complemento_acidente, $bairro_localidade_acidente, 
-    $ponto_referencia_acidente, $condicoes_via, $sinalizacao_horizontal_vertical,
-    $tracado_via,
-    $condicoes_meteorologicas,
-    $tipo_acidente,
-    $token,
-    $formulario_id
-);
+// Bind parameters - Ajustando a string de tipos para 35 parâmetros
+if ($check_result->num_rows > 0) {
+    $stmt->bind_param(
+        "sisssssssssssssssssssssssssssssssss",  // 35 tipos (34 campos + token para WHERE)
+        $relacao_com_veiculo,
+        $estrangeiro,
+        $tipo_documento,
+        $numero_documento,
+        $pais,
+        $nome,
+        $cpf,
+        $profissao,
+        $sexo,
+        $data_nascimento,
+        $email,
+        $celular,
+        $cep,
+        $logradouro,
+        $numero,
+        $complemento,
+        $bairro_localidade,
+        $cidade,
+        $uf,
+        $data,
+        $horario,
+        $cidade_acidente,
+        $uf_acidente,
+        $cep_acidente,
+        $logradouro_acidente,
+        $numero_acidente,
+        $complemento_acidente,
+        $bairro_localidade_acidente,
+        $ponto_referencia_acidente,
+        $condicoes_via,
+        $sinalizacao_horizontal_vertical,
+        $tracado_via,
+        $condicoes_meteorologicas,
+        $tipo_acidente,
+        $token
+    );
+} else {
+    $stmt->bind_param(
+        "sisssssssssssssssssssssssssssssssss",  // 35 tipos (34 campos + token)
+        $relacao_com_veiculo,
+        $estrangeiro,
+        $tipo_documento,
+        $numero_documento,
+        $pais,
+        $nome,
+        $cpf,
+        $profissao,
+        $sexo,
+        $data_nascimento,
+        $email,
+        $celular,
+        $cep,
+        $logradouro,
+        $numero,
+        $complemento,
+        $bairro_localidade,
+        $cidade,
+        $uf,
+        $data,
+        $horario,
+        $cidade_acidente,
+        $uf_acidente,
+        $cep_acidente,
+        $logradouro_acidente,
+        $numero_acidente,
+        $complemento_acidente,
+        $bairro_localidade_acidente,
+        $ponto_referencia_acidente,
+        $condicoes_via,
+        $sinalizacao_horizontal_vertical,
+        $tracado_via,
+        $condicoes_meteorologicas,
+        $tipo_acidente,
+        $token
+    );
+}
 
 if ($stmt->execute()) {
+    // Atualizar o timestamp em formularios_dat_central
+    // Nota: Isso não é necessário se você configurou ON UPDATE CURRENT_TIMESTAMP
+    // mas vamos manter para garantir compatibilidade
+    $update_timestamp_sql = "UPDATE formularios_dat_central SET ultima_atualizacao = CURRENT_TIMESTAMP WHERE token = ?";
+    $update_timestamp_stmt = $conn->prepare($update_timestamp_sql);
+    $update_timestamp_stmt->bind_param("s", $token);
+    $update_timestamp_stmt->execute();
+    $update_timestamp_stmt->close();
+
     echo json_encode([
         'success' => true,
         'message' => "Dados " . ($check_result->num_rows > 0 ? "atualizados" : "inseridos") . " com sucesso!"

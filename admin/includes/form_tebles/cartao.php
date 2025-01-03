@@ -102,6 +102,8 @@ function exibirDetalhesCartao($conn, $id)
             <h3 class="text-2xl font-semibold text-gray-800 mb-4">Documentos Anexados</h3>
             <?php
             $temDocumentos = false;
+            $baseUrl = "https://{$_SERVER['HTTP_HOST']}/midia/cartao/{$cartao['id']}";
+
             $documentos = [
                 'doc_identidade_url' => ['icon' => 'description', 'label' => 'Documento de Identidade'],
                 'comprovante_residencia_url' => ['icon' => 'home', 'label' => 'Comprovante de Residência'],
@@ -117,7 +119,7 @@ function exibirDetalhesCartao($conn, $id)
                         $temDocumentos = true; ?>
                         <div class="flex items-center">
                             <i class="material-icons text-blue-600 mr-2"><?php echo $info['icon']; ?></i>
-                            <a href="<?php echo htmlspecialchars($cartao[$campo]); ?>" target="_blank"
+                            <a href="<?php echo $baseUrl . '/' . basename($cartao[$campo]); ?>" target="_blank"
                                 class="text-blue-600 hover:text-blue-800"><?php echo $info['label']; ?></a>
                         </div>
                 <?php endif;

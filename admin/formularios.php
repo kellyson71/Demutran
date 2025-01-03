@@ -20,18 +20,21 @@ if (!isset($_SESSION['usuario_id'])) {
 
 $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 
-function obterSubmissoesPaginadas($conn, $tabela, $limite, $offset) {
+function obterSubmissoesPaginadas($conn, $tabela, $limite, $offset)
+{
     $sql = "SELECT * FROM $tabela ORDER BY id DESC LIMIT $limite OFFSET $offset";
     return $conn->query($sql);
 }
 
 // Add this helper function near the top with other functions
-function safeString($value) {
+function safeString($value)
+{
     return htmlspecialchars($value ?? 'Não informado', ENT_QUOTES, 'UTF-8');
 }
 
 // Adicionar função auxiliar para obter o título correto
-function getTipoJariLabel($subtipo) {
+function getTipoJariLabel($subtipo)
+{
     $labels = [
         'apresentacao_condutor' => ['titulo' => 'Apresentação de Condutor', 'subtitulo' => 'Indicação do condutor infrator'],
         'defesa_previa' => ['titulo' => 'Defesa Prévia', 'subtitulo' => 'Contestação de infração'],
@@ -71,16 +74,28 @@ while ($row = $pcd->fetch_assoc()) {
 // Processamento das submissões de 'DAT'
 while ($row = $dat->fetch_assoc()) {
     $row['tipo'] = 'DAT';
-    // Buscar 'nome' na tabela 'DAT1' usando o 'token'
+    // Inicializar valores padrão
+    $row['preenchimento_status'] = 'Incompleto'; // Valor padrão
+    $row['email'] = 'Não informado'; // Valor padrão
+
+    // Buscar informações adicionais da tabela formularios_dat_central
     $token = $conn->real_escape_string($row['token']);
-    $sql_nome = "SELECT nome FROM DAT1 WHERE token = '$token' LIMIT 1";
-    $result_nome = $conn->query($sql_nome);
-    if ($result_nome->num_rows > 0) {
-        $row_nome = $result_nome->fetch_assoc();
-        $row['nome'] = $row_nome['nome'];
-    } else {
-        $row['nome'] = 'Nome não encontrado';
+    $sql_dat_info = "SELECT fc.*, d1.nome 
+                     FROM formularios_dat_central fc 
+                     LEFT JOIN DAT1 d1 ON fc.token = d1.token 
+                     WHERE fc.token = '$token' 
+                     LIMIT 1";
+    $result_dat_info = $conn->query($sql_dat_info);
+
+    if ($result_dat_info && $result_dat_info->num_rows > 0) {
+        $dat_info = $result_dat_info->fetch_assoc();
+        $row['nome'] = $dat_info['nome'] ?? 'Nome não encontrado';
+        $row['email'] = $dat_info['email_usuario'] ?? 'Não informado';
+        $row['preenchimento_status'] = $dat_info['preenchimento_status'] ?? 'Incompleto';
+        $row['data_submissao'] = $dat_info['data_criacao'] ?? date('Y-m-d H:i:s');
+        $row['ultima_atualizacao'] = $dat_info['ultima_atualizacao'] ?? date('Y-m-d H:i:s');
     }
+
     $submissoes[] = $row;
 }
 
@@ -124,11 +139,11 @@ if ($tipo_filter == 'SAC_GRUPO') {
 foreach ($tipos as $tipo => $tabela) {
     $is_jari_subtipo = strpos($tipo_filter, 'JARI_') === 0;
     $jari_subtipo = $is_jari_subtipo ? substr($tipo_filter, 5) : null;
-    
+
     // Verificar se deve processar este tipo
     $should_process = empty($tipo_filter) || // Sem filtro
-                     in_array($tipo, $tipos_selecionados) || // Tipo específico ou grupo
-                     ($tipo == 'JARI' && $is_jari_subtipo); // Subtipo JARI
+        in_array($tipo, $tipos_selecionados) || // Tipo específico ou grupo
+        ($tipo == 'JARI' && $is_jari_subtipo); // Subtipo JARI
 
     if ($should_process) {
         if ($tabela === 'solicitacao_cartao') {
@@ -138,9 +153,11 @@ foreach ($tipos as $tipo => $tabela) {
             while ($row = $result->fetch_assoc()) {
                 // Garantir que o tipo seja maiúsculo e corresponda exatamente a 'PCD' ou 'IDOSO'
                 $row['tipo'] = strtoupper($row['tipo_solicitacao']);
-                if (empty($tipo_filter) || 
-                    in_array($row['tipo'], $tipos_selecionados) || 
-                    $tipo_filter == 'CREDENCIAIS_GRUPO') {
+                if (
+                    empty($tipo_filter) ||
+                    in_array($row['tipo'], $tipos_selecionados) ||
+                    $tipo_filter == 'CREDENCIAIS_GRUPO'
+                ) {
                     $submissoes[] = $row;
                 }
             }
@@ -152,7 +169,7 @@ foreach ($tipos as $tipo => $tabela) {
                 $sql .= " WHERE tipo_solicitacao = '" . $conn->real_escape_string($jari_subtipo) . "'";
             }
             $sql .= " ORDER BY id DESC LIMIT $fetch_limit";
-            
+
             $result = $conn->query($sql);
             while ($row = $result->fetch_assoc()) {
                 $row['tipo'] = 'JARI';
@@ -164,7 +181,7 @@ foreach ($tipos as $tipo => $tabela) {
             $result = obterSubmissoesPaginadas($conn, $tabela, $fetch_limit, 0);
             while ($row = $result->fetch_assoc()) {
                 $row['tipo'] = $tipo;
-                
+
                 // Para 'DAT', buscar 'nome' na tabela 'DAT1'
                 if ($tipo == 'DAT') {
                     $token = $conn->real_escape_string($row['token']);
@@ -186,13 +203,13 @@ foreach ($tipos as $tipo => $tabela) {
 
 // Aplicar filtro de pesquisa após coletar todas as submissões
 if (!empty($search)) {
-    $submissoes = array_filter($submissoes, function($row) use ($search) {
+    $submissoes = array_filter($submissoes, function ($row) use ($search) {
         return isset($row['nome']) && stripos($row['nome'], $search) !== false;
     });
 }
 
 // Ordenar submissões por data
-usort($submissoes, function($a, $b) {
+usort($submissoes, function ($a, $b) {
     return strtotime($b['data_submissao']) - strtotime($a['data_submissao']);
 });
 
@@ -231,23 +248,23 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
     <script src="//unpkg.com/alpinejs" defer></script>
 
     <style>
-    [x-cloak] {
-        display: none;
-    }
+        [x-cloak] {
+            display: none;
+        }
     </style>
 
     <!-- Script para filtros -->
     <script>
-    function filtrar(tipo) {
-        var cards = document.querySelectorAll('.form-card');
-        cards.forEach(function(card) {
-            if (tipo === 'todos' || card.dataset.tipo === tipo) {
-                card.classList.remove('hidden');
-            } else {
-                card.classList.add('hidden');
-            }
-        });
-    }
+        function filtrar(tipo) {
+            var cards = document.querySelectorAll('.form-card');
+            cards.forEach(function(card) {
+                if (tipo === 'todos' || card.dataset.tipo === tipo) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
     </script>
 </head>
 
@@ -312,7 +329,7 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <?php 
+            <?php
             $topbarHtml = getTopbarHtml('Formulários Recebidos', $notificacoesNaoLidas);
             $avatarHtml = getAvatarHtml($_SESSION['usuario_nome'], $_SESSION['usuario_avatar'] ?? '');
             echo str_replace('[AVATAR_PLACEHOLDER]', $avatarHtml, $topbarHtml);
@@ -344,33 +361,57 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                                     <select name="tipo"
                                         class="block w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-lg appearance-none bg-white shadow-sm text-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer transition-all duration-200">
                                         <option value="">Todos os tipos</option>
-                                        
+
                                         <!-- Grupo SAC -->
                                         <optgroup label="SAC">
-                                            <option value="SAC_GRUPO" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'SAC_GRUPO') ? 'selected' : ''; ?>>Todos SAC</option>
-                                            <option value="SAC" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'SAC') ? 'selected' : ''; ?>>&nbsp;&nbsp;&nbsp;&nbsp;SAC Individual</option>
+                                            <option value="SAC_GRUPO"
+                                                <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'SAC_GRUPO') ? 'selected' : ''; ?>>
+                                                Todos SAC</option>
+                                            <option value="SAC"
+                                                <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'SAC') ? 'selected' : ''; ?>>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;SAC Individual</option>
                                         </optgroup>
-                                        
+
                                         <!-- Grupo Recursos e Defesas -->
                                         <optgroup label="Recursos e Defesas">
-                                            <option value="JARI_GRUPO" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'JARI_GRUPO') ? 'selected' : ''; ?>>Todos os Recursos</option>
-                                            <option value="JARI_apresentacao_condutor" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'JARI_apresentacao_condutor') ? 'selected' : ''; ?>>&nbsp;&nbsp;&nbsp;&nbsp;Apresentação de Condutor</option>
-                                            <option value="JARI_defesa_previa" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'JARI_defesa_previa') ? 'selected' : ''; ?>>&nbsp;&nbsp;&nbsp;&nbsp;Defesa Prévia</option>
-                                            <option value="JARI_jari" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'JARI_jari') ? 'selected' : ''; ?>>&nbsp;&nbsp;&nbsp;&nbsp;Recurso JARI</option>
+                                            <option value="JARI_GRUPO"
+                                                <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'JARI_GRUPO') ? 'selected' : ''; ?>>
+                                                Todos os Recursos</option>
+                                            <option value="JARI_apresentacao_condutor"
+                                                <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'JARI_apresentacao_condutor') ? 'selected' : ''; ?>>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;Apresentação de Condutor</option>
+                                            <option value="JARI_defesa_previa"
+                                                <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'JARI_defesa_previa') ? 'selected' : ''; ?>>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;Defesa Prévia</option>
+                                            <option value="JARI_jari"
+                                                <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'JARI_jari') ? 'selected' : ''; ?>>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;Recurso JARI</option>
                                         </optgroup>
-                                        
+
                                         <!-- Grupo Credenciais -->
                                         <optgroup label="Credenciais">
-                                            <option value="CREDENCIAIS_GRUPO" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'CREDENCIAIS_GRUPO') ? 'selected' : ''; ?>>Todas as Credenciais</option>
-                                            <option value="PCD" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'PCD') ? 'selected' : ''; ?>>&nbsp;&nbsp;&nbsp;&nbsp;PCD</option>
-                                            <option value="IDOSO" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'IDOSO') ? 'selected' : ''; ?>>&nbsp;&nbsp;&nbsp;&nbsp;IDOSO</option>
+                                            <option value="CREDENCIAIS_GRUPO"
+                                                <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'CREDENCIAIS_GRUPO') ? 'selected' : ''; ?>>
+                                                Todas as Credenciais</option>
+                                            <option value="PCD"
+                                                <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'PCD') ? 'selected' : ''; ?>>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;PCD</option>
+                                            <option value="IDOSO"
+                                                <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'IDOSO') ? 'selected' : ''; ?>>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;IDOSO</option>
                                         </optgroup>
-                                        
+
                                         <!-- Grupo Outros -->
                                         <optgroup label="Outros">
-                                            <option value="OUTROS_GRUPO" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'OUTROS_GRUPO') ? 'selected' : ''; ?>>Todos os Outros</option>
-                                            <option value="DAT" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'DAT') ? 'selected' : ''; ?>>&nbsp;&nbsp;&nbsp;&nbsp;DAT</option>
-                                            <option value="Parecer" <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'Parecer') ? 'selected' : ''; ?>>&nbsp;&nbsp;&nbsp;&nbsp;Parecer</option>
+                                            <option value="OUTROS_GRUPO"
+                                                <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'OUTROS_GRUPO') ? 'selected' : ''; ?>>
+                                                Todos os Outros</option>
+                                            <option value="DAT"
+                                                <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'DAT') ? 'selected' : ''; ?>>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;DAT</option>
+                                            <option value="Parecer"
+                                                <?php echo (isset($_GET['tipo']) && $_GET['tipo'] == 'Parecer') ? 'selected' : ''; ?>>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;Parecer</option>
                                         </optgroup>
                                     </select>
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
@@ -388,29 +429,29 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
 
                             <!-- Active Filters (if any) -->
                             <?php if (!empty($_GET['search']) || !empty($_GET['tipo'])): ?>
-                            <div class="mt-4 flex items-center space-x-2">
-                                <span class="text-sm text-gray-500">Filtros ativos:</span>
-                                <?php if (!empty($_GET['search'])): ?>
-                                <span
-                                    class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-                                    "<?php echo htmlspecialchars($_GET['search']); ?>"
-                                    <a href="?<?php echo http_build_query(array_merge($_GET, ['search' => ''])); ?>"
-                                        class="ml-2 text-blue-600 hover:text-blue-800">
-                                        <span class="material-icons text-sm">close</span>
-                                    </a>
-                                </span>
-                                <?php endif; ?>
-                                <?php if (!empty($_GET['tipo'])): ?>
-                                <span
-                                    class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-800">
-                                    Tipo: <?php echo htmlspecialchars($_GET['tipo']); ?>
-                                    <a href="?<?php echo http_build_query(array_merge($_GET, ['tipo' => ''])); ?>"
-                                        class="ml-2 text-gray-600 hover:text-gray-800">
-                                        <span class="material-icons text-sm">close</span>
-                                    </a>
-                                </span>
-                                <?php endif; ?>
-                            </div>
+                                <div class="mt-4 flex items-center space-x-2">
+                                    <span class="text-sm text-gray-500">Filtros ativos:</span>
+                                    <?php if (!empty($_GET['search'])): ?>
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                                            "<?php echo htmlspecialchars($_GET['search']); ?>"
+                                            <a href="?<?php echo http_build_query(array_merge($_GET, ['search' => ''])); ?>"
+                                                class="ml-2 text-blue-600 hover:text-blue-800">
+                                                <span class="material-icons text-sm">close</span>
+                                            </a>
+                                        </span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($_GET['tipo'])): ?>
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-800">
+                                            Tipo: <?php echo htmlspecialchars($_GET['tipo']); ?>
+                                            <a href="?<?php echo http_build_query(array_merge($_GET, ['tipo' => ''])); ?>"
+                                                class="ml-2 text-gray-600 hover:text-gray-800">
+                                                <span class="material-icons text-sm">close</span>
+                                            </a>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
                             <?php endif; ?>
                         </form>
                     </div>
@@ -458,13 +499,15 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                                     <div class="p-5">
                                         <div class="flex items-center justify-between mb-4">
                                             <div class="flex items-center">
-                                                <span class="material-icons <?php echo $style['text']; ?> mr-2"><?php echo $style['icon']; ?></span>
+                                                <span
+                                                    class="material-icons <?php echo $style['text']; ?> mr-2"><?php echo $style['icon']; ?></span>
                                                 <div>
                                                     <h3 class="text-lg font-semibold text-gray-800">
-                                                        <?php if($item['tipo'] === 'JARI' && isset($item['subtipo'])): ?>
+                                                        <?php if ($item['tipo'] === 'JARI' && isset($item['subtipo'])): ?>
                                                             <?php $labelInfo = getTipoJariLabel($item['subtipo']); ?>
                                                             <?php echo $labelInfo['titulo']; ?>
-                                                            <div class="text-xs <?php echo $style['text']; ?>"><?php echo $labelInfo['subtitulo']; ?></div>
+                                                            <div class="text-xs <?php echo $style['text']; ?>">
+                                                                <?php echo $labelInfo['subtitulo']; ?></div>
                                                         <?php else: ?>
                                                             <?php echo $item['tipo']; ?>
                                                         <?php endif; ?>
@@ -487,36 +530,55 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                                                     class="text-sm font-medium text-gray-800"><?php echo date('d/m/Y', strtotime($item['data_submissao'])); ?></span>
                                             </div>
 
-                                            <?php if($item['tipo'] === 'PCD' || $item['tipo'] === 'IDOSO'): ?>
-                                            <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                                                <span class="text-sm text-gray-600">Nº do Cartão</span>
-                                                <span class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['n_cartao'] ?? 'Não atribuído'); ?></span>
-                                            </div>
+                                            <?php if ($item['tipo'] === 'PCD' || $item['tipo'] === 'IDOSO'): ?>
+                                                <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                                                    <span class="text-sm text-gray-600">Nº do Cartão</span>
+                                                    <span
+                                                        class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['n_cartao'] ?? 'Não atribuído'); ?></span>
+                                                </div>
                                             <?php endif; ?>
 
-                                            <?php if($item['tipo'] === 'Parecer'): ?>
-                                            <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                                                <span class="text-sm text-gray-600">Local</span>
-                                                <span
-                                                    class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['local']); ?></span>
-                                            </div>
-                                            <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                                                <span class="text-sm text-gray-600">Protocolo</span>
-                                                <span
-                                                    class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['protocolo']); ?></span>
-                                            </div>
+                                            <?php if ($item['tipo'] === 'Parecer'): ?>
+                                                <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                                                    <span class="text-sm text-gray-600">Local</span>
+                                                    <span
+                                                        class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['local']); ?></span>
+                                                </div>
+                                                <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                                                    <span class="text-sm text-gray-600">Protocolo</span>
+                                                    <span
+                                                        class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['protocolo']); ?></span>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if ($item['tipo'] === 'DAT'): ?>
+                                                <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                                                    <span class="text-sm text-gray-600">Email</span>
+                                                    <span class="text-sm font-medium text-gray-800">
+                                                        <?php echo htmlspecialchars($item['email'] ?? 'Não informado'); ?>
+                                                    </span>
+                                                </div>
+                                                <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                                                    <span class="text-sm text-gray-600">Preenchimento</span>
+                                                    <span class="text-sm font-medium <?php
+                                                                                        $preenchimento = $item['preenchimento_status'] ?? 'Incompleto';
+                                                                                        echo $preenchimento === 'Incompleto' ? 'text-red-600' : 'text-green-600';
+                                                                                        ?>">
+                                                        <?php echo htmlspecialchars($preenchimento); ?>
+                                                    </span>
+                                                </div>
                                             <?php endif; ?>
                                         </div>
 
                                         <div class="mt-4 pt-2">
-                                            <a href="detalhes_formulario.php?id=<?php echo $item['id']; ?>&tipo=<?php 
-                        // Mapeia os tipos para os tipos suportados pelo detalhes_formulario.php
-                        $tipoRedirect = $item['tipo'];
-                        if ($tipoRedirect === 'IDOSO') {
-                            $tipoRedirect = 'PCD'; // IDOSO é tratado como PCD no detalhes
-                        }
-                        echo $tipoRedirect; 
-                    ?>"
+                                            <a href="detalhes_formulario.php?id=<?php echo $item['id']; ?>&tipo=<?php
+                                                                                                                // Mapeia os tipos para os tipos suportados pelo detalhes_formulario.php
+                                                                                                                $tipoRedirect = $item['tipo'];
+                                                                                                                if ($tipoRedirect === 'IDOSO') {
+                                                                                                                    $tipoRedirect = 'PCD'; // IDOSO é tratado como PCD no detalhes
+                                                                                                                }
+                                                                                                                echo $tipoRedirect;
+                                                                                                                ?>"
                                                 class="inline-flex items-center justify-center w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                                                 <span class="material-icons text-sm mr-2">visibility</span>
                                                 Visualizar detalhes
@@ -542,23 +604,25 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                                                         </h3>
                                                         <span
                                                             class="px-2 py-1 text-xs rounded-full <?php echo $style['bg']; ?> <?php echo $style['text']; ?>">
-                                                            <?php if($item['tipo'] === 'JARI' && isset($item['subtipo'])): ?>
+                                                            <?php if ($item['tipo'] === 'JARI' && isset($item['subtipo'])): ?>
                                                                 <?php $labelInfo = getTipoJariLabel($item['subtipo']); ?>
                                                                 <?php echo $labelInfo['titulo']; ?>
                                                             <?php else: ?>
                                                                 <?php echo $item['tipo']; ?>
                                                             <?php endif; ?>
                                                         </span>
-                                                        <?php if($item['tipo'] === 'JARI' && isset($item['subtipo'])): ?>
-                                                        <span class="text-xs text-gray-500"><?php echo getTipoJariLabel($item['subtipo'])['subtitulo']; ?></span>
+                                                        <?php if ($item['tipo'] === 'JARI' && isset($item['subtipo'])): ?>
+                                                            <span
+                                                                class="text-xs text-gray-500"><?php echo getTipoJariLabel($item['subtipo'])['subtitulo']; ?></span>
                                                         <?php endif; ?>
                                                     </div>
                                                     <p class="text-sm text-gray-500">
                                                         ID: #<?php echo $item['id']; ?> •
                                                         Submetido em:
                                                         <?php echo date('d/m/Y', strtotime($item['data_submissao'])); ?>
-                                                        <?php if($item['tipo'] === 'PCD' || $item['tipo'] === 'IDOSO'): ?>
-                                                        • Cartão: <?php echo htmlspecialchars($item['n_cartao'] ?? 'Não atribuído'); ?>
+                                                        <?php if ($item['tipo'] === 'PCD' || $item['tipo'] === 'IDOSO'): ?>
+                                                            • Cartão:
+                                                            <?php echo htmlspecialchars($item['n_cartao'] ?? 'Não atribuído'); ?>
                                                         <?php endif; ?>
                                                     </p>
                                                 </div>
@@ -566,23 +630,37 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
 
                                             <!-- Right section: Status and Action -->
                                             <div class="flex items-center space-x-4">
-                                                <?php if($item['tipo'] === 'Parecer'): ?>
-                                                <div class="hidden md:block text-right">
-                                                    <p class="text-sm text-gray-600">Local:
-                                                        <?php echo safeString($item['local']); ?></p>
-                                                    <p class="text-sm text-gray-600">Protocolo:
-                                                        <?php echo safeString($item['protocolo']); ?></p>
-                                                </div>
+                                                <?php if ($item['tipo'] === 'Parecer'): ?>
+                                                    <div class="hidden md:block text-right">
+                                                        <p class="text-sm text-gray-600">Local:
+                                                            <?php echo safeString($item['local']); ?></p>
+                                                        <p class="text-sm text-gray-600">Protocolo:
+                                                            <?php echo safeString($item['protocolo']); ?></p>
+                                                    </div>
                                                 <?php endif; ?>
 
-                                                <a href="detalhes_formulario.php?id=<?php echo $item['id']; ?>&tipo=<?php 
-                    // Mapeia os tipos para os tipos suportados pelo detalhes_formulario.php
-                    $tipoRedirect = $item['tipo'];
-                    if ($tipoRedirect === 'IDOSO') {
-                        $tipoRedirect = 'PCD'; // IDOSO é tratado como PCD no detalhes
-                    }
-                    echo $tipoRedirect; 
-                ?>"
+                                                <?php if ($item['tipo'] === 'DAT'): ?>
+                                                    <div class="hidden md:flex items-center space-x-4 text-sm">
+                                                        <span class="text-gray-500">
+                                                            <?php echo htmlspecialchars($item['email'] ?? 'Não informado'); ?>
+                                                        </span>
+                                                        <span class="px-2 py-1 rounded-full text-xs <?php
+                                                                                                    $preenchimento = $item['preenchimento_status'] ?? 'Incompleto';
+                                                                                                    echo $preenchimento === 'Incompleto' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
+                                                                                                    ?>">
+                                                            <?php echo htmlspecialchars($preenchimento); ?>
+                                                        </span>
+                                                    </div>
+                                                <?php endif; ?>
+
+                                                <a href="detalhes_formulario.php?id=<?php echo $item['id']; ?>&tipo=<?php
+                                                                                                                    // Mapeia os tipos para os tipos suportados pelo detalhes_formulario.php
+                                                                                                                    $tipoRedirect = $item['tipo'];
+                                                                                                                    if ($tipoRedirect === 'IDOSO') {
+                                                                                                                        $tipoRedirect = 'PCD'; // IDOSO é tratado como PCD no detalhes
+                                                                                                                    }
+                                                                                                                    echo $tipoRedirect;
+                                                                                                                    ?>"
                                                     class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                                                     <span class="material-icons text-sm mr-2">visibility</span>
                                                     Detalhes
@@ -600,14 +678,14 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                 <!-- Paginação -->
                 <div class="flex justify-center mt-6 space-x-2">
                     <?php if ($pagina > 1): ?>
-                    <a href="?pagina=<?php echo $pagina - 1; ?>&search=<?php echo urlencode($search); ?>&tipo=<?php echo urlencode($tipo_filter); ?>"
-                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Anterior</a>
+                        <a href="?pagina=<?php echo $pagina - 1; ?>&search=<?php echo urlencode($search); ?>&tipo=<?php echo urlencode($tipo_filter); ?>"
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Anterior</a>
                     <?php endif; ?>
                     <span class="px-4 py-2 bg-gray-100 text-gray-700 rounded">Página <?php echo $pagina; ?> de
                         <?php echo $total_pages; ?></span>
                     <?php if ($pagina < $total_pages): ?>
-                    <a href="?pagina=<?php echo $pagina + 1; ?>&search=<?php echo urlencode($search); ?>&tipo=<?php echo urlencode($tipo_filter); ?>"
-                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Próxima</a>
+                        <a href="?pagina=<?php echo $pagina + 1; ?>&search=<?php echo urlencode($search); ?>&tipo=<?php echo urlencode($tipo_filter); ?>"
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Próxima</a>
                     <?php endif; ?>
                 </div>
 

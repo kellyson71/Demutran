@@ -4,7 +4,7 @@ function contarNotificacoesNaoLidas($conn) {
     $tresDiasAtras = date('Y-m-d H:i:s', strtotime('-3 days'));
     
     $sql = "SELECT 
-        (SELECT COUNT(*) FROM DAT4 WHERE data_submissao >= ? AND is_read = 0) +
+        (SELECT COUNT(*) FROM formularios_dat_central WHERE data_criacao >= ? AND is_read = 0) +
         (SELECT COUNT(*) FROM Parecer WHERE data_submissao >= ? AND is_read = 0) +
         (SELECT COUNT(*) FROM sac WHERE data_submissao >= ? AND is_read = 0) +
         (SELECT COUNT(*) FROM solicitacao_cartao WHERE data_submissao >= ? AND is_read = 0) +
@@ -65,19 +65,19 @@ function getNotificacoesNaoLidas($conn, $usuario_id) {
     
     $sql = "SELECT * FROM (
         SELECT 
-            'DAT4' as tipo,
+            'DAT' as tipo,
             d.id,
             d.token as titulo,
-            d.situacao,
-            d.data_submissao,
+            d.status as situacao,
+            d.data_criacao as data_submissao,
             dat1.nome as nome,
             dat1.email as email,
             dat1.cidade as cidade,
             dat1.tipo_acidente as subtipo,
             d.is_read
-        FROM DAT4 d
+        FROM formularios_dat_central d
         LEFT JOIN DAT1 dat1 ON dat1.token = d.token
-        WHERE d.data_submissao >= ? AND d.is_read = 0
+        WHERE d.data_criacao >= ? AND d.is_read = 0
         
         UNION ALL
         
@@ -155,7 +155,7 @@ function getNotificacoesNaoLidas($conn, $usuario_id) {
 
 function marcarComoLido($conn, $tipo, $registro_id) {
     $tabela = match($tipo) {
-        'DAT4' => 'DAT4',
+        'DAT' => 'formularios_dat_central',
         'Parecer' => 'Parecer',
         'SAC' => 'sac',
         'Cartao' => 'solicitacao_cartao',

@@ -13,41 +13,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $senha = $_POST['senha'];
 
-    // Verificar se o usuário está na tabela de usuários pendentes
-    $sql_pendentes = "SELECT * FROM usuarios_pendentes WHERE email = ?";
-    $stmt_pendentes = $conn->prepare($sql_pendentes);
-    $stmt_pendentes->bind_param('s', $email);
-    $stmt_pendentes->execute();
-    $resultado_pendentes = $stmt_pendentes->get_result();
+    $sql = "SELECT * FROM usuarios WHERE email = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('s', $email);
 
-    if ($resultado_pendentes->num_rows === 1) {
-        // Usuário pendente encontrado
-        $erro = 'Seu cadastro ainda não foi aprovado. Você receberá uma notificação por e-mail quando for aprovado.';
-    } else {
-        // Verificar se o usuário está na tabela de usuários aprovados
-        $sql = "SELECT * FROM usuarios WHERE email = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param('s', $email);
-
-        if ($stmt->execute()) {
-            $resultado = $stmt->get_result();
-            if ($resultado->num_rows === 1) {
-                $usuario = $resultado->fetch_assoc();
-                if (password_verify($senha, $usuario['senha'])) {
-                    $_SESSION['usuario_id'] = $usuario['id'];
-                    $_SESSION['usuario_nome'] = $usuario['nome'];
-                    $_SESSION['is_admin'] = $usuario['is_admin'];
-                    header('Location: index.php');
-                    exit();
-                } else {
-                    $erro = 'Senha incorreta.';
-                }
+    if ($stmt->execute()) {
+        $resultado = $stmt->get_result();
+        if ($resultado->num_rows === 1) {
+            $usuario = $resultado->fetch_assoc();
+            if (password_verify($senha, $usuario['senha'])) {
+                $_SESSION['usuario_id'] = $usuario['id'];
+                $_SESSION['usuario_nome'] = $usuario['nome'];
+                $_SESSION['is_admin'] = $usuario['is_admin'];
+                header('Location: index.php');
+                exit();
             } else {
-                $erro = 'Usuário não encontrado.';
+                $erro = 'Senha incorreta.';
             }
         } else {
-            $erro = 'Erro na execução da consulta.';
+            $erro = 'Usuário não encontrado.';
         }
+    } else {
+        $erro = 'Erro na execução da consulta.';
     }
 }
 ?>
@@ -66,13 +53,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
-    body {
-        font-family: 'Poppins', sans-serif;
-        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('./assets/bk.jpg');
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-    }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('./assets/bk.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
     </style>
 </head>
 
@@ -88,12 +75,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <!-- Card do formulário -->
         <div class="bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl p-8">
             <?php if ($erro): ?>
-            <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-                <div class="flex items-center">
-                    <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
-                    <p class="text-sm text-red-700"><?php echo $erro; ?></p>
+                <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                        <p class="text-sm text-red-700"><?php echo $erro; ?></p>
+                    </div>
                 </div>
-            </div>
             <?php endif; ?>
 
             <form action="login.php" method="POST" class="space-y-6">
@@ -135,16 +122,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     Entrar
                 </button>
             </form>
-
-            <!-- Link para registro -->
-            <div class="mt-6 text-center">
-                <p class="text-sm text-gray-600">
-                    Não tem acesso?
-                    <a href="registro.php" class="text-blue-600 hover:text-blue-700 font-medium">
-                        Solicite sua autorização
-                    </a>
-                </p>
-            </div>
         </div>
 
         <!-- Footer -->

@@ -175,6 +175,162 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                 }
                 ?>
 
+                <div class="card">
+                    <div class="card-footer p-4 flex justify-end">
+                        <button id="btnConcluir"
+                            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Concluir Solicitação
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modal de Loading/Erro -->
+                <div id="statusModal"
+                    class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+                    <div class="bg-white rounded-lg p-6 w-96 shadow-xl">
+                        <!-- Loading State -->
+                        <div id="loadingState" class="text-center">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                            <p class="mt-4 text-gray-700">Processando solicitação...</p>
+                        </div>
+
+                        <!-- Error State -->
+                        <div id="errorState" class="hidden">
+                            <div class="bg-red-100 border-l-4 border-red-500 p-4 mb-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-red-700 font-medium" id="errorMessage">Erro ao processar
+                                            solicitação</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-end">
+                                <button onclick="closeModal()"
+                                    class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors">
+                                    Fechar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Success State -->
+                        <div id="successState" class="hidden">
+                            <div class="bg-green-100 border-l-4 border-green-500 p-4 mb-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-green-700 font-medium">Solicitação concluída com sucesso!</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-end">
+                                <button onclick="closeModal()"
+                                    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors">
+                                    Fechar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    function showModal(state = 'loading') {
+                        const modal = document.getElementById('statusModal');
+                        const loadingState = document.getElementById('loadingState');
+                        const errorState = document.getElementById('errorState');
+                        const successState = document.getElementById('successState');
+
+                        // Reset states
+                        loadingState.classList.add('hidden');
+                        errorState.classList.add('hidden');
+                        successState.classList.add('hidden');
+
+                        // Show modal
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+
+                        // Show correct state
+                        switch (state) {
+                            case 'loading':
+                                loadingState.classList.remove('hidden');
+                                break;
+                            case 'error':
+                                errorState.classList.remove('hidden');
+                                break;
+                            case 'success':
+                                successState.classList.remove('hidden');
+                                break;
+                        }
+                    }
+
+                    function closeModal() {
+                        const modal = document.getElementById('statusModal');
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                        if (document.getElementById('successState').classList.contains('hidden') === false) {
+                            location.reload();
+                        }
+                    }
+
+                    document.getElementById('btnConcluir').addEventListener('click', async function() {
+                        try {
+                            showModal('loading');
+
+                            const formData = {
+                                id: '<?php echo $id; ?>',
+                                tipo: '<?php echo $tipo; ?>',
+                                email: '<?php echo $dados['email'] ?? ''; ?>',
+                                nome: '<?php echo $dados['nome'] ?? ''; ?>'
+                            };
+
+                            const response = await fetch('concluir_formulario_ajax.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(formData)
+                            });
+
+                            const data = await response.json();
+
+                            if (response.ok) {
+                                showModal('success');
+                                setTimeout(() => {
+                                    closeModal();
+                                    location.reload();
+                                }, 2000);
+                            } else {
+                                document.getElementById('errorMessage').textContent = data.message ||
+                                    'Erro ao processar a solicitação';
+                                showModal('error');
+                            }
+
+                        } catch (error) {
+                            console.error('Erro:', error);
+                            document.getElementById('errorMessage').textContent = error.message;
+                            showModal('error');
+                        }
+                    });
+                </script>
+
             </main>
 
             <!-- Footer -->

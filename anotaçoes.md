@@ -1,5 +1,8 @@
 # Notas da Reunião
 
+não gerar mais de um , tudo obrigatório
+pdc/idoso (I2025001/P2025001)
+
 ### 1. Funcionalidades e Campos Adicionais
 
 - [ x ] **Campo "Outros"**: Adicionar opção "Outros" em campos específicos conforme necessidade.

@@ -54,8 +54,30 @@ function verificaTexto($valor) {
     return isset($valor) && !empty($valor) ? $valor : "não informado";
 }
 
-// Função para fazer upload de arquivo
-function uploadFile($file_key, $upload_dir, $base_url, $id_solicitacao) {
+// Função para mapear o nome do campo para o nome do arquivo
+function getFileNameByType($file_key)
+{
+    $fileTypes = [
+        'doc_requerimento' => 'requerimento',
+        'cnh' => 'cnh_proprietario',
+        'cnh_condutor' => 'cnh_condutor',
+        'notif_DEMUTRAN' => 'notificacao',
+        'crlv' => 'crlv',
+        'comprovante_residencia' => 'comprovante_residencia',
+        'assinatura_condutor' => 'assinatura_condutor',
+        'assinatura_proprietario' => 'assinatura_proprietario',
+        'rg' => 'rg',
+        'rg_condutor' => 'rg_condutor'
+    ];
+
+    return isset($fileTypes[$file_key]) ? $fileTypes[$file_key] : $file_key;
+}
+
+// Função modificada para fazer upload de arquivo
+function uploadFile($file_key, $tipo_solicitacao, $id_solicitacao, $base_url)
+{
+    global $upload_dir; // Adicione esta linha para usar a variável global
+    
     error_log("Tentando fazer upload do arquivo: " . $file_key);
     
     if (!isset($_FILES[$file_key])) {
@@ -64,7 +86,6 @@ function uploadFile($file_key, $upload_dir, $base_url, $id_solicitacao) {
     }
 
     if ($_FILES[$file_key]['error'] === UPLOAD_ERR_OK) {
-        // Validar o tipo do arquivo
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mime_type = finfo_file($finfo, $_FILES[$file_key]['tmp_name']);
         finfo_close($finfo);
@@ -74,22 +95,24 @@ function uploadFile($file_key, $upload_dir, $base_url, $id_solicitacao) {
             return null;
         }
 
-        $file_name = basename($_FILES[$file_key]['name']);
-        $file_name = preg_replace('/[^A-Za-z0-9\-_\.]/', '_', $file_name);
-        
-        $dir_with_id = $upload_dir . $id_solicitacao . '/';
-        if (!is_dir($dir_with_id)) {
-            if (!mkdir($dir_with_id, 0777, true)) {
-                error_log("Falha ao criar diretório: " . $dir_with_id);
+        // Gera o nome do arquivo baseado no tipo
+        $file_name = getFileNameByType($file_key) . '.pdf';
+
+        // Cria o diretório com o tipo de solicitação e ID
+        $full_upload_dir = dirname(__DIR__) . '/' . $upload_dir . $tipo_solicitacao . '/' . $id_solicitacao . '/';
+        if (!is_dir($full_upload_dir)) {
+            if (!mkdir($full_upload_dir, 0777, true)) {
+                error_log("Falha ao criar diretório: " . $full_upload_dir);
                 return null;
             }
         }
 
-        $target_path = $dir_with_id . $file_name;
+        $target_path = $full_upload_dir . $file_name;
         
         if (move_uploaded_file($_FILES[$file_key]['tmp_name'], $target_path)) {
             error_log("Upload bem sucedido para: " . $target_path);
-            return $base_url . $id_solicitacao . '/' . $file_name;
+            // Retorna a URL completa usando o base_url do config
+            return "https://" . $base_url . "/" . $upload_dir . $tipo_solicitacao . '/' . $id_solicitacao . '/' . $file_name;
         } else {
             error_log("Falha no upload para: " . $target_path);
             error_log("Erro de upload: " . $_FILES[$file_key]['error']);
@@ -100,27 +123,31 @@ function uploadFile($file_key, $upload_dir, $base_url, $id_solicitacao) {
     return null;
 }
 
-// Função para fazer upload de múltiplos arquivos
-function uploadMultipleFiles($file_key, $upload_dir, $base_url, $id_solicitacao) {
+// Função modificada para fazer upload de múltiplos arquivos
+function uploadMultipleFiles($file_key, $tipo_solicitacao, $id_solicitacao, $base_url)
+{
+    global $upload_dir; // Adicione esta linha para usar a variável global
+    
     $urls = [];
     if (isset($_FILES[$file_key])) {
         for ($i = 0; $i < count($_FILES[$file_key]['name']); $i++) {
             if ($_FILES[$file_key]['error'][$i] === UPLOAD_ERR_OK) {
-                $file_name = basename($_FILES[$file_key]['name'][$i]);
-                $file_name = preg_replace('/[^A-Za-z0-9\-_\.]/', '_', $file_name);
+                // Gera um nome único para documentos complementares
+                $file_name = 'doc_complementar_' . ($i + 1) . '.pdf';
 
-                $dir_with_id = $upload_dir . $id_solicitacao . '/';
-                if (!is_dir($dir_with_id)) {
-                    mkdir($dir_with_id, 0777, true);
+                $full_upload_dir = dirname(__DIR__) . '/' . $upload_dir . $tipo_solicitacao . '/' . $id_solicitacao . '/';
+                if (!is_dir($full_upload_dir)) {
+                    mkdir($full_upload_dir, 0777, true);
                 }
-                $target_path = $dir_with_id . $file_name;
+
+                $target_path = $full_upload_dir . $file_name;
                 if (move_uploaded_file($_FILES[$file_key]['tmp_name'][$i], $target_path)) {
-                    $urls[] = $base_url . $dir_with_id . $file_name;
+                    $urls[] = "https://" . $base_url . "/" . $upload_dir . $tipo_solicitacao . '/' . $id_solicitacao . '/' . $file_name;
                 }
             }
         }
     }
-    return implode(';', $urls); // Armazena as URLs separadas por ponto e vírgula
+    return implode(';', $urls);
 }
 
 // Function to check if a column exists in a table
@@ -176,8 +203,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $tipo_solicitacao = verificaTexto($tipo_solicitacao);
 
     // Diretório base para upload
-    $upload_dir = 'midia/';
-    $base_url = "https://seusite.com/Defesa/midia/"; // Atualize com a URL base correta
+    // $upload_dir = 'midia/';
+    // $base_url = "https://seusite.com/Defesa/midia/"; // Atualize com a URL base correta
 
     // Inicialmente, os URLs de arquivo serão nulos
     $doc_requerimento_url = null;
@@ -288,15 +315,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         // Agora processar os arquivos e salvar nas novas pastas
-        $doc_requerimento_url = uploadFile('doc_requerimento', $upload_dir, $base_url, $id_solicitacao);
-        $cnh_url = uploadFile('cnh', $upload_dir, $base_url, $id_solicitacao);
-        $cnh_condutor_url = uploadFile('cnh_condutor', $upload_dir, $base_url, $id_solicitacao);
-        $notif_DEMUTRAN_url = uploadFile('notif_DEMUTRAN', $upload_dir, $base_url, $id_solicitacao);
-        $crlv_url = uploadFile('crlv', $upload_dir, $base_url, $id_solicitacao);
-        $comprovante_residencia_url = uploadFile('comprovante_residencia', $upload_dir, $base_url, $id_solicitacao);
-        $doc_complementares_urls = uploadMultipleFiles('doc_complementares', $upload_dir, $base_url, $id_solicitacao);
+        $doc_requerimento_url = uploadFile('doc_requerimento', $tipo_solicitacao, $id_solicitacao, $base_url);
+        $cnh_url = uploadFile('cnh', $tipo_solicitacao, $id_solicitacao, $base_url);
+        $cnh_condutor_url = uploadFile('cnh_condutor', $tipo_solicitacao, $id_solicitacao, $base_url);
+        $notif_DEMUTRAN_url = uploadFile('notif_DEMUTRAN', $tipo_solicitacao, $id_solicitacao, $base_url);
+        $crlv_url = uploadFile('crlv', $tipo_solicitacao, $id_solicitacao, $base_url);
+        $comprovante_residencia_url = uploadFile('comprovante_residencia', $tipo_solicitacao, $id_solicitacao, $base_url);
+        $doc_complementares_urls = uploadMultipleFiles('doc_complementares', $tipo_solicitacao, $id_solicitacao, $base_url);
 
-        // Handle file upload for signed document
+        // Remova ou modifique esta parte que está causando o erro
+        /*
         if (isset($_FILES['signedDocument']) && $_FILES['signedDocument']['error'] === UPLOAD_ERR_OK) {
             $file_name = basename($_FILES['signedDocument']['name']);
             $file_name = preg_replace('/[^A-Za-z0-9\-_\.]/', '_', $file_name);
@@ -309,6 +337,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             returnError("Nenhum arquivo enviado ou erro no upload.");
         }
+        */
+
+        // Substitua por:
+        $signed_document_url = null; // Inicializa como null, já que não é mais obrigatório
 
         // Adicione ao trecho onde são capturados os dados do formulário
         if ($tipo_solicitacao === 'apresentacao_condutor') {

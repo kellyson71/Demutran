@@ -2,6 +2,9 @@
 require_once(__DIR__ . '/../includes/header.php');
 require_once(__DIR__ . '/../../env/config.php');
 
+// Define a etapa atual antes de incluir o progresso
+$currentStep = 5; // Alterado de 4 para 5
+
 // Array com as partes do veículo que podem ser danificadas
 $partesDanificadas = [
   'dianteira_direita' => 'Dianteira Direita',
@@ -265,7 +268,13 @@ function renderVehicleForm($index, $partesDanificadas)
       })
       .then(response => response.text())
       .then(html => {
-        container.insertAdjacentHTML('beforeend', html);
+        // Cria um elemento temporário para não afetar outros elementos da página
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+
+        // Insere apenas o formulário do veículo, preservando outros elementos
+        container.insertAdjacentHTML('beforeend', temp.querySelector('.vehicle-form').outerHTML);
+
         const newVehicle = container.lastElementChild;
 
         // Força a aplicação dos estilos
@@ -330,7 +339,7 @@ function renderVehicleForm($index, $partesDanificadas)
     // ...existing submit logic...
   });
 
-  // Adicionar lógica do botão avançar
+  // Modificar a lógica do botão avançar
   document.getElementById('submit-data-btn').addEventListener('click', function() {
     const vehicleForms = document.querySelectorAll('.vehicle-form');
     const vehiclesData = [];
@@ -339,34 +348,47 @@ function renderVehicleForm($index, $partesDanificadas)
 
     // Coletar dados de cada veículo
     vehicleForms.forEach((form, index) => {
+      const damageSystemCheckbox = form.querySelector(`[name="damage_system_${index + 1}"]`);
+      const loadDamageCheckbox = form.querySelector(`[name="load_damage_${index + 1}"]`);
+
       const vehicleData = {
-        damageSystem: form.querySelector(`[name="damage_system_${index + 1}"]`).checked,
+        damageSystem: damageSystemCheckbox ? damageSystemCheckbox.checked : false,
         damagedParts: [],
-        loadDamage: form.querySelector(`[name="load_damage_${index + 1}"]`).checked
+        loadDamage: loadDamageCheckbox ? loadDamageCheckbox.checked : false
       };
 
       // Coletar partes danificadas
-      const partCheckboxes = form.querySelectorAll('[name^="parte_danificada_"]');
-      partCheckboxes.forEach(checkbox => {
-        vehicleData.damagedParts.push({
-          name: checkbox.name,
-          checked: checkbox.checked
+      if (vehicleData.damageSystem) {
+        const partCheckboxes = form.querySelectorAll('[name^="parte_danificada_"]');
+        partCheckboxes.forEach(checkbox => {
+          if (checkbox) { // Verifica se o checkbox existe
+            vehicleData.damagedParts.push({
+              name: checkbox.name,
+              checked: checkbox.checked
+            });
+          }
         });
-      });
+      }
 
       // Coletar informações de carga se houver danos
       if (vehicleData.loadDamage) {
-        vehicleData.notaFiscal = form.querySelector(`[name="nota_fiscal_${index + 1}"]`).value;
-        vehicleData.tipoMercadoria = form.querySelector(`[name="tipo_mercadoria_${index + 1}"]`)
-          .value;
-        vehicleData.valorTotal = form.querySelector(`[name="valor_total_${index + 1}"]`).value;
-        vehicleData.estimativaDanos = form.querySelector(`[name="estimativa_danos_${index + 1}"]`)
-          .value;
-        vehicleData.hasInsurance = form.querySelector(`[name="has_insurance_${index + 1}"]`)
-          .checked;
+        const fields = {
+          notaFiscal: form.querySelector(`[name="nota_fiscal_${index + 1}"]`),
+          tipoMercadoria: form.querySelector(`[name="tipo_mercadoria_${index + 1}"]`),
+          valorTotal: form.querySelector(`[name="valor_total_${index + 1}"]`),
+          estimativaDanos: form.querySelector(`[name="estimativa_danos_${index + 1}"]`),
+          hasInsurance: form.querySelector(`[name="has_insurance_${index + 1}"]`),
+          seguradora: form.querySelector(`[name="seguradora_${index + 1}"]`)
+        };
 
-        if (vehicleData.hasInsurance) {
-          vehicleData.seguradora = form.querySelector(`[name="seguradora_${index + 1}"]`).value;
+        vehicleData.notaFiscal = fields.notaFiscal ? fields.notaFiscal.value : '';
+        vehicleData.tipoMercadoria = fields.tipoMercadoria ? fields.tipoMercadoria.value : '';
+        vehicleData.valorTotal = fields.valorTotal ? fields.valorTotal.value : '';
+        vehicleData.estimativaDanos = fields.estimativaDanos ? fields.estimativaDanos.value : '';
+        vehicleData.hasInsurance = fields.hasInsurance ? fields.hasInsurance.checked : false;
+
+        if (vehicleData.hasInsurance && fields.seguradora) {
+          vehicleData.seguradora = fields.seguradora.value;
         }
       }
 
@@ -388,7 +410,7 @@ function renderVehicleForm($index, $partesDanificadas)
       .then(data => {
         console.log('Resposta do servidor:', data);
         if (data.success) {
-          window.location.href = `revisao.php?token=${token}`; // Redireciona para próxima página
+          window.location.href = `revisao.php?token=${token}`;
         } else {
           alert(data.error || 'Erro ao salvar os dados');
         }

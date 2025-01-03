@@ -212,7 +212,6 @@ require_once(__DIR__ . '/../includes/header.php');
                 formData.append('token', token);
 
                 try {
-                    // Corrigindo o caminho para DAT4.php
                     const response = await fetch('../Process_form/DAT4.php', {
                         method: 'POST',
                         body: formData
@@ -222,20 +221,7 @@ require_once(__DIR__ . '/../includes/header.php');
                         throw new Error('Erro ao salvar os dados');
                     }
 
-                    // Enviar e-mail de confirmação
-                    const emailResponse = await fetch('Process_form/send_confirmation_email.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: `token=${token}`
-                    });
-
-                    if (!emailResponse.ok) {
-                        throw new Error('Erro ao enviar e-mail');
-                    }
-
-                    // Mostrar o modal
+                    // Removendo a parte do envio de email separado já que ele está sendo feito no DAT4.php
                     showModal();
 
                 } catch (error) {

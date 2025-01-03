@@ -24,48 +24,48 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <!-- Estilos Personalizados -->
     <style>
-    /* Estilos personalizados */
-    .print-button {
-        display: none;
-    }
-
-    /* Estilos para o modal */
-    .modal-overlay {
-        background-color: rgba(0, 0, 0, 0.7);
-    }
-
-    .modal-content {
-        max-width: 600px;
-    }
-
-    /* Estilos para impressão */
-    @media print {
-        body * {
-            visibility: hidden;
-        }
-
-        #print-section,
-        #print-section * {
-            visibility: visible;
-        }
-
-        #print-section {
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        /* Remover fundos e cores */
-        body {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-            background: white;
-        }
-
-        .no-print {
+        /* Estilos personalizados */
+        .print-button {
             display: none;
         }
-    }
+
+        /* Estilos para o modal */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-content {
+            max-width: 600px;
+        }
+
+        /* Estilos para impressão */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #print-section,
+            #print-section * {
+                visibility: visible;
+            }
+
+            #print-section {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+
+            /* Remover fundos e cores */
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                background: white;
+            }
+
+            .no-print {
+                display: none;
+            }
+        }
     </style>
     <!-- Inclua o Bootstrap para modais, se necessário -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -124,8 +124,10 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                 SOLICITAÇÃO DE PARECER AO DEPARTAMENTO MUNICIPAL DE TRÂNSITO – DEMUTRAN/PAU DOS FERROS
             </h2>
             <div class="flex p-4 mb-4 text-green-800 rounded-lg bg-green-50" role="alert">
-                <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+                <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
                 </svg>
                 <div>
                     <span class="font-medium">Informações importantes:</span>
@@ -140,15 +142,15 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             </p>
 
             <?php if (isset($successMessage)): ?>
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                <?php echo $successMessage; ?>
-            </div>
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                    <?php echo $successMessage; ?>
+                </div>
             <?php endif; ?>
 
             <?php if (isset($errorMessage)): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                <?php echo $errorMessage; ?>
-            </div>
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    <?php echo $errorMessage; ?>
+                </div>
             <?php endif; ?>
 
             <form method="post" enctype="multipart/form-data" action="processa_formulario.php">
@@ -227,22 +229,22 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                 <!-- Upload Documento de Identificação -->
                 <div class="mb-4">
                     <label for="doc_identificacao" class="block text-gray-700 mb-2">
-                        Documento de Identificação (PDF ou imagem):
+                        <i class="far fa-file-alt"></i> Anexar Documento de Identificação*:
                     </label>
-                    <input type="file" id="doc_identificacao" name="doc_identificacao" required
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <input type="file" id="doc_identificacao" name="doc_identificacao" accept=".pdf,.jpg,.jpeg,.png"
+                        required
+                        class="w-full text-gray-600 border rounded-md file:border-0 file:border-r border-gray-300 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 hover:file:bg-gray-100 file:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     <p class="text-sm text-gray-500 mt-1">Formatos aceitos: PDF, JPG, PNG (máx. 5MB)</p>
                 </div>
 
                 <!-- Upload Comprovante de Residência -->
                 <div class="mb-4">
                     <label for="comp_residencia" class="block text-gray-700 mb-2">
-                        Comprovante de Residência (PDF ou imagem):
+                        <i class="far fa-file-alt"></i> Anexar Comprovante de Residência*:
                     </label>
-                    <input type="file" id="comp_residencia" name="comp_residencia" required
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <input type="file" id="comp_residencia" name="comp_residencia" accept=".pdf,.jpg,.jpeg,.png"
+                        required
+                        class="w-full text-gray-600 border rounded-md file:border-0 file:border-r border-gray-300 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 hover:file:bg-gray-100 file:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     <p class="text-sm text-gray-500 mt-1">Formatos aceitos: PDF, JPG, PNG (máx. 5MB)</p>
                 </div>
 
@@ -263,51 +265,51 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-    // Script para alternar o menu mobile
-    const menuBtn = document.getElementById("menu-btn");
-    const mobileMenu = document.getElementById("mobile-menu");
+        // Script para alternar o menu mobile
+        const menuBtn = document.getElementById("menu-btn");
+        const mobileMenu = document.getElementById("mobile-menu");
 
-    menuBtn.addEventListener("click", () => {
-        mobileMenu.classList.toggle("hidden");
-    });
+        menuBtn.addEventListener("click", () => {
+            mobileMenu.classList.toggle("hidden");
+        });
 
-    // Inicializa o Flatpickr para o campo de data/hora
-    flatpickr("#data_horario", {
-        enableTime: true,
-        dateFormat: "d/m/Y H:i",
-        time_24hr: true,
-        minDate: new Date().fp_incr(8), // Adiciona 8 dias à data atual
-        locale: {
-            firstDayOfWeek: 1,
-            weekdays: {
-                shorthand: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
-                longhand: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira',
-                    'Sexta-feira', 'Sábado'
-                ],
-            },
-            months: {
-                shorthand: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-                longhand: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto',
-                    'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-                ],
-            },
-        }
-    });
+        // Inicializa o Flatpickr para o campo de data/hora
+        flatpickr("#data_horario", {
+            enableTime: true,
+            dateFormat: "d/m/Y H:i",
+            time_24hr: true,
+            minDate: new Date().fp_incr(8), // Adiciona 8 dias à data atual
+            locale: {
+                firstDayOfWeek: 1,
+                weekdays: {
+                    shorthand: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+                    longhand: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira',
+                        'Sexta-feira', 'Sábado'
+                    ],
+                },
+                months: {
+                    shorthand: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                    longhand: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto',
+                        'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+                    ],
+                },
+            }
+        });
 
-    // Modificar o envio do formulário para mostrar o loading
-    document.querySelector('form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const submitButton = document.getElementById('submitButton');
-        submitButton.disabled = true;
-        submitButton.innerHTML = `
+        // Modificar o envio do formulário para mostrar o loading
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitButton = document.getElementById('submitButton');
+            submitButton.disabled = true;
+            submitButton.innerHTML = `
             <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
             Processando...
         `;
-        this.submit();
-    });
+            this.submit();
+        });
     </script>
 </body>
 

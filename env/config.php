@@ -1,22 +1,23 @@
 <?php
-// config.php
 
+// Configurações do banco de dados
 $servername = "srv1078.hstgr.io"; 
 $username = "u492577848_protocolo";
 $password = "WRVGAxCbrJ8wdM$"; 
 $dbname = "u492577848_demutran";
 
 // Base URL and upload directory
-$base_url = "https://seusite.com/midia/";
+$base_url = "demutranpaudosferros.com.br";
 $upload_dir = 'midia/';
 
 /**
  * Função para converter o caminho relativo da imagem para o caminho absoluto
  */
-function get_image_path($relative_path) {
-    // Remove o ./ inicial se existir
-    $path = ltrim($relative_path, './');
-    return 'admin/' . $path;
+if (!function_exists('get_image_path')) {
+    function get_image_path($image_name)
+    {
+        return "/Demutran/assets/images/" . $image_name;
+    }
 }
 
 // Cria a conexão com o banco de dados

@@ -253,13 +253,14 @@
             <p class="text-gray-600 mb-2">Apenas em PDF*</p>
             <label for="doc_identidade" class="block text-gray-700 mb-2">
               <i class="far fa-file-alt"></i> Anexar Identidade (Frente e
-              Verso):
+              Verso)*:
             </label>
             <input
               type="file"
               id="doc_identidade"
               name="doc_identidade"
               accept="application/pdf"
+              required
               class="w-full text-gray-600 border rounded-md file:border-0 file:border-r border-gray-300 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 hover:file:bg-gray-100 file:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" />
           </div>
 
@@ -267,27 +268,28 @@
             <label
               for="comprovante_residencia"
               class="block text-gray-700 mb-2">
-              <i class="far fa-file-alt"></i> Anexar Comprovante de Residência:
+              <i class="far fa-file-alt"></i> Anexar Comprovante de Residência*:
             </label>
             <input
               type="file"
               id="comprovante_residencia"
               name="comprovante_residencia"
               accept="application/pdf"
+              required
               class="w-full text-gray-600 border rounded-md file:border-0 file:border-r border-gray-300 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 hover:file:bg-gray-100 file:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" />
           </div>
 
           <!-- Campo de Laudo Médico que aparece somente se "pcd" for selecionado -->
           <div class="mb-4 hidden" id="laudo_medico_section">
             <label for="laudo_medico" class="block text-gray-700 mb-2">
-              Anexar Laudo Médico (Caso for PCD):
+              Anexar Laudo Médico*:
             </label>
             <input
               type="file"
               id="laudo_medico"
               name="laudo_medico"
               accept="application/pdf"
-              class="w-full" />
+              class="w-full text-gray-600 border rounded-md file:border-0 file:border-r border-gray-300 file:bg-gray-50 file:mr-4 file:py-2 file:px-4 hover:file:bg-gray-100 file:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" />
           </div>
 
           <!-- Seção para Dados do Representante Legal -->
@@ -371,7 +373,7 @@
               <label
                 for="doc_identidade_representante"
                 class="block text-gray-700 mb-2">
-                Anexar Documento de Identificação com Foto:
+                Anexar Documento de Identificação do Representante com Foto*:
               </label>
               <input
                 type="file"
@@ -383,7 +385,7 @@
 
             <div class="mb-4">
               <label for="proc_comprovante" class="block text-gray-700 mb-2">
-                Enviar Comprovante de Procuração como Representante Legal:
+                Enviar Comprovante de Procuração como Representante Legal*:
               </label>
               <input
                 type="file"
@@ -462,10 +464,14 @@
         .getElementById("tipo_solicitacao")
         .addEventListener("change", function () {
           const laudoSection = document.getElementById("laudo_medico_section");
+          const laudoInput = document.getElementById("laudo_medico");
+          
           if (this.value === "pcd") {
             laudoSection.classList.remove("hidden");
+            laudoInput.required = true;
           } else {
             laudoSection.classList.add("hidden");
+            laudoInput.required = false;
           }
         });
 
@@ -475,10 +481,17 @@
           "representante_legal_check"
         ).checked;
         var section = document.getElementById("representante_legal_section");
+        var docIdentidadeRep = document.getElementById("doc_identidade_representante");
+        var procComprovante = document.getElementById("proc_comprovante");
+        
         if (isChecked) {
           section.classList.remove("hidden");
+          docIdentidadeRep.required = true;
+          procComprovante.required = true;
         } else {
           section.classList.add("hidden");
+          docIdentidadeRep.required = false;
+          procComprovante.required = false;
         }
       }
 
@@ -493,10 +506,14 @@
       function submitForm() {
         const form = document.getElementById("SoliForm");
         const formData = new FormData(form);
-
-        // Toggle buttons
         const submitButton = document.getElementById("submitButton");
         const loadingButton = document.getElementById("loadingButton");
+
+        // Desativa o botão imediatamente
+        submitButton.disabled = true;
+        submitButton.classList.add("opacity-50", "cursor-not-allowed");
+
+        // Toggle buttons
         submitButton.classList.add("hidden");
         loadingButton.classList.remove("hidden");
 
@@ -508,6 +525,9 @@
             value.type !== "application/pdf"
           ) {
             alert("Todos os arquivos devem estar no formato PDF.");
+            // Reativa o botão em caso de erro
+            submitButton.disabled = false;
+            submitButton.classList.remove("opacity-50", "cursor-not-allowed");
             return;
           }
         }
@@ -529,6 +549,11 @@
               "mb-4"
             );
             feedback.classList.remove("hidden");
+            
+            // Mantém o botão desativado após sucesso
+            form.reset();
+            submitButton.disabled = true;
+            submitButton.classList.add("opacity-50", "cursor-not-allowed");
           })
           .catch((error) => {
             const feedback = document.getElementById("feedback");
@@ -541,15 +566,15 @@
               "mb-4"
             );
             feedback.classList.remove("hidden");
+            
+            // Reativa o botão em caso de erro
+            submitButton.disabled = false;
+            submitButton.classList.remove("opacity-50", "cursor-not-allowed");
           })
           .finally(() => {
             // Restore buttons
             submitButton.classList.remove("hidden");
             loadingButton.classList.add("hidden");
-
-            setTimeout(() => {
-              feedback.classList.add("hidden");
-            }, 5000);
           });
       }
 
