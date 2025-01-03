@@ -1,10 +1,58 @@
 <?php
-include '../env/config.php';
-
-// Enable error reporting but don't display errors directly
+// Desabilitar exibição de erros do PHP para evitar output HTML
 ini_set('display_errors', 0);
-ini_set('log_errors', 1);
 error_reporting(E_ALL);
+
+// Garantir que a resposta seja sempre JSON
+header('Content-Type: application/json; charset=utf-8');
+
+// Função para log de erros
+function logError($message)
+{
+    error_log(date('[Y-m-d H:i:s] ') . "Error: " . $message . "\n", 3, dirname(__FILE__) . '/error.log');
+}
+
+// Função de resposta JSON
+function sendJsonResponse($success, $message, $data = null)
+{
+    $response = [
+        'success' => $success,
+        'message' => $message
+    ];
+
+    if ($data !== null) {
+        $response['data'] = $data;
+    }
+
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+// Capturar erros fatais
+register_shutdown_function(function () {
+    $error = error_get_last();
+    if ($error !== NULL && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        logError($error['message'] . ' in ' . $error['file'] . ' on line ' . $error['line']);
+        sendJsonResponse(false, "Erro interno do servidor");
+    }
+});
+
+try {
+    // Verificar método da requisição
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        sendJsonResponse(false, "Método inválido");
+    }
+
+    include '../env/config.php';
+
+    // Verificar conexão com banco de dados
+    $conn = new mysqli($servername, $username, $password, $dbname);
+    if ($conn->connect_error) {
+        logError("Database connection failed: " . $conn->connect_error);
+        sendJsonResponse(false, "Erro de conexão com o banco de dados");
+    }
+
+    // Resto do seu código existente...
 
 // Ensure JSON response
 header('Content-Type: application/json; charset=utf-8');
@@ -480,5 +528,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $stmt->close();
     $conn->close();
+}
+
+    // Modificar a parte final do processamento para usar sendJsonResponse
+    if ($update_stmt->execute()) {
+        sendJsonResponse(true, "Solicitação enviada com sucesso! Um email de confirmação foi enviado.", ['id' => $id_solicitacao]);
+    } else {
+        logError("Update statement failed: " . $update_stmt->error);
+        sendJsonResponse(false, "Erro ao atualizar os arquivos");
+    }
+} catch (Exception $e) {
+    logError("Caught exception: " . $e->getMessage());
+    sendJsonResponse(false, "Ocorreu um erro ao processar sua solicitação");
 }
 ?>
