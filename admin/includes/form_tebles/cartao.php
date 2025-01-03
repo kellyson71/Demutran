@@ -18,6 +18,10 @@ function exibirDetalhesCartao($conn, $id)
 
     $dataSubmissao = new DateTime($cartao['data_submissao']);
     $dataNascimento = new DateTime($cartao['data_nascimento']);
+
+    // Inclui o componente do PDF Viewer
+    require_once 'pdf_viewer_modal.php';
+    echo getPdfViewerModal();
 ?>
     <div class="bg-white shadow rounded-lg p-6">
         <!-- Informações do Cartão -->
@@ -102,7 +106,15 @@ function exibirDetalhesCartao($conn, $id)
             <h3 class="text-2xl font-semibold text-gray-800 mb-4">Documentos Anexados</h3>
             <?php
             $temDocumentos = false;
-            $baseUrl = "https://{$_SERVER['HTTP_HOST']}/midia/cartao/{$cartao['id']}";
+            $pastaDocumentos = "../midia/cartao/{$cartao['id']}";
+            $errosDocumentos = [];
+
+            // Verifica se a pasta existe, se não, tenta criar
+            if (!file_exists($pastaDocumentos)) {
+                if (!mkdir($pastaDocumentos, 0777, true)) {
+                    $errosDocumentos[] = "Erro ao criar diretório de documentos.";
+                }
+            }
 
             $documentos = [
                 'doc_identidade_url' => ['icon' => 'description', 'label' => 'Documento de Identidade'],
@@ -113,17 +125,56 @@ function exibirDetalhesCartao($conn, $id)
             ];
             ?>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <?php foreach ($documentos as $campo => $info):
-                    if (!empty($cartao[$campo])):
-                        $temDocumentos = true; ?>
-                        <div class="flex items-center">
-                            <i class="material-icons text-blue-600 mr-2"><?php echo $info['icon']; ?></i>
-                            <a href="<?php echo $baseUrl . '/' . basename($cartao[$campo]); ?>" target="_blank"
-                                class="text-blue-600 hover:text-blue-800"><?php echo $info['label']; ?></a>
+            <?php if (!empty($errosDocumentos)): ?>
+                <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="material-icons text-red-400">warning</i>
                         </div>
-                <?php endif;
-                endforeach; ?>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">Problemas encontrados:</h3>
+                            <div class="mt-2 text-sm text-red-700">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <?php foreach ($errosDocumentos as $erro): ?>
+                                        <li><?php echo htmlspecialchars($erro); ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <?php
+                foreach ($documentos as $campo => $info):
+                    if (!empty($cartao[$campo])):
+                        $nomeArquivo = basename($cartao[$campo]);
+                        $caminhoArquivo = $pastaDocumentos . '/' . $nomeArquivo;
+                        $arquivoExiste = file_exists($caminhoArquivo);
+
+                        if ($arquivoExiste):
+                            $temDocumentos = true;
+                ?>
+                            <div class="flex items-center">
+                                <i class="material-icons text-blue-600 mr-2"><?php echo $info['icon']; ?></i>
+                                <button onclick="mostrarDocumento('<?php echo $caminhoArquivo; ?>', '<?php echo $info['label']; ?>')"
+                                    class="text-blue-600 hover:text-blue-800 cursor-pointer">
+                                    <?php echo $info['label']; ?>
+                                </button>
+                            </div>
+                        <?php else: ?>
+                            <div class="flex items-center">
+                                <i class="material-icons text-red-600 mr-2">error</i>
+                                <span class="text-red-600">
+                                    <?php echo $info['label']; ?> (arquivo não encontrado)
+                                </span>
+                            </div>
+                <?php
+                        endif;
+                    endif;
+                endforeach;
+                ?>
 
                 <?php if (!$temDocumentos): ?>
                     <div class="col-span-2">

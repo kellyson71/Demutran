@@ -12,12 +12,14 @@ if (!isset($_SESSION['usuario_id'])) {
 $id = $_GET['id'];
 $tipo = $_GET['tipo'];
 
-function obterUltimosFormulariosSAC($conn) {
+function obterUltimosFormulariosSAC($conn)
+{
     $sql = "SELECT * FROM sac ORDER BY id DESC LIMIT 2";
     return $conn->query($sql);
 }
 
-function atualizarSituacaoFormulario($conn, $id, $tipo) {
+function atualizarSituacaoFormulario($conn, $id, $tipo)
+{
     $tabela = '';
     switch ($tipo) {
         case 'DAT':
@@ -50,7 +52,8 @@ $sacFormularios = obterUltimosFormulariosSAC($conn);
 $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 
 // Atualizar a função exibir_dados_formatados para tratar URLs
-function exibir_dados_formatados($dados) {
+function exibir_dados_formatados($dados)
+{
     $colunas_personalizadas = [
         'created_at' => 'Criado em',
         'damage_system' => 'Sistema de danos',
@@ -60,7 +63,7 @@ function exibir_dados_formatados($dados) {
         'comprovante' => 'Comprovante',
         'midia' => 'Mídia',
     ];
-    
+
     $colunas_ocultas = ['token', 'id', 'damaged_parts'];
     $colunas_arquivo = ['arquivo_anexo', 'documento', 'comprovante', 'midia'];
 
@@ -70,13 +73,13 @@ function exibir_dados_formatados($dados) {
     }
 
     echo "<div class='border border-gray-200 rounded-lg divide-y divide-gray-200'>";
-    
+
     foreach ($dados as $coluna => $valor) {
         if (!in_array($coluna, $colunas_ocultas)) {
             $nome_coluna = isset($colunas_personalizadas[$coluna]) ? $colunas_personalizadas[$coluna] : ucfirst(str_replace('_', ' ', $coluna));
 
             echo "<div class='px-4 py-3 bg-white hover:bg-gray-50 transition-colors'>";
-            
+
             if (in_array($coluna, $colunas_arquivo) || filter_var($valor, FILTER_VALIDATE_URL)) {
                 echo "<div class='flex items-center justify-between'>";
                 echo "<div class='text-gray-600 font-medium'>" . $nome_coluna . "</div>";
@@ -89,17 +92,17 @@ function exibir_dados_formatados($dados) {
             } else {
                 echo "<div class='grid grid-cols-3 gap-4'>";
                 echo "<div class='text-gray-600 font-medium'>" . $nome_coluna . "</div>";
-                echo "<div class='col-span-2 text-gray-800'>" . 
-                     (!empty($valor) ? htmlspecialchars($valor) : 
-                     '<span class="text-gray-400 italic">Não informado</span>') . 
-                     "</div>";
+                echo "<div class='col-span-2 text-gray-800'>" .
+                    (!empty($valor) ? htmlspecialchars($valor) :
+                        '<span class="text-gray-400 italic">Não informado</span>') .
+                    "</div>";
                 echo "</div>";
             }
-            
+
             echo "</div>";
         }
     }
-    
+
     echo "</div>";
 }
 
@@ -223,91 +226,92 @@ if ($tipo == 'DAT') {
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
     <style>
-    [x-cloak] {
-        display: none;
-    }
-
-    .gradient-bg {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    .card-hover {
-        transition: transform 0.2s ease;
-    }
-
-    .card-hover:hover {
-        transform: translateY(-2px);
-    }
-
-    .title-animation {
-        animation: slideDown 0.6s ease-out;
-    }
-
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
+        [x-cloak] {
+            display: none;
         }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .glass-effect {
-        background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(5px);
-    }
-
-    .backdrop-blur {
-        backdrop-filter: blur(5px);
-        background-color: rgba(0, 0, 0, 0.5);
-    }
-
-    .modal-animation {
-        animation: modalFadeIn 0.3s ease-out;
-    }
-
-    @keyframes modalFadeIn {
-        from {
-            opacity: 0;
-            transform: scale(0.95);
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
-        to {
-            opacity: 1;
-            transform: scale(1);
+        .card-hover {
+            transition: transform 0.2s ease;
         }
-    }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+        }
+
+        .title-animation {
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(5px);
+        }
+
+        .backdrop-blur {
+            backdrop-filter: blur(5px);
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-animation {
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
     </style>
 
     <script>
-    // Função para abrir o modal de edição
-    function openEditModal() {
-        document.getElementById("editModal").classList.remove("hidden");
-    }
+        // Função para abrir o modal de edição
+        function openEditModal() {
+            document.getElementById("editModal").classList.remove("hidden");
+        }
 
-    // Função para fechar o modal de edição
-    function closeEditModal() {
-        document.getElementById("editModal").classList.add("hidden");
-    }
+        // Função para fechar o modal de edição
+        function closeEditModal() {
+            document.getElementById("editModal").classList.add("hidden");
+        }
 
-    // Função para abrir o modal de exclusão
-    function openDeleteModal() {
-        document.getElementById("deleteModal").classList.remove("hidden");
-    }
+        // Função para abrir o modal de exclusão
+        function openDeleteModal() {
+            document.getElementById("deleteModal").classList.remove("hidden");
+        }
 
-    // Função para fechar o modal de exclusão
-    function closeDeleteModal() {
-        document.getElementById("deleteModal").classList.add("hidden");
-    }
+        // Função para fechar o modal de exclusão
+        function closeDeleteModal() {
+            document.getElementById("deleteModal").classList.add("hidden");
+        }
 
-    // Função para mostrar o alerta de sucesso
-    function showSuccessAlert(message) {
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'fixed top-4 right-4 z-50 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-lg max-w-lg';
-        alertDiv.innerHTML = `
+        // Função para mostrar o alerta de sucesso
+        function showSuccessAlert(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className =
+                'fixed top-4 right-4 z-50 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-lg max-w-lg';
+            alertDiv.innerHTML = `
             <div class="flex items-center">
                 <i class='bx bx-check-circle text-2xl mr-2'></i>
                 <div>
@@ -319,132 +323,133 @@ if ($tipo == 'DAT') {
                 </button>
             </div>
         `;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 5000);
-    }
+            document.body.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
 
-    // Função para fechar o alerta
-    function closeAlert() {
-        document.getElementById('successAlert').classList.add('hidden');
-    }
+        // Função para fechar o alerta
+        function closeAlert() {
+            document.getElementById('successAlert').classList.add('hidden');
+        }
 
-    // Função para mostrar o alerta de exclusão
-    function showDeleteSuccessAlert(message) {
-        const alert = document.getElementById('deleteSuccessAlert');
-        document.getElementById('deleteAlertMessage').textContent = message;
-        alert.classList.remove('hidden');
-        // Esconde o alerta após 3 segundos
-        setTimeout(() => {
-            closeDeleteAlert();
-        }, 3000);
-    }
+        // Função para mostrar o alerta de exclusão
+        function showDeleteSuccessAlert(message) {
+            const alert = document.getElementById('deleteSuccessAlert');
+            document.getElementById('deleteAlertMessage').textContent = message;
+            alert.classList.remove('hidden');
+            // Esconde o alerta após 3 segundos
+            setTimeout(() => {
+                closeDeleteAlert();
+            }, 3000);
+        }
 
-    // Função para fechar o alerta de exclusão
-    function closeDeleteAlert() {
-        document.getElementById('deleteSuccessAlert').classList.add('hidden');
-    }
+        // Função para fechar o alerta de exclusão
+        function closeDeleteAlert() {
+            document.getElementById('deleteSuccessAlert').classList.add('hidden');
+        }
 
-    // AJAX para editar o formulário
-    function editarFormulario() {
-        var campo = document.getElementById('campo').value;
-        var novoValor = document.getElementById('novoValor').value;
-        var id = <?php echo $id; ?>;
-        var tipo = '<?php echo $tipo; ?>';
+        // AJAX para editar o formulário
+        function editarFormulario() {
+            var campo = document.getElementById('campo').value;
+            var novoValor = document.getElementById('novoValor').value;
+            var id = <?php echo $id; ?>;
+            var tipo = '<?php echo $tipo; ?>';
 
-        fetch('editar_formulario_ajax.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    id,
-                    tipo,
-                    campo,
-                    novoValor
+            fetch('editar_formulario_ajax.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id,
+                        tipo,
+                        campo,
+                        novoValor
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    closeEditModal();
-                    showSuccessAlert('Formulário atualizado com sucesso!');
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2000);
-                } else {
-                    alert('Erro ao atualizar o formulário.');
-                }
-            });
-    }
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        closeEditModal();
+                        showSuccessAlert('Formulário atualizado com sucesso!');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        alert('Erro ao atualizar o formulário.');
+                    }
+                });
+        }
 
-    // AJAX para excluir o formulário
-    function excluirFormulario() {
-        var id = <?php echo $id; ?>;
-        var tipo = '<?php echo $tipo; ?>';
+        // AJAX para excluir o formulário
+        function excluirFormulario() {
+            var id = <?php echo $id; ?>;
+            var tipo = '<?php echo $tipo; ?>';
 
-        fetch('excluir_formulario_ajax.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    id,
-                    tipo
+            fetch('excluir_formulario_ajax.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id,
+                        tipo
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    closeDeleteModal();
-                    showDeleteSuccessAlert('Formulário excluído com sucesso!');
-                    setTimeout(() => {
-                        window.location.href = 'formularios.php';
-                    }, 2000);
-                } else {
-                    showDeleteSuccessAlert('Erro ao excluir o formulário.');
-                }
-            });
-    }
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        closeDeleteModal();
+                        showDeleteSuccessAlert('Formulário excluído com sucesso!');
+                        setTimeout(() => {
+                            window.location.href = 'formularios.php';
+                        }, 2000);
+                    } else {
+                        showDeleteSuccessAlert('Erro ao excluir o formulário.');
+                    }
+                });
+        }
 
-    // Função para abrir o modal de confirmação
-    function openConfirmModal() {
-        document.getElementById("confirm-modal").classList.remove("hidden");
-        document.getElementById("confirm-modal").classList.add("flex");
-    }
+        // Função para abrir o modal de confirmação
+        function openConfirmModal() {
+            document.getElementById("confirm-modal").classList.remove("hidden");
+            document.getElementById("confirm-modal").classList.add("flex");
+        }
 
-    // Função para fechar o modal de confirmação
-    function closeConfirmModal() {
-        document.getElementById("confirm-modal").classList.remove("flex");
-        document.getElementById("confirm-modal").classList.add("hidden");
-    }
+        // Função para fechar o modal de confirmação
+        function closeConfirmModal() {
+            document.getElementById("confirm-modal").classList.remove("flex");
+            document.getElementById("confirm-modal").classList.add("hidden");
+        }
 
-    // Modifica a função concluirFormulario para ser chamada após confirmação
-    function concluirFormulario() {
-    let email = document.getElementById('emailDestino').textContent.trim();
-    let nome = '<?php echo $tipo == "DAT" ? addslashes($dat1['nome'] ?? '') : addslashes($formulario['nome'] ?? ''); ?>';
-    
-    // Validação mais robusta dos dados
-    if (!nome) {
-        showErrorAlert('Erro: Nome não encontrado no formulário');
-        return;
-    }
+        // Modifica a função concluirFormulario para ser chamada após confirmação
+        function concluirFormulario() {
+            let email = document.getElementById('emailDestino').textContent.trim();
+            let nome =
+                '<?php echo $tipo == "DAT" ? addslashes($dat1['nome'] ?? '') : addslashes($formulario['nome'] ?? ''); ?>';
 
-    if (email === 'Email não informado' || !email) {
-        showErrorAlert('Não é possível concluir: email não informado no cadastro');
-        return;
-    }
+            // Validação mais robusta dos dados
+            if (!nome) {
+                showErrorAlert('Erro: Nome não encontrado no formulário');
+                return;
+            }
 
-    if (!validateEmail(email)) {
-        showErrorAlert('O email cadastrado é inválido');
-        return;
-    }
+            if (email === 'Email não informado' || !email) {
+                showErrorAlert('Não é possível concluir: email não informado no cadastro');
+                return;
+            }
 
-    const loadingButton = document.getElementById('btnConcluir');
-    const cancelButton = document.getElementById('btnCancelar');
-    
-    loadingButton.disabled = true;
-    cancelButton.disabled = true;
-    loadingButton.innerHTML = `
+            if (!validateEmail(email)) {
+                showErrorAlert('O email cadastrado é inválido');
+                return;
+            }
+
+            const loadingButton = document.getElementById('btnConcluir');
+            const cancelButton = document.getElementById('btnCancelar');
+
+            loadingButton.disabled = true;
+            cancelButton.disabled = true;
+            loadingButton.innerHTML = `
         <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -452,72 +457,77 @@ if ($tipo == 'DAT') {
         Enviando email...
     `;
 
-    // Primeiro atualizar o status
-    fetch('atualizar_situacao_ajax.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            id: <?php echo $id; ?>,
-            tipo: '<?php echo $tipo; ?>'
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (!data.success && !data.alreadyCompleted) {
-            throw new Error(data.message || 'Erro desconhecido ao atualizar status');
-        }
-        
-        // Log para debug
-        console.log('Status atualizado, enviando email para:', {email, nome, id: <?php echo $id; ?>});
-        
-        // Enviar email mesmo se já estiver concluído
-        return fetch('processar_email.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: email,
-                nome: nome,
-                id: <?php echo $id; ?>,
-                tipo: '<?php echo $tipo; ?>'
-            })
-        });
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (!data.success) {
-            throw new Error(data.message || 'Erro ao enviar email');
-        }
-        closeConfirmModal();
-        showSuccessAlert('Protocolo concluído e email enviado com sucesso!');
-        setTimeout(() => {
-            location.reload();
-        }, 2000);
-    })
-    .catch(error => {
-        console.error('Erro completo:', error);
-        showErrorAlert(`Erro ao processar: ${error.message}`);
-        // Reativar botões em caso de erro
-        const loadingButton = document.getElementById('btnConcluir');
-        const cancelButton = document.getElementById('btnCancelar');
-        loadingButton.disabled = false;
-        cancelButton.disabled = false;
-        loadingButton.innerHTML = 'Sim, concluir';
-    });
-}
+            // Primeiro atualizar o status
+            fetch('atualizar_situacao_ajax.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id: <?php echo $id; ?>,
+                        tipo: '<?php echo $tipo; ?>'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success && !data.alreadyCompleted) {
+                        throw new Error(data.message || 'Erro desconhecido ao atualizar status');
+                    }
 
-function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-}
+                    // Log para debug
+                    console.log('Status atualizado, enviando email para:', {
+                        email,
+                        nome,
+                        id: <?php echo $id; ?>
+                    });
 
-function showErrorAlert(message) {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = 'fixed top-4 right-4 z-50 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg max-w-lg';
-    alertDiv.innerHTML = `
+                    // Enviar email mesmo se já estiver concluído
+                    return fetch('processar_email.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            nome: nome,
+                            id: <?php echo $id; ?>,
+                            tipo: '<?php echo $tipo; ?>'
+                        })
+                    });
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        throw new Error(data.message || 'Erro ao enviar email');
+                    }
+                    closeConfirmModal();
+                    showSuccessAlert('Protocolo concluído e email enviado com sucesso!');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                })
+                .catch(error => {
+                    console.error('Erro completo:', error);
+                    showErrorAlert(`Erro ao processar: ${error.message}`);
+                    // Reativar botões em caso de erro
+                    const loadingButton = document.getElementById('btnConcluir');
+                    const cancelButton = document.getElementById('btnCancelar');
+                    loadingButton.disabled = false;
+                    cancelButton.disabled = false;
+                    loadingButton.innerHTML = 'Sim, concluir';
+                });
+        }
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function showErrorAlert(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className =
+                'fixed top-4 right-4 z-50 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg max-w-lg';
+            alertDiv.innerHTML = `
         <div class="flex items-center">
             <i class='bx bx-error-circle text-2xl mr-2'></i>
             <div>
@@ -529,9 +539,9 @@ function showErrorAlert(message) {
             </button>
         </div>
     `;
-    document.body.appendChild(alertDiv);
-    setTimeout(() => alertDiv.remove(), 8000); // Aumentar tempo para 8 segundos
-}
+            document.body.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 8000); // Aumentar tempo para 8 segundos
+        }
     </script>
 </head>
 
@@ -581,7 +591,7 @@ function showErrorAlert(message) {
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <?php 
+            <?php
             $topbarHtml = getTopbarHtml('Detalhes do Formulário', $notificacoesNaoLidas);
             $avatarHtml = getAvatarHtml($_SESSION['usuario_nome'], $_SESSION['usuario_avatar'] ?? '');
             echo str_replace('[AVATAR_PLACEHOLDER]', $avatarHtml, $topbarHtml);
@@ -612,102 +622,102 @@ function showErrorAlert(message) {
                 </div>
 
                 <?php if ($tipo == 'DAT'): ?>
-                <!-- Seção DAT -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Informações Gerais -->
-                    <?php if ($dat1): ?>
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-lg font-semibold text-gray-800">Informações Gerais</h3>
-                        </div>
-                        <div class="p-6">
-                            <?php exibir_dados_formatados($dat1); ?>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-
-                    <!-- Detalhes do Acidente -->
-                    <?php if ($dat2): ?>
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-lg font-semibold text-gray-800">Detalhes do Acidente</h3>
-                        </div>
-                        <div class="p-6">
-                            <?php exibir_dados_formatados($dat2); ?>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Veículos Envolvidos -->
-                <?php if ($dat3): ?>
-                <div class="mt-8">
-                    <div class="flex items-center mb-6">
-                        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-4">
-                            <i class='bx bx-car text-green-600 text-2xl'></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-800">Veículos Envolvidos</h3>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <?php foreach ($dat3 as $index => $veiculo): ?>
-                        <div class="glass-effect rounded-2xl shadow-lg p-6 card-hover">
-                            <div class="flex items-center justify-between mb-6">
-                                <h4 class="text-lg font-bold text-gray-700 flex items-center">
-                                    <i class='bx bxs-car-crash text-gray-500 mr-2 text-xl'></i>
-                                    Veículo <?php echo $index + 1; ?>
-                                </h4>
-                                <span
-                                    class="px-3 py-1 rounded-full text-sm <?php echo $index % 2 ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'; ?>">
-                                    #<?php echo $index + 1; ?>
-                                </span>
-                            </div>
-                            <div class="space-y-3">
-                                <?php exibir_dados_formatados($veiculo); ?>
-
-                                <?php if (!empty($veiculo['damaged_parts'])): ?>
-                                <div class="mt-4 bg-gray-50 p-4 rounded-lg">
-                                    <h5 class="font-semibold text-gray-700 mb-2">Áreas Danificadas:</h5>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <?php 
-                                            $damaged_parts = json_decode($veiculo['damaged_parts'], true);
-                                            foreach ($damaged_parts as $part):
-                                                if ($part['checked']):
-                                            ?>
-                                        <div class="flex items-center">
-                                            <span class="material-icons text-red-500 text-sm mr-1">warning</span>
-                                            <span
-                                                class="text-sm"><?php echo ucfirst(str_replace('_', ' ', $part['name'])); ?></span>
-                                        </div>
-                                        <?php 
-                                                endif;
-                                            endforeach; 
-                                            ?>
-                                    </div>
+                    <!-- Seção DAT -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Informações Gerais -->
+                        <?php if ($dat1): ?>
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                                <div class="border-b border-gray-200 px-6 py-4">
+                                    <h3 class="text-lg font-semibold text-gray-800">Informações Gerais</h3>
                                 </div>
-                                <?php endif; ?>
+                                <div class="p-6">
+                                    <?php exibir_dados_formatados($dat1); ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Detalhes do Acidente -->
+                        <?php if ($dat2): ?>
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                                <div class="border-b border-gray-200 px-6 py-4">
+                                    <h3 class="text-lg font-semibold text-gray-800">Detalhes do Acidente</h3>
+                                </div>
+                                <div class="p-6">
+                                    <?php exibir_dados_formatados($dat2); ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Veículos Envolvidos -->
+                    <?php if ($dat3): ?>
+                        <div class="mt-8">
+                            <div class="flex items-center mb-6">
+                                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-4">
+                                    <i class='bx bx-car text-green-600 text-2xl'></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800">Veículos Envolvidos</h3>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <?php foreach ($dat3 as $index => $veiculo): ?>
+                                    <div class="glass-effect rounded-2xl shadow-lg p-6 card-hover">
+                                        <div class="flex items-center justify-between mb-6">
+                                            <h4 class="text-lg font-bold text-gray-700 flex items-center">
+                                                <i class='bx bxs-car-crash text-gray-500 mr-2 text-xl'></i>
+                                                Veículo <?php echo $index + 1; ?>
+                                            </h4>
+                                            <span
+                                                class="px-3 py-1 rounded-full text-sm <?php echo $index % 2 ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'; ?>">
+                                                #<?php echo $index + 1; ?>
+                                            </span>
+                                        </div>
+                                        <div class="space-y-3">
+                                            <?php exibir_dados_formatados($veiculo); ?>
+
+                                            <?php if (!empty($veiculo['damaged_parts'])): ?>
+                                                <div class="mt-4 bg-gray-50 p-4 rounded-lg">
+                                                    <h5 class="font-semibold text-gray-700 mb-2">Áreas Danificadas:</h5>
+                                                    <div class="grid grid-cols-2 gap-2">
+                                                        <?php
+                                                        $damaged_parts = json_decode($veiculo['damaged_parts'], true);
+                                                        foreach ($damaged_parts as $part):
+                                                            if ($part['checked']):
+                                                        ?>
+                                                                <div class="flex items-center">
+                                                                    <span class="material-icons text-red-500 text-sm mr-1">warning</span>
+                                                                    <span
+                                                                        class="text-sm"><?php echo ucfirst(str_replace('_', ' ', $part['name'])); ?></span>
+                                                                </div>
+                                                        <?php
+                                                            endif;
+                                                        endforeach;
+                                                        ?>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-                <?php endif; ?>
+                    <?php endif; ?>
 
                 <?php else: ?>
-                <!-- Outros tipos de formulário -->
-                <div class="glass-effect rounded-2xl shadow-lg p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <?php foreach ($formulario as $coluna => $valor): ?>
-                        <div class="p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 card-hover">
-                            <label class="text-sm font-medium text-gray-600 block mb-1">
-                                <?php echo ucfirst(str_replace('_', ' ', $coluna)); ?>
-                            </label>
-                            <div class="text-gray-900 font-medium">
-                                <?php echo !empty($valor) ? htmlspecialchars($valor) : '<span class="text-gray-400">Não informado</span>';?>
-                            </div>
+                    <!-- Outros tipos de formulário -->
+                    <div class="glass-effect rounded-2xl shadow-lg p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <?php foreach ($formulario as $coluna => $valor): ?>
+                                <div class="p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 card-hover">
+                                    <label class="text-sm font-medium text-gray-600 block mb-1">
+                                        <?php echo ucfirst(str_replace('_', ' ', $coluna)); ?>
+                                    </label>
+                                    <div class="text-gray-900 font-medium">
+                                        <?php echo !empty($valor) ? htmlspecialchars($valor) : '<span class="text-gray-400">Não informado</span>'; ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
-                        <?php endforeach; ?>
                     </div>
-                </div>
                 <?php endif; ?>
 
                 <!-- Botões de ação -->
@@ -754,7 +764,7 @@ function showErrorAlert(message) {
                 <?php
                 $dadosParaEdicao = $tipo == 'DAT' ? array_merge($dat1, $dat2, $dat4) : $formulario;
                 foreach ($dadosParaEdicao as $coluna => $valor): ?>
-                <option value="<?php echo $coluna; ?>"><?php echo ucfirst(str_replace('_', ' ', $coluna)); ?></option>
+                    <option value="<?php echo $coluna; ?>"><?php echo ucfirst(str_replace('_', ' ', $coluna)); ?></option>
                 <?php endforeach; ?>
             </select>
 
@@ -807,15 +817,14 @@ function showErrorAlert(message) {
                     </svg>
                     <h3 class="mb-5 text-lg font-normal text-gray-500">Tem certeza que deseja concluir este protocolo?
                     </h3>
-                    
+
                     <!-- Adicionar informação do email -->
                     <div class="mb-4 text-left p-4 bg-gray-50 rounded-lg">
                         <p class="text-sm text-gray-600">Uma notificação será enviada para:</p>
                         <p class="text-blue-600 font-medium mt-1" id="emailDestino">
-                            <?php 
-                            $emailDestino = $tipo == 'DAT' ? 
-                                (isset($dat1['email']) ? $dat1['email'] : 'Email não informado') : 
-                                (isset($formulario['email']) ? $formulario['email'] : 'Email não informado');
+                            <?php
+                            $emailDestino = $tipo == 'DAT' ?
+                                (isset($dat1['email']) ? $dat1['email'] : 'Email não informado') : (isset($formulario['email']) ? $formulario['email'] : 'Email não informado');
                             echo $emailDestino;
                             ?>
                         </p>
@@ -837,4 +846,4 @@ function showErrorAlert(message) {
     </div>
 </body>
 
-</html> 
+</html>

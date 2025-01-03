@@ -37,7 +37,7 @@ try {
         'JARI' => 'solicitacoes_demutran',
         'PCD' => 'solicitacao_cartao',
         'DAT' => 'DAT1',
-        'Parecer' => 'parecer',
+        'Parecer' => 'Parecer',
         default => throw new Exception('Tipo de formulário inválido')
     };
 
@@ -178,26 +178,51 @@ try {
         $baseTemplate
     );
 
-    // Chamar a função sendMail diretamente
-    error_log("Tentando enviar email...");
+    // Ao invés de enviar o email diretamente, retorna para preview
+    if (isset($data['preview']) && $data['preview'] === true) {
+        echo json_encode([
+            'success' => true,
+            'preview' => [
+                'titulo' => $titulo,
+                'conteudo' => $conteudo,
+                'email' => $dados['email'],
+                'nome' => $dados['nome']
+            ]
+        ]);
+        exit;
+    }
+
+    // Se não for preview, verifica se temos confirmação
+    if (!isset($data['confirmed']) || $data['confirmed'] !== true) {
+        throw new Exception('É necessário confirmar o envio do email');
+    }
+
+    // Procede com o envio após confirmação
+    error_log("Tentando enviar email confirmado...");
+    $mensagemFinal = str_replace(
+        ['%TITULO%', '%CONTEUDO%'],
+        [$data['assunto'], $data['conteudo'] ?? $conteudo],
+        $baseTemplate
+    );
+
     $emailSuccess = sendMail(
-        $dados['email'],
+        $data['email'] ?? $dados['email'],
         $dados['nome'],
-        $titulo,
-        $mensagemEmail
+        $data['assunto'] ?? $titulo,
+        $mensagemFinal
     );
 
     if (!$emailSuccess) {
         throw new Exception('Falha no envio do email');
     }
 
-    // Se o email foi enviado com sucesso, continuar com a atualização do status
+    // Se o email foi enviado com sucesso, atualiza o status
     $sql = match ($tipo) {
         'SAC' => "UPDATE sac SET situacao = 'Concluído', is_read = 1 WHERE id = ?",
         'JARI' => "UPDATE solicitacoes_demutran SET situacao = 'Concluído', is_read = 1 WHERE id = ?",
         'PCD' => "UPDATE solicitacao_cartao SET situacao = 'Concluído', is_read = 1 WHERE id = ?",
         'DAT' => "UPDATE DAT1 SET situacao = 'Concluído', is_read = 1 WHERE id = ?",
-        'Parecer' => "UPDATE parecer SET situacao = 'Concluído', is_read = 1 WHERE id = ?",
+        'Parecer' => "UPDATE Parecer SET situacao = 'Concluído', is_read = 1 WHERE id = ?",
         default => throw new Exception('Tipo de formulário inválido')
     };
 
@@ -217,10 +242,12 @@ try {
     $stmt_log->bind_param('ssss', $usuario, $tipo, $id, $data_hora);
     $stmt_log->execute();
 
+    // Retorna apenas uma resposta JSON
     echo json_encode([
         'success' => true,
         'message' => 'Formulário concluído e email enviado com sucesso'
     ]);
+
 } catch (Throwable $e) {
     if (ob_get_length()) ob_clean();
 

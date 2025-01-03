@@ -490,9 +490,11 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                             <?php $style = getFormularioStyle($item['tipo'], $item['subtipo'] ?? null); ?>
 
                             <div class="form-card bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
-                                x-bind:class="{\
-                                    'border-l-4 <?php echo $style['border']; ?>': viewMode === 'grid',
-                                    'border border-gray-200 hover:border-<?php echo explode('-', $style['border'])[1]; ?>': viewMode === 'list'
+                                :class="{
+                                    'border-l-4': viewMode === 'grid',
+                                    [<?php echo "'$style[border]'"; ?>]: viewMode === 'grid',
+                                    'border border-gray-200': viewMode === 'list',
+                                    ['hover:border-<?php echo explode('-', $style['border'])[1]; ?>']: viewMode === 'list'
                                 }">
                                 <!-- Grid View -->
                                 <template x-if="viewMode === 'grid'">
