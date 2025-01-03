@@ -1,0 +1,7 @@
+{
+  "name": "kellyson71/demutran",
+  "description": "Projeto Demutran",
+  "require": {
+    "php": "^8.0"
+  }
+}
