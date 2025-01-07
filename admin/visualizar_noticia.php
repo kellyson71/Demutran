@@ -30,7 +30,8 @@ if (!$noticia) {
 }
 
 // Função para formatar a data
-function formatarData($data) {
+function formatarData($data)
+{
     return date('d/m/Y', strtotime($data));
 }
 
@@ -90,7 +91,7 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <?php 
+            <?php
             $topbarHtml = getTopbarHtml('Visualizar Notícia', $notificacoesNaoLidas);
             $avatarHtml = getAvatarHtml($_SESSION['usuario_nome'], $_SESSION['usuario_avatar'] ?? '');
             echo str_replace('[AVATAR_PLACEHOLDER]', $avatarHtml, $topbarHtml);
@@ -110,7 +111,7 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                     <!-- Imagem da Notícia -->
                     <?php if (!empty($noticia['imagem_url'])): ?>
                     <div class="relative h-[400px] w-full">
-                        <img src="<?php echo htmlspecialchars($noticia['imagem_url']); ?>"
+                        <img src="<?php echo '../' . htmlspecialchars($noticia['imagem_url']); ?>"
                             alt="<?php echo htmlspecialchars($noticia['titulo']); ?>"
                             class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
@@ -142,7 +143,11 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 
                         <!-- Conteúdo Principal -->
                         <div class="prose max-w-none">
-                            <?php echo nl2br(htmlspecialchars($noticia['conteudo'])); ?>
+                            <?php
+                            // Adiciona '../' nos caminhos das imagens no conteúdo
+                            $conteudo = preg_replace('/(src=["|\'])(midia\/)/i', '$1../$2', $noticia['conteudo']);
+                            echo $conteudo;
+                            ?>
                         </div>
 
                         <!-- Ações -->

@@ -120,7 +120,7 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <?php 
+            <?php
             $topbarHtml = getTopbarHtml('Gerenciar Notícias', $notificacoesNaoLidas);
             $avatarHtml = getAvatarHtml($_SESSION['usuario_nome'], $_SESSION['usuario_avatar'] ?? '');
             echo str_replace('[AVATAR_PLACEHOLDER]', $avatarHtml, $topbarHtml);
@@ -180,7 +180,7 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                             class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
                             <div class="relative aspect-video">
                                 <?php if (!empty($noticia['imagem_url'])): ?>
-                                <img src="<?php echo $noticia['imagem_url']; ?>"
+                                <img src="../<?php echo $noticia['imagem_url']; ?>"
                                     alt="<?php echo htmlspecialchars($noticia['titulo']); ?>"
                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                                 <?php else: ?>

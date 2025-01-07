@@ -1,6 +1,14 @@
 <?php
-// todas-noticias.php
 include 'env/config.php';
+
+// Função helper para tratar o caminho das imagens
+function get_image_path($path)
+{
+    if (empty($path)) {
+        return 'assets/placeholder.jpg';
+    }
+    return $path; // Retorna o caminho como está no banco
+}
 
 // Definir o número de notícias por página
 $noticias_por_pagina = 6;
@@ -136,7 +144,8 @@ $conn->close();
         <!-- Grid de Notícias -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <?php foreach ($noticias as $noticia): ?>
-            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <a href="noticia.php?id=<?php echo $noticia['id']; ?>"
+                class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
                 <div class="h-48">
                     <img src="<?php echo get_image_path($noticia['imagem_url']); ?>"
                         alt="<?php echo htmlspecialchars($noticia['titulo'], ENT_QUOTES, 'UTF-8'); ?>"
@@ -144,13 +153,14 @@ $conn->close();
                 </div>
                 <div class="p-4">
                     <h3 class="text-gray-900 font-bold text-xl mb-2">
-                        <?php echo htmlspecialchars($noticia['titulo'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                        <?php echo htmlspecialchars($noticia['titulo'], ENT_QUOTES, 'UTF-8'); ?>
+                    </h3>
                     <p class="text-gray-600 text-sm mb-4">
-                        <?php echo htmlspecialchars($noticia['resumo'], ENT_QUOTES, 'UTF-8'); ?></p>
-                    <a href="noticia.php?id=<?php echo $noticia['id']; ?>" class="text-green-600 hover:underline">Leia
-                        mais</a>
+                        <?php echo htmlspecialchars($noticia['resumo'], ENT_QUOTES, 'UTF-8'); ?>
+                    </p>
+                    <span class="text-green-600">Leia mais</span>
                 </div>
-            </div>
+            </a>
             <?php endforeach; ?>
         </div>
 
@@ -163,16 +173,16 @@ $conn->close();
 
             <?php
             // Exibir links para as páginas
-            for ($i = 1; $i <= $total_paginas; $i++): 
+            for ($i = 1; $i <= $total_paginas; $i++):
                 if ($i == $pagina_atual):
             ?>
             <span class="px-4 py-2 mx-1 bg-green-600 text-white rounded"><?php echo $i; ?></span>
             <?php else: ?>
             <a href="?pagina=<?php echo $i; ?>"
                 class="px-4 py-2 mx-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"><?php echo $i; ?></a>
-            <?php 
+            <?php
                 endif;
-            endfor; 
+            endfor;
             ?>
 
             <?php if ($pagina_atual < $total_paginas): ?>

@@ -46,15 +46,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->execute()) {
             // Processa a nova imagem, se fornecida
             if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] == UPLOAD_ERR_OK) {
-                $target_dir = "./midia/" . $id;
+                $target_dir = "../midia/noticia/" . $id;  // Alterado para incluir '../'
                 if (!is_dir($target_dir)) {
                     mkdir($target_dir, 0777, true);
                 }
 
                 $imagem_nome = basename($_FILES['imagem']['name']);
-                $target_file = $target_dir . '/' . $imagem_nome;
-                
-                if (move_uploaded_file($_FILES['imagem']['tmp_name'], $target_file)) {
+                $target_file = "midia/noticia/" . $id . '/' . $imagem_nome;  // Caminho para salvar no banco
+                $full_path = "../" . $target_file;  // Caminho completo para mover o arquivo
+
+                if (move_uploaded_file($_FILES['imagem']['tmp_name'], $full_path)) {
                     $sql_update = "UPDATE noticias SET imagem_url = ? WHERE id = ?";
                     $stmt_update = $conn->prepare($sql_update);
                     $stmt_update->bind_param('si', $target_file, $id);
@@ -86,28 +87,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.tiny.cloud/1/djvd4vhwlkk5pio6pmjhmqd0a0j0iwziovpy9rz7k4jvzboi/tinymce/6/langs/pt_BR.js">
     </script>
     <style>
-    body {
-        font-family: 'Inter', sans-serif;
-    }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
 
-    .dropzone {
-        border: 2px dashed #4F46E5;
-        background: #F5F3FF;
-        transition: all 0.3s ease;
-    }
+        .dropzone {
+            border: 2px dashed #4F46E5;
+            background: #F5F3FF;
+            transition: all 0.3s ease;
+        }
 
-    .dropzone.dragover {
-        background: #EEF2FF;
-        border-color: #6366F1;
-    }
+        .dropzone.dragover {
+            background: #EEF2FF;
+            border-color: #6366F1;
+        }
 
-    .tox-tinymce {
-        border-radius: 0.5rem !important;
-    }
+        .tox-tinymce {
+            border-radius: 0.5rem !important;
+        }
 
-    .tox .tox-mbtn__select-label {
-        font-family: 'Inter', sans-serif !important;
-    }
+        .tox .tox-mbtn__select-label {
+            font-family: 'Inter', sans-serif !important;
+        }
     </style>
 </head>
 
@@ -159,11 +160,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <!-- User Profile -->
                     <div x-data="{ open: false }" class="relative">
                         <button @click="open = !open" class="flex items-center focus:outline-none">
-                            <?php 
+                            <?php
                             $avatarUrl = $_SESSION['usuario_avatar'] ?? '';
                             $nome = $_SESSION['usuario_nome'];
                             $iniciais = strtoupper(mb_substr($nome, 0, 1) . mb_substr(strstr($nome, ' '), 1, 1));
-                            
+
                             if ($avatarUrl) {
                                 echo "<img src='{$avatarUrl}' alt='Avatar' 
                                       class='w-8 h-8 rounded-full object-cover ring-2 ring-blue-500 ring-offset-2'
@@ -199,9 +200,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="container mx-auto">
                     <div class="bg-white shadow-xl rounded-2xl p-8 max-w-4xl mx-auto">
                         <?php if (isset($error)): ?>
-                        <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg" role="alert">
-                            <p><?php echo $error; ?></p>
-                        </div>
+                            <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg" role="alert">
+                                <p><?php echo $error; ?></p>
+                            </div>
                         <?php endif; ?>
 
                         <form method="POST" action="" enctype="multipart/form-data" class="space-y-6">
@@ -240,11 +241,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <label class="block text-sm font-medium text-gray-700">Imagem da Notícia</label>
                                 <!-- Mostrar imagem atual -->
                                 <?php if (!empty($noticia['imagem_url'])): ?>
-                                <div class="mb-4">
-                                    <p class="text-sm text-gray-600 mb-2">Imagem atual:</p>
-                                    <img src="<?php echo htmlspecialchars($noticia['imagem_url']); ?>"
-                                        alt="Imagem atual" class="max-h-64 rounded-lg">
-                                </div>
+                                    <div class="mb-4">
+                                        <p class="text-sm text-gray-600 mb-2">Imagem atual:</p>
+                                        <img src="<?php echo '../' . htmlspecialchars($noticia['imagem_url']); ?>"
+                                            alt="Imagem atual" class="max-h-64 rounded-lg">
+                                    </div>
                                 <?php endif; ?>
                                 <div id="dropzone" class="dropzone rounded-lg p-8 text-center cursor-pointer">
                                     <div class="space-y-2">
@@ -287,135 +288,136 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="//unpkg.com/alpinejs" defer></script>
 
     <script>
-    // Inicialização do TinyMCE
-    tinymce.init({
-        selector: '#conteudo',
-        language: 'pt_BR',
-        height: 500,
-        plugins: [
-            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-            'insertdatetime', 'media', 'table', 'help', 'wordcount'
-        ],
-        toolbar: 'undo redo | formatselect | ' +
-            'bold italic backcolor | alignleft aligncenter ' +
-            'alignright alignjustify | bullist numlist outdent indent | ' +
-            'removeformat | image media link table | help',
-        content_style: "body { font-family: 'Inter', sans-serif; }",
+        // Inicialização do TinyMCE
+        tinymce.init({
+            selector: '#conteudo',
+            language: 'pt_BR',
+            height: 500,
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+            ],
+            toolbar: 'undo redo | formatselect | ' +
+                'bold italic backcolor | alignleft aligncenter ' +
+                'alignright alignjustify | bullist numlist outdent indent | ' +
+                'removeformat | image media link table | help',
+            content_style: "body { font-family: 'Inter', sans-serif; }",
 
-        // Configurações em português
-        language_url: 'pt_BR',
+            // Configurações em português
+            language_url: 'pt_BR',
 
-        // Configurações de imagem
-        image_title: true,
-        automatic_uploads: true,
-        file_picker_types: 'image',
-        images_upload_handler: function(blobInfo, progress) {
-            return new Promise((resolve, reject) => {
-                let formData = new FormData();
-                formData.append('file', blobInfo.blob(), blobInfo.filename());
+            // Configurações de imagem
+            image_title: true,
+            automatic_uploads: true,
+            file_picker_types: 'image',
+            images_upload_handler: function(blobInfo, progress) {
+                return new Promise((resolve, reject) => {
+                    let formData = new FormData();
+                    formData.append('file', blobInfo.blob(), blobInfo.filename());
 
-                fetch('upload_image.php', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Erro no upload: ' + response.statusText);
-                        }
-                        return response.json();
-                    })
-                    .then(result => {
-                        if (result.location) {
-                            resolve(result.location);
-                        } else {
-                            reject(result.error || 'Erro no upload da imagem');
-                        }
-                    })
-                    .catch(error => {
-                        reject('Erro no upload: ' + error.message);
-                    });
-            });
-        },
-
-        // Adicionar configurações adicionais para melhor tratamento de imagens
-        image_uploadtab: true,
-        images_reuse_filename: true,
-        automatic_uploads: true,
-        images_file_types: 'jpg,jpeg,png,gif,webp',
-        max_file_size: '5mb',
-
-        // Configurações de formato
-        formats: {
-            alignleft: {
-                selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img',
-                classes: 'text-left'
+                    fetch('upload_image.php', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Erro no upload: ' + response.statusText);
+                            }
+                            return response.json();
+                        })
+                        .then(result => {
+                            if (result.location) {
+                                // Adicionar '../' ao início do caminho retornado
+                                resolve('../' + result.location);
+                            } else {
+                                reject(result.error || 'Erro no upload da imagem');
+                            }
+                        })
+                        .catch(error => {
+                            reject('Erro no upload: ' + error.message);
+                        });
+                });
             },
-            aligncenter: {
-                selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img',
-                classes: 'text-center'
+
+            // Adicionar configurações adicionais para melhor tratamento de imagens
+            image_uploadtab: true,
+            images_reuse_filename: true,
+            automatic_uploads: true,
+            images_file_types: 'jpg,jpeg,png,gif,webp',
+            max_file_size: '5mb',
+
+            // Configurações de formato
+            formats: {
+                alignleft: {
+                    selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img',
+                    classes: 'text-left'
+                },
+                aligncenter: {
+                    selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img',
+                    classes: 'text-center'
+                },
+                alignright: {
+                    selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img',
+                    classes: 'text-right'
+                },
+                bold: {
+                    inline: 'span',
+                    classes: 'font-bold'
+                },
+                italic: {
+                    inline: 'span',
+                    classes: 'italic'
+                }
             },
-            alignright: {
-                selector: 'p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li,table,img',
-                classes: 'text-right'
-            },
-            bold: {
-                inline: 'span',
-                classes: 'font-bold'
-            },
-            italic: {
-                inline: 'span',
-                classes: 'italic'
+
+            // Menu de contexto em português
+            contextmenu: "link image table",
+
+            // Permitir tags HTML específicas e seus atributos
+            extended_valid_elements: "img[class|src|border=0|alt|title|hspace|vspace|width|height|align|onmouseover|onmouseout|name|style],hr[class|width|size|noshade],font[face|size|color|style],span[class|align|style]"
+        });
+
+        // Preview da imagem
+        const dropzone = document.getElementById('dropzone');
+        const imageInput = document.getElementById('imagem');
+        const previewContainer = document.getElementById('preview-container');
+        const preview = document.getElementById('preview');
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                imageInput.files = e.dataTransfer.files;
+                showPreview(e.dataTransfer.files[0]);
             }
-        },
+        });
 
-        // Menu de contexto em português
-        contextmenu: "link image table",
+        dropzone.addEventListener('click', () => imageInput.click());
 
-        // Permitir tags HTML específicas e seus atributos
-        extended_valid_elements: "img[class|src|border=0|alt|title|hspace|vspace|width|height|align|onmouseover|onmouseout|name|style],hr[class|width|size|noshade],font[face|size|color|style],span[class|align|style]"
-    });
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                showPreview(e.target.files[0]);
+            }
+        });
 
-    // Preview da imagem
-    const dropzone = document.getElementById('dropzone');
-    const imageInput = document.getElementById('imagem');
-    const previewContainer = document.getElementById('preview-container');
-    const preview = document.getElementById('preview');
-
-    dropzone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropzone.classList.add('dragover');
-    });
-
-    dropzone.addEventListener('dragleave', () => {
-        dropzone.classList.remove('dragover');
-    });
-
-    dropzone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropzone.classList.remove('dragover');
-        if (e.dataTransfer.files.length) {
-            imageInput.files = e.dataTransfer.files;
-            showPreview(e.dataTransfer.files[0]);
+        function showPreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                previewContainer.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
         }
-    });
-
-    dropzone.addEventListener('click', () => imageInput.click());
-
-    imageInput.addEventListener('change', (e) => {
-        if (e.target.files.length) {
-            showPreview(e.target.files[0]);
-        }
-    });
-
-    function showPreview(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            preview.src = e.target.result;
-            previewContainer.classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-    }
     </script>
 
 </body>

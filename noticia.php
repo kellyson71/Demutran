@@ -122,36 +122,53 @@ $conn->close();
     </div>
 
     <!-- Conteúdo Principal -->
-    <main class="container mx-auto py-8">
-        <!-- Título da Notícia -->
-        <h1 class="text-4xl font-bold text-center text-gray-800 mb-6">
-            <?php echo htmlspecialchars($news['titulo'], ENT_QUOTES, 'UTF-8'); ?>
-        </h1>
+    <main class="container mx-auto py-8 px-4">
+        <article class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+            <!-- Cabeçalho da Notícia -->
+            <header class="p-6">
+                <h1 class="text-4xl font-bold text-gray-800 mb-4">
+                    <?php echo htmlspecialchars($news['titulo'], ENT_QUOTES, 'UTF-8'); ?>
+                </h1>
+                <p class="text-gray-600">
+                    Publicado em: <?php echo date('d/m/Y', strtotime($news['data_publicacao'])); ?>
+                </p>
+            </header>
 
-        <!-- Data de Publicação -->
-        <p class="text-gray-600 text-center mb-4">
-            Publicado em: <?php echo date('d/m/Y', strtotime($news['data_publicacao'])); ?>
-        </p>
+            <!-- Imagem Principal -->
+            <div class="relative w-full h-[400px] overflow-hidden">
+                <img src="<?php echo $news['imagem_url']; ?>"
+                    alt="<?php echo htmlspecialchars($news['titulo'], ENT_QUOTES, 'UTF-8'); ?>"
+                    class="w-full h-full object-cover">
+            </div>
 
-        <!-- Imagem Principal -->
-        <div class="flex justify-center mb-8">
-            <img src="<?php echo get_image_path($news['imagem_url']); ?>"
-                alt="<?php echo htmlspecialchars($news['titulo'], ENT_QUOTES, 'UTF-8'); ?>"
-                class="w-full md:w-2/3 rounded-lg shadow-lg">
-        </div>
+            <!-- Conteúdo da Notícia -->
+            <div class="p-6 prose prose-lg max-w-none">
+                <style>
+                /* Estilos para as imagens dentro do conteúdo */
+                .prose img {
+                    margin: 1.5rem auto;
+                    border-radius: 0.375rem;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                    max-width: 100%;
+                    height: auto;
+                }
 
-        <!-- Conteúdo da Notícia -->
-        <div class="text-gray-800 leading-relaxed max-w-3xl mx-auto">
-            <?php echo nl2br(htmlspecialchars($news['conteudo'], ENT_QUOTES, 'UTF-8')); ?>
-        </div>
+                .prose p {
+                    margin-bottom: 1.5rem;
+                }
+                </style>
+                <?php echo $news['conteudo']; ?>
+            </div>
 
-        <!-- Botão Voltar -->
-        <div class="text-center mt-8">
-            <a href="index.php" class="inline-flex items-center text-green-600 hover:text-green-800">
-                <i class="fas fa-arrow-left mr-2"></i>
-                <span>Voltar para a Página Inicial</span>
-            </a>
-        </div>
+            <!-- Botão Voltar -->
+            <div class="p-6 border-t border-gray-200">
+                <a href="index.php"
+                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    <span>Voltar para a Página Inicial</span>
+                </a>
+            </div>
+        </article>
     </main>
 
     <!-- Footer -->
