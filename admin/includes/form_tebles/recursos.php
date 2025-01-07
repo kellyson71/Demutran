@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/helpers.php';
+
 function exibirDetalhesRecurso($conn, $id)
 {
     $sql = "SELECT * FROM solicitacoes_demutran WHERE id = ?";
@@ -23,50 +25,32 @@ function exibirDetalhesRecurso($conn, $id)
         <!-- Informações do Solicitante -->
         <div class="border-b pb-6 mb-6">
             <h3 class="text-2xl font-semibold text-gray-800 mb-4">Informações do Solicitante</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <p class="text-gray-600"><span class="font-semibold">Nome:</span>
-                        <?php echo htmlspecialchars($recurso['nome'] ?? ''); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">CPF:</span>
-                        <?php echo htmlspecialchars($recurso['cpf'] ?? ''); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Endereço:</span>
-                        <?php echo htmlspecialchars($recurso['endereco'] ?? ''); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Número:</span>
-                        <?php echo htmlspecialchars($recurso['numero'] ?? ''); ?></p>
-                </div>
-                <div>
-                    <p class="text-gray-600"><span class="font-semibold">Email:</span>
-                        <?php echo htmlspecialchars($recurso['email'] ?? ''); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Telefone:</span>
-                        <?php echo htmlspecialchars($recurso['telefone'] ?? ''); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Bairro:</span>
-                        <?php echo htmlspecialchars($recurso['bairro'] ?? ''); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">CEP:</span>
-                        <?php echo htmlspecialchars($recurso['cep'] ?? ''); ?></p>
-                </div>
+            <div class="space-y-4">
+                <?php
+                echo createEditableField('Nome', $recurso['nome'], 'nome');
+                echo createEditableField('CPF', $recurso['cpf'], 'cpf');
+                echo createEditableField('Email', $recurso['email'], 'email');
+                echo createEditableField('Telefone', $recurso['telefone'], 'telefone');
+                echo createEditableField('Endereço', $recurso['endereco'], 'endereco');
+                echo createEditableField('Número', $recurso['numero'], 'numero');
+                echo createEditableField('Bairro', $recurso['bairro'], 'bairro');
+                echo createEditableField('CEP', $recurso['cep'], 'cep');
+                ?>
             </div>
         </div>
 
         <!-- Informações do Veículo -->
         <div class="border-b pb-6 mb-6">
             <h3 class="text-2xl font-semibold text-gray-800 mb-4">Informações do Veículo</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <p class="text-gray-600"><span class="font-semibold">Placa:</span>
-                        <?php echo htmlspecialchars($recurso['placa'] ?? ''); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Marca/Modelo:</span>
-                        <?php echo htmlspecialchars($recurso['marcaModelo'] ?? ''); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Cor:</span>
-                        <?php echo htmlspecialchars($recurso['cor'] ?? ''); ?></p>
-                </div>
-                <div>
-                    <p class="text-gray-600"><span class="font-semibold">Espécie:</span>
-                        <?php echo htmlspecialchars($recurso['especie'] ?? ''); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Categoria:</span>
-                        <?php echo htmlspecialchars($recurso['categoria'] ?? ''); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Ano:</span>
-                        <?php echo htmlspecialchars($recurso['ano'] ?? ''); ?></p>
-                </div>
+            <div class="space-y-4">
+                <?php
+                echo createEditableField('Placa', $recurso['placa'], 'placa');
+                echo createEditableField('Marca/Modelo', $recurso['marcaModelo'], 'marcaModelo');
+                echo createEditableField('Cor', $recurso['cor'], 'cor');
+                echo createEditableField('Espécie', $recurso['especie'], 'especie');
+                echo createEditableField('Categoria', $recurso['categoria'], 'categoria');
+                echo createEditableField('Ano', $recurso['ano'], 'ano');
+                ?>
             </div>
         </div>
 

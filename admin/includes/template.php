@@ -4,7 +4,7 @@ function contarNotificacoesNaoLidas($conn)
     $tresDiasAtras = date('Y-m-d H:i:s', strtotime('-3 days'));
 
     $sql = "SELECT (
-        (SELECT COUNT(*) FROM formularios_dat_central WHERE data_criacao >= ? AND (is_read = 0 OR is_read IS NULL)) +
+        (SELECT COUNT(*) FROM formularios_dat_central WHERE data_submissao >= ? AND (is_read = 0 OR is_read IS NULL)) +
         (SELECT COUNT(*) FROM Parecer WHERE data_submissao >= ? AND (is_read = 0 OR is_read IS NULL)) +
         (SELECT COUNT(*) FROM sac WHERE data_submissao >= ? AND (is_read = 0 OR is_read IS NULL)) +
         (SELECT COUNT(*) FROM solicitacao_cartao WHERE data_submissao >= ? AND (is_read = 0 OR is_read IS NULL)) +
@@ -36,11 +36,11 @@ function getAvatarHtml($usuario_nome, $usuario_avatar = '') {
 function getSidebarHtml($currentPage) {
     $menuItems = [
         'index' => ['icon' => 'dashboard', 'text' => 'Dashboard'],
-        'formularios' => ['icon' => 'assignment', 'text' => 'Formulários'],
-        'gerenciar_noticias' => ['icon' => 'article', 'text' => 'Notícias'],
-        'analytics' => ['icon' => 'analytics', 'text' => 'Estatísticas'],
-        'usuarios' => ['icon' => 'people', 'text' => 'Usuários'],
-        'perfil' => ['icon' => 'person', 'text' => 'Perfil']
+        'formularios' => ['icon' => 'description', 'text' => 'Formulários'],
+        'gerenciar_noticias' => ['icon' => 'newspaper', 'text' => 'Notícias'],
+        'analytics' => ['icon' => 'query_stats', 'text' => 'Estatísticas'],
+        'usuarios' => ['icon' => 'group', 'text' => 'Usuários'],
+        'perfil' => ['icon' => 'account_circle', 'text' => 'Perfil']
     ];
 
     $html = '<nav class="space-y-2 flex-1">';
@@ -70,13 +70,13 @@ function getNotificacoesNaoLidas($conn, $usuario_id) {
             id,
             token as titulo,
             status as situacao,
-            data_criacao as data_submissao,
+            data_submissao as data_submissao,
             NULL as nome,
             NULL as email,
             NULL as cidade,
             NULL as subtipo
         FROM formularios_dat_central
-        WHERE data_criacao >= ? AND (is_read = 0 OR is_read IS NULL)
+        WHERE data_submissao >= ? AND (is_read = 0 OR is_read IS NULL)
         
         UNION ALL
         
@@ -196,13 +196,13 @@ function getFormularioStyle($tipo, $subtipo = null)
             'border' => 'border-green-500'
         ],
         'DAT' => [
-            'icon' => 'description',
+            'icon' => 'car_crash', // Atualizado para um ícone mais apropriado
             'text' => 'text-red-600',
             'bg' => 'bg-red-100',
             'border' => 'border-red-500'
         ],
         'Parecer' => [
-            'icon' => 'fact_check',
+            'icon' => 'assignment',
             'text' => 'text-gray-600',
             'bg' => 'bg-gray-100',
             'border' => 'border-gray-500'
@@ -216,7 +216,7 @@ function getFormularioStyle($tipo, $subtipo = null)
                 $styles['JARI']['icon'] = 'person_add';
                 break;
             case 'defesa_previa':
-                $styles['JARI']['icon'] = 'security';
+                $styles['JARI']['icon'] = 'shield';
                 break;
             case 'jari':
                 $styles['JARI']['icon'] = 'balance';
@@ -296,8 +296,9 @@ function getTopbarHtml($pageTitle, $usuario_id) {
                 </button>
                 <div x-show='open' 
                      @click.away='open = false' 
-                     x-cloak 
-                     class='absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg z-50'>
+                     x-cloak
+                     class='absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg z-50'
+                     style='display: none;'>
                     <div class='p-4 border-b'>
                         <div class='flex items-center justify-between'>
                             <span class='font-bold text-gray-700'>Notificações</span>

@@ -18,6 +18,44 @@ if (!$id || !$tipo) {
     exit();
 }
 
+// Atualizar o status de leitura baseado no tipo do formulário
+$tableName = '';
+switch ($tipo) {
+    case 'JARI':
+        $tableName = 'solicitacoes_demutran';
+        break;
+    case 'PCD':
+        $tableName = 'solicitacao_cartao';
+        break;
+    case 'DAT':
+        // Para DAT, precisamos buscar o ID correto na tabela formularios_dat_central usando o token
+        $sql = "SELECT fc.id, fc.token FROM DAT4 d4 
+                INNER JOIN formularios_dat_central fc ON d4.token = fc.token 
+                WHERE d4.id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc()) {
+            $tableName = 'formularios_dat_central';
+            $id = $row['id']; // Atualiza o ID para o da tabela correta
+        }
+        break;
+    case 'SAC':
+        $tableName = 'sac';
+        break;
+    case 'Parecer':
+        $tableName = 'parecer';
+        break;
+}
+
+if ($tableName) {
+    $sql = "UPDATE $tableName SET is_read = 1 WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+}
+
 // Função para obter o título do formulário baseado no tipo e subtipo
 function obterTituloFormulario($tipo, $conn, $id)
 {
@@ -90,25 +128,54 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
     <script src="//unpkg.com/alpinejs" defer></script>
 
     <style>
-        .title-animation {
-            animation: slideDown 0.6s ease-out;
+    .title-animation {
+        animation: slideDown 0.6s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
         }
 
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
+    }
 
-        .title-header {
-            background-color: #2563eb;
-        }
+    .title-header {
+        background-color: #2563eb;
+    }
+
+    .editable-field {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .edit-button {
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .editable-field:hover .edit-button {
+        opacity: 1;
+    }
+
+    .field-input {
+        background-color: transparent;
+        border: 1px solid transparent;
+        padding: 0.25rem;
+        transition: all 0.3s;
+    }
+
+    .field-input.editing {
+        background-color: white;
+        border-color: #e2e8f0;
+        border-radius: 0.375rem;
+    }
     </style>
 </head>
 
@@ -324,203 +391,299 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                 </div>
 
                 <script>
-                    let emailData = null;
-                    let isProcessing = false; // Flag para evitar chamadas duplas
+                let emailData = null;
+                let isProcessing = false; // Flag para evitar chamadas duplas
 
-                    function showModal(state = 'loading') {
-                        const modal = document.getElementById('statusModal');
-                        const loadingState = document.getElementById('loadingState');
-                        const errorState = document.getElementById('errorState');
-                        const successState = document.getElementById('successState');
+                function showModal(state = 'loading') {
+                    const modal = document.getElementById('statusModal');
+                    const loadingState = document.getElementById('loadingState');
+                    const errorState = document.getElementById('errorState');
+                    const successState = document.getElementById('successState');
 
-                        // Reset states
-                        loadingState.classList.add('hidden');
-                        errorState.classList.add('hidden');
-                        successState.classList.add('hidden');
+                    // Reset states
+                    loadingState.classList.add('hidden');
+                    errorState.classList.add('hidden');
+                    successState.classList.add('hidden');
 
-                        // Show modal
-                        modal.classList.remove('hidden');
-                        modal.classList.add('flex');
+                    // Show modal
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
 
-                        // Show correct state
-                        switch (state) {
-                            case 'loading':
-                                loadingState.classList.remove('hidden');
-                                break;
-                            case 'error':
-                                errorState.classList.remove('hidden');
-                                break;
-                            case 'success':
-                                successState.classList.remove('hidden');
-                                break;
-                        }
+                    // Show correct state
+                    switch (state) {
+                        case 'loading':
+                            loadingState.classList.remove('hidden');
+                            break;
+                        case 'error':
+                            errorState.classList.remove('hidden');
+                            break;
+                        case 'success':
+                            successState.classList.remove('hidden');
+                            break;
                     }
+                }
 
-                    function closeModal() {
-                        const modal = document.getElementById('statusModal');
-                        if (isProcessing) return; // Evita fechamento durante processamento
+                function closeModal() {
+                    const modal = document.getElementById('statusModal');
+                    if (isProcessing) return; // Evita fechamento durante processamento
 
-                        modal.classList.add('hidden');
-                        modal.classList.remove('flex');
-                        if (document.getElementById('successState').classList.contains('hidden') === false) {
-                            location.reload();
-                        }
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    if (document.getElementById('successState').classList.contains('hidden') === false) {
+                        location.reload();
                     }
+                }
 
-                    function closeEmailModal() {
-                        const modal = document.getElementById('emailModal');
-                        modal.classList.add('hidden');
-                        modal.classList.remove('flex');
-                    }
+                function closeEmailModal() {
+                    const modal = document.getElementById('emailModal');
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
 
-                    function showEmailModal(data) {
-                        emailData = data;
-                        const modal = document.getElementById('emailModal');
+                function showEmailModal(data) {
+                    emailData = data;
+                    const modal = document.getElementById('emailModal');
 
-                        // Preencher campos do preview
-                        document.getElementById('previewTo').textContent = data.email;
-                        document.getElementById('previewSubject').textContent = data.titulo;
+                    // Preencher campos do preview
+                    document.getElementById('previewTo').textContent = data.email;
+                    document.getElementById('previewSubject').textContent = data.titulo;
 
-                        // Preencher campos do formulário de edição
-                        document.getElementById('emailTo').value = data.email;
-                        document.getElementById('emailSubject').value = data.titulo;
-                        document.getElementById('emailContent').value = data.conteudo;
+                    // Preencher campos do formulário de edição
+                    document.getElementById('emailTo').value = data.email;
+                    document.getElementById('emailSubject').value = data.titulo;
+                    document.getElementById('emailContent').value = data.conteudo;
 
-                        updatePreview();
-                        modal.classList.remove('hidden');
-                        modal.classList.add('flex');
+                    updatePreview();
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
 
-                        // Esconder formulário de edição
-                        document.getElementById('editForm').classList.add('hidden');
-                    }
+                    // Esconder formulário de edição
+                    document.getElementById('editForm').classList.add('hidden');
+                }
 
-                    function showEditForm() {
-                        document.getElementById('editForm').classList.remove('hidden');
-                    }
+                function showEditForm() {
+                    document.getElementById('editForm').classList.remove('hidden');
+                }
 
-                    function updatePreview() {
-                        const emailPreview = document.getElementById('emailPreview');
-                        const content = document.getElementById('emailContent').value;
+                function updatePreview() {
+                    const emailPreview = document.getElementById('emailPreview');
+                    const content = document.getElementById('emailContent').value;
 
-                        emailPreview.innerHTML = content;
+                    emailPreview.innerHTML = content;
 
-                        // Atualizar também o preview do cabeçalho
-                        document.getElementById('previewTo').textContent = document.getElementById('emailTo').value;
-                        document.getElementById('previewSubject').textContent = document.getElementById('emailSubject')
-                            .value;
-                    }
+                    // Atualizar também o preview do cabeçalho
+                    document.getElementById('previewTo').textContent = document.getElementById('emailTo').value;
+                    document.getElementById('previewSubject').textContent = document.getElementById('emailSubject')
+                        .value;
+                }
 
-                    async function confirmarEnvio() {
-                        if (isProcessing) return;
+                async function confirmarEnvio() {
+                    if (isProcessing) return;
 
-                        try {
-                            isProcessing = true;
-                            closeEmailModal();
-                            showModal('loading');
+                    try {
+                        isProcessing = true;
+                        closeEmailModal();
+                        showModal('loading');
 
-                            const response = await fetch('concluir_formulario_ajax.php', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    id: '<?php echo $id; ?>',
-                                    tipo: '<?php echo $tipo; ?>',
-                                    email: document.getElementById('emailTo').value,
-                                    assunto: document.getElementById('emailSubject').value,
-                                    conteudo: document.getElementById('emailContent').value,
-                                    confirmed: true
-                                })
-                            });
+                        const response = await fetch('concluir_formulario_ajax.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                id: '<?php echo $id; ?>',
+                                tipo: '<?php echo $tipo; ?>',
+                                email: document.getElementById('emailTo').value,
+                                assunto: document.getElementById('emailSubject').value,
+                                conteudo: document.getElementById('emailContent').value,
+                                confirmed: true
+                            })
+                        });
 
-                            const data = await response.json();
+                        const data = await response.json();
 
-                            if (data.success) {
-                                showModal('success');
-                                setTimeout(() => {
-                                    location.reload();
-                                }, 2000);
-                            } else {
-                                document.getElementById('errorMessage').textContent = data.message;
-                                showModal('error');
-                            }
-                        } catch (error) {
-                            console.error('Erro:', error);
-                            document.getElementById('errorMessage').textContent = error.message;
+                        if (data.success) {
+                            showModal('success');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 2000);
+                        } else {
+                            document.getElementById('errorMessage').textContent = data.message;
                             showModal('error');
-                        } finally {
-                            isProcessing = false;
                         }
+                    } catch (error) {
+                        console.error('Erro:', error);
+                        document.getElementById('errorMessage').textContent = error.message;
+                        showModal('error');
+                    } finally {
+                        isProcessing = false;
+                    }
+                }
+
+                // Event Listeners
+                document.addEventListener('DOMContentLoaded', function() {
+                    const btnConcluir = document.getElementById('btnConcluir');
+                    const documentoModal = document.getElementById('documentoModal');
+                    const emailModal = document.getElementById('emailModal');
+                    const statusModal = document.getElementById('statusModal');
+
+                    if (btnConcluir) {
+                        btnConcluir.addEventListener('click', async function() {
+                            if (isProcessing) return;
+                            try {
+                                isProcessing = true;
+                                showModal('loading');
+
+                                // Primeiro, solicita o preview do email
+                                const response = await fetch('concluir_formulario_ajax.php', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        id: '<?php echo $id; ?>',
+                                        tipo: '<?php echo $tipo; ?>',
+                                        preview: true
+                                    })
+                                });
+
+                                const data = await response.json();
+
+                                // Esconder modal de status antes de mostrar o modal de email
+                                const statusModal = document.getElementById('statusModal');
+                                statusModal.classList.add('hidden');
+                                statusModal.classList.remove('flex');
+
+                                if (data.success && data.preview) {
+                                    showEmailModal(data.preview);
+                                } else {
+                                    throw new Error(data.message ||
+                                        'Erro ao gerar preview do email');
+                                }
+                            } catch (error) {
+                                console.error('Erro:', error);
+                                document.getElementById('errorMessage').textContent = error.message;
+                                showModal('error');
+                            } finally {
+                                isProcessing = false;
+                            }
+                        });
                     }
 
-                    // Event Listeners
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const btnConcluir = document.getElementById('btnConcluir');
-                        const documentoModal = document.getElementById('documentoModal');
-                        const emailModal = document.getElementById('emailModal');
-                        const statusModal = document.getElementById('statusModal');
+                    if (documentoModal) {
+                        documentoModal.addEventListener('click', function(e) {
+                            if (e.target === this && !isProcessing) fecharModal();
+                        });
+                    }
 
-                        if (btnConcluir) {
-                            btnConcluir.addEventListener('click', async function() {
-                                if (isProcessing) return;
-                                try {
-                                    isProcessing = true;
-                                    showModal('loading');
+                    if (emailModal) {
+                        emailModal.addEventListener('click', function(e) {
+                            if (e.target === this && !isProcessing) closeEmailModal();
+                        });
+                    }
 
-                                    // Primeiro, solicita o preview do email
-                                    const response = await fetch('concluir_formulario_ajax.php', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify({
-                                            id: '<?php echo $id; ?>',
-                                            tipo: '<?php echo $tipo; ?>',
-                                            preview: true
-                                        })
-                                    });
+                    if (statusModal) {
+                        statusModal.addEventListener('click', function(e) {
+                            if (e.target === this && !isProcessing) closeModal();
+                        });
+                    }
+                });
 
-                                    const data = await response.json();
+                const originalValues = {};
 
-                                    // Esconder modal de status antes de mostrar o modal de email
-                                    const statusModal = document.getElementById('statusModal');
-                                    statusModal.classList.add('hidden');
-                                    statusModal.classList.remove('flex');
+                function toggleEdit(fieldId) {
+                    const input = document.getElementById(fieldId);
+                    const editBtn = input.parentElement.querySelector('.edit-button');
+                    const saveBtn = input.parentElement.querySelector('.save-button');
+                    const cancelBtn = input.parentElement.querySelector('.cancel-button');
 
-                                    if (data.success && data.preview) {
-                                        showEmailModal(data.preview);
-                                    } else {
-                                        throw new Error(data.message ||
-                                            'Erro ao gerar preview do email');
-                                    }
-                                } catch (error) {
-                                    console.error('Erro:', error);
-                                    document.getElementById('errorMessage').textContent = error.message;
-                                    showModal('error');
-                                } finally {
-                                    isProcessing = false;
-                                }
-                            });
-                        }
+                    // Guarda o valor original
+                    if (!originalValues[fieldId]) {
+                        originalValues[fieldId] = input.value;
+                    }
 
-                        if (documentoModal) {
-                            documentoModal.addEventListener('click', function(e) {
-                                if (e.target === this && !isProcessing) fecharModal();
-                            });
-                        }
+                    // Ativa edição
+                    input.readOnly = false;
+                    input.classList.add('editing');
+                    input.focus();
 
-                        if (emailModal) {
-                            emailModal.addEventListener('click', function(e) {
-                                if (e.target === this && !isProcessing) closeEmailModal();
-                            });
-                        }
+                    // Mostra/esconde botões
+                    editBtn.classList.add('hidden');
+                    saveBtn.classList.remove('hidden');
+                    cancelBtn.classList.remove('hidden');
+                }
 
-                        if (statusModal) {
-                            statusModal.addEventListener('click', function(e) {
-                                if (e.target === this && !isProcessing) closeModal();
-                            });
-                        }
-                    });
+                function saveField(fieldId) {
+                    const input = document.getElementById(fieldId);
+                    const newValue = input.value;
+                    const fieldName = input.name;
+
+                    // Aqui você deve implementar a chamada AJAX para salvar as alterações
+                    fetch('salvar_campo.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                fieldName: fieldName,
+                                value: newValue,
+                                formId: '<?php echo $id; ?>',
+                                formType: '<?php echo $tipo; ?>'
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Atualiza o valor original
+                                originalValues[fieldId] = newValue;
+                                // Desativa edição
+                                finishEdit(fieldId);
+                                // Mostra mensagem de sucesso
+                                showToast('Campo atualizado com sucesso!', 'success');
+                            } else {
+                                throw new Error(data.message || 'Erro ao salvar');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erro:', error);
+                            showToast(error.message, 'error');
+                            cancelEdit(fieldId);
+                        });
+                }
+
+                function cancelEdit(fieldId) {
+                    const input = document.getElementById(fieldId);
+                    input.value = originalValues[fieldId] || '';
+                    finishEdit(fieldId);
+                }
+
+                function finishEdit(fieldId) {
+                    const input = document.getElementById(fieldId);
+                    const editBtn = input.parentElement.querySelector('.edit-button');
+                    const saveBtn = input.parentElement.querySelector('.save-button');
+                    const cancelBtn = input.parentElement.querySelector('.cancel-button');
+
+                    input.readOnly = true;
+                    input.classList.remove('editing');
+
+                    editBtn.classList.remove('hidden');
+                    saveBtn.classList.add('hidden');
+                    cancelBtn.classList.add('hidden');
+                }
+
+                function showToast(message, type = 'success') {
+                    const toast = document.createElement('div');
+                    toast.className = `fixed bottom-4 right-4 p-4 rounded-lg shadow-lg ${
+                            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+                        } text-white z-50`;
+                    toast.textContent = message;
+
+                    document.body.appendChild(toast);
+
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 3000);
+                }
                 </script>
 
                 <!-- Modal de Preview do Email -->

@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/helpers.php';
+
 function exibirDetalhesParecer($conn, $id)
 {
     // Buscar dados do parecer
@@ -29,38 +31,27 @@ function exibirDetalhesParecer($conn, $id)
         <!-- Informações Básicas -->
         <div class="border-b pb-6 mb-6">
             <h3 class="text-2xl font-semibold text-gray-800 mb-4">Informações do Solicitante</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <p class="text-gray-600"><span class="font-semibold">Nome:</span>
-                        <?php echo htmlspecialchars($parecer['nome']); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">CPF/CNPJ:</span>
-                        <?php echo htmlspecialchars($parecer['cpf_cnpj']); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Email:</span>
-                        <?php echo htmlspecialchars($parecer['email']); ?></p>
-                </div>
-                <div>
-                    <p class="text-gray-600"><span class="font-semibold">Telefone:</span>
-                        <?php echo htmlspecialchars($parecer['telefone']); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Protocolo:</span>
-                        <?php echo htmlspecialchars($parecer['protocolo']); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Data de Submissão:</span>
-                        <?php echo $dataSubmissao->format('d/m/Y H:i'); ?></p>
-                </div>
+            <div class="space-y-4">
+                <?php
+                echo createEditableField('Nome', $parecer['nome'], 'nome');
+                echo createEditableField('CPF/CNPJ', $parecer['cpf_cnpj'], 'cpf_cnpj');
+                echo createEditableField('Email', $parecer['email'], 'email');
+                echo createEditableField('Telefone', $parecer['telefone'], 'telefone');
+                echo createEditableField('Protocolo', $parecer['protocolo'], 'protocolo');
+                ?>
             </div>
         </div>
 
         <!-- Detalhes do Evento -->
         <div class="border-b pb-6 mb-6">
             <h3 class="text-2xl font-semibold text-gray-800 mb-4">Detalhes do Evento</h3>
-            <div class="grid grid-cols-1 gap-4">
-                <p class="text-gray-600"><span class="font-semibold">Local:</span>
-                    <?php echo htmlspecialchars($parecer['local']); ?></p>
-                <p class="text-gray-600"><span class="font-semibold">Evento:</span>
-                    <?php echo htmlspecialchars($parecer['evento']); ?></p>
-                <p class="text-gray-600"><span class="font-semibold">Ponto de Referência:</span>
-                    <?php echo htmlspecialchars($parecer['ponto_referencia']); ?></p>
-                <p class="text-gray-600"><span class="font-semibold">Data e Horário:</span>
-                    <?php echo htmlspecialchars($parecer['data_horario']); ?></p>
+            <div class="space-y-4">
+                <?php
+                echo createEditableField('Local', $parecer['local'], 'local');
+                echo createEditableField('Evento', $parecer['evento'], 'evento');
+                echo createEditableField('Ponto de Referência', $parecer['ponto_referencia'], 'ponto_referencia');
+                echo createEditableField('Data e Horário', $parecer['data_horario'], 'data_horario');
+                ?>
             </div>
         </div>
 

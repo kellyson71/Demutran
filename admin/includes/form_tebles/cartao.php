@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/helpers.php';
+
 function exibirDetalhesCartao($conn, $id)
 {
     $sql = "SELECT * FROM solicitacao_cartao WHERE id = ?";
@@ -27,46 +29,26 @@ function exibirDetalhesCartao($conn, $id)
         <!-- Informações do Cartão -->
         <div class="border-b pb-6 mb-6">
             <h3 class="text-2xl font-semibold text-gray-800 mb-4">Informações do Cartão</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <p class="text-gray-600"><span class="font-semibold">Tipo:</span>
-                        <?php echo ucfirst(htmlspecialchars($cartao['tipo_solicitacao'])); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Emissão:</span>
-                        <?php echo ucfirst(htmlspecialchars($cartao['emissao_cartao'])); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Nº do Cartão:</span>
-                        <?php echo htmlspecialchars($cartao['n_cartao'] ?? 'Não atribuído'); ?></p>
-                </div>
-                <div>
-                    <p class="text-gray-600"><span class="font-semibold">Residente:</span>
-                        <?php echo $cartao['residente'] ? 'Sim' : 'Não'; ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Solicitante:</span>
-                        <?php echo htmlspecialchars($cartao['solicitante']); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Data de Submissão:</span>
-                        <?php echo $dataSubmissao->format('d/m/Y H:i'); ?></p>
-                </div>
+            <div class="space-y-4">
+                <?php
+                echo createEditableField('Tipo', ucfirst($cartao['tipo_solicitacao']), 'tipo_solicitacao');
+                echo createEditableField('Emissão', ucfirst($cartao['emissao_cartao']), 'emissao_cartao');
+                echo createEditableField('Nº do Cartão', $cartao['n_cartao'] ?? 'Não atribuído', 'n_cartao');
+                ?>
             </div>
         </div>
 
         <!-- Informações Pessoais -->
         <div class="border-b pb-6 mb-6">
             <h3 class="text-2xl font-semibold text-gray-800 mb-4">Informações Pessoais</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <p class="text-gray-600"><span class="font-semibold">Nome:</span>
-                        <?php echo htmlspecialchars($cartao['nome']); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">CPF:</span>
-                        <?php echo htmlspecialchars($cartao['cpf']); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Data de Nascimento:</span>
-                        <?php echo $dataNascimento->format('d/m/Y'); ?></p>
-                </div>
-                <div>
-                    <p class="text-gray-600"><span class="font-semibold">Email:</span>
-                        <?php echo htmlspecialchars($cartao['email']); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Telefone:</span>
-                        <?php echo htmlspecialchars($cartao['telefone']); ?></p>
-                    <p class="text-gray-600"><span class="font-semibold">Endereço:</span>
-                        <?php echo htmlspecialchars($cartao['endereco']); ?></p>
-                </div>
+            <div class="space-y-4">
+                <?php
+                echo createEditableField('Nome', $cartao['nome'], 'nome');
+                echo createEditableField('CPF', $cartao['cpf'], 'cpf');
+                echo createEditableField('Email', $cartao['email'], 'email');
+                echo createEditableField('Telefone', $cartao['telefone'], 'telefone');
+                echo createEditableField('Endereço', $cartao['endereco'], 'endereco');
+                ?>
             </div>
         </div>
 
