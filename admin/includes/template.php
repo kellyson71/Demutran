@@ -166,7 +166,6 @@ function marcarComoLido($conn, $tipo, $registro_id) {
     return $stmt->execute();
 }
 
-// ...existing code...
 
 function getFormularioStyle($tipo, $subtipo = null)
 {

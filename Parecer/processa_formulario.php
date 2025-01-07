@@ -144,7 +144,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Incluir e executar o envio de email
             require_once '../utils/mail.php';
 
-            // ...existing code...
         }
 
         $_SESSION['success_message'] = "Solicitação enviada com sucesso! Seu protocolo é: $protocolo";

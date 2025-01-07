@@ -336,7 +336,6 @@ function renderVehicleForm($index, $partesDanificadas)
   // Adiciona handler para o formulário
   document.getElementById('form-veiculo').addEventListener('submit', function(e) {
     e.preventDefault();
-    // ...existing submit logic...
   });
 
   // Modificar a lógica do botão avançar

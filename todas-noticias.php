@@ -75,7 +75,6 @@ $conn->close();
     <!-- Início da Página -->
     <div id="top"></div>
 
-    <!-- Top Bar (mesmo código do seu header) -->
     <header class="bg-green-600 text-white shadow-md w-full fixed top-0 left-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <!-- Logo -->
@@ -144,31 +143,31 @@ $conn->close();
         <!-- Grid de Notícias -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <?php foreach ($noticias as $noticia): ?>
-            <a href="noticia.php?id=<?php echo $noticia['id']; ?>"
-                class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                <div class="h-48">
-                    <img src="<?php echo get_image_path($noticia['imagem_url']); ?>"
-                        alt="<?php echo htmlspecialchars($noticia['titulo'], ENT_QUOTES, 'UTF-8'); ?>"
-                        class="object-cover w-full h-full">
-                </div>
-                <div class="p-4">
-                    <h3 class="text-gray-900 font-bold text-xl mb-2">
-                        <?php echo htmlspecialchars($noticia['titulo'], ENT_QUOTES, 'UTF-8'); ?>
-                    </h3>
-                    <p class="text-gray-600 text-sm mb-4">
-                        <?php echo htmlspecialchars($noticia['resumo'], ENT_QUOTES, 'UTF-8'); ?>
-                    </p>
-                    <span class="text-green-600">Leia mais</span>
-                </div>
-            </a>
+                <a href="noticia.php?id=<?php echo $noticia['id']; ?>"
+                    class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                    <div class="h-48">
+                        <img src="<?php echo get_image_path($noticia['imagem_url']); ?>"
+                            alt="<?php echo htmlspecialchars($noticia['titulo'], ENT_QUOTES, 'UTF-8'); ?>"
+                            class="object-cover w-full h-full">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-gray-900 font-bold text-xl mb-2">
+                            <?php echo htmlspecialchars($noticia['titulo'], ENT_QUOTES, 'UTF-8'); ?>
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-4">
+                            <?php echo htmlspecialchars($noticia['resumo'], ENT_QUOTES, 'UTF-8'); ?>
+                        </p>
+                        <span class="text-green-600">Leia mais</span>
+                    </div>
+                </a>
             <?php endforeach; ?>
         </div>
 
         <!-- Paginação -->
         <div class="mt-8 flex justify-center">
             <?php if ($pagina_atual > 1): ?>
-            <a href="?pagina=<?php echo $pagina_atual - 1; ?>"
-                class="px-4 py-2 mx-1 bg-green-600 text-white rounded hover:bg-green-700">Anterior</a>
+                <a href="?pagina=<?php echo $pagina_atual - 1; ?>"
+                    class="px-4 py-2 mx-1 bg-green-600 text-white rounded hover:bg-green-700">Anterior</a>
             <?php endif; ?>
 
             <?php
@@ -176,18 +175,18 @@ $conn->close();
             for ($i = 1; $i <= $total_paginas; $i++):
                 if ($i == $pagina_atual):
             ?>
-            <span class="px-4 py-2 mx-1 bg-green-600 text-white rounded"><?php echo $i; ?></span>
-            <?php else: ?>
-            <a href="?pagina=<?php echo $i; ?>"
-                class="px-4 py-2 mx-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"><?php echo $i; ?></a>
+                    <span class="px-4 py-2 mx-1 bg-green-600 text-white rounded"><?php echo $i; ?></span>
+                <?php else: ?>
+                    <a href="?pagina=<?php echo $i; ?>"
+                        class="px-4 py-2 mx-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"><?php echo $i; ?></a>
             <?php
                 endif;
             endfor;
             ?>
 
             <?php if ($pagina_atual < $total_paginas): ?>
-            <a href="?pagina=<?php echo $pagina_atual + 1; ?>"
-                class="px-4 py-2 mx-1 bg-green-600 text-white rounded hover:bg-green-700">Próxima</a>
+                <a href="?pagina=<?php echo $pagina_atual + 1; ?>"
+                    class="px-4 py-2 mx-1 bg-green-600 text-white rounded hover:bg-green-700">Próxima</a>
             <?php endif; ?>
         </div>
 
@@ -200,7 +199,6 @@ $conn->close();
         </div>
     </main>
 
-    <!-- Footer (mesmo código do seu footer) -->
     <footer class="bg-gray-800 text-white py-8 mt-8">
         <div class="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
@@ -238,13 +236,13 @@ $conn->close();
 
     <!-- Scripts -->
     <script>
-    // Mobile Menu Toggle
-    const menuBtn = document.getElementById("menu-btn");
-    const mobileMenu = document.getElementById("mobile-menu");
+        // Mobile Menu Toggle
+        const menuBtn = document.getElementById("menu-btn");
+        const mobileMenu = document.getElementById("mobile-menu");
 
-    menuBtn.addEventListener("click", () => {
-        mobileMenu.classList.toggle("hidden");
-    });
+        menuBtn.addEventListener("click", () => {
+            mobileMenu.classList.toggle("hidden");
+        });
     </script>
 </body>
 

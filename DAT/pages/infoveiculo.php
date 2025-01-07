@@ -12,7 +12,7 @@ if (!$token) {
     exit;
 }
 
-require_once(__DIR__ . '/../../env/config.php'); // Mantém o mesmo caminho pois já está correto
+require_once(__DIR__ . '/../../env/config.php'); 
 ?>
 
 <div class="pt-20 flex justify-center flex-col items-center">
