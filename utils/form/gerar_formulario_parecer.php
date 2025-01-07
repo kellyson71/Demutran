@@ -23,17 +23,19 @@ if (!$dados) {
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Parecer Técnico</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         /* Estilos base comuns */
-        body { 
+        body {
             margin: 20px 0;
             background: white;
         }
-        .container { 
+
+        .container {
             max-width: 800px;
             background: white;
             padding: 20px;
@@ -41,44 +43,53 @@ if (!$dados) {
             width: 21cm;
             margin: 0 auto;
         }
-        
+
         /* Logos e cabeçalho */
         .logo-container {
             position: relative;
             height: 120px;
             margin-bottom: 40px;
         }
+
         .logo {
             position: absolute;
             top: 0;
             max-width: 80px;
             height: auto;
         }
-        .logo-left { left: 0; }
-        .logo-right { right: 0; }
-        
+
+        .logo-left {
+            left: 0;
+        }
+
+        .logo-right {
+            right: 0;
+        }
+
         /* Título centralizado */
         .centered-title {
             text-align: center;
             padding: 0 100px;
             margin-top: 20px;
         }
+
         .centered-title p {
             margin: 2px 0;
             line-height: 1.4;
         }
-        
+
         /* Número do protocolo */
         .protocol-number {
             text-align: right;
             margin: 20px 0;
             font-family: 'Courier New', monospace;
         }
+
         .protocol-number span {
             border-bottom: 1px solid #000;
             padding: 2px 5px;
         }
-        
+
         /* Seções e tabelas */
         .section-title {
             background-color: #E3F2FD;
@@ -87,35 +98,43 @@ if (!$dados) {
             font-weight: bold;
             border-left: 4px solid #2196F3;
         }
+
         .data-table {
             width: 100%;
             margin: 10px 0;
         }
+
         .data-table td {
             padding: 6px;
             vertical-align: top;
         }
-        
+
         /* Assinaturas */
         .signature-section {
             margin-top: 50px;
             text-align: center;
         }
+
         .signature-line {
             width: 60%;
             border-top: 1px solid #000;
             margin: 0 auto 5px;
         }
-        
+
         /* Ajustes para impressão */
         @media print {
-            body { margin: 0; background: white; }
-            .container { 
+            body {
+                margin: 0;
+                background: white;
+            }
+
+            .container {
                 width: 100%;
                 max-width: none;
                 padding: 20px;
                 margin: 0;
             }
+
             .section-title {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
@@ -123,11 +142,12 @@ if (!$dados) {
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="logo-container">
-            <img src="image1.png" alt="Logo Esquerda" class="logo logo-left">
-            <img src="image3.png" alt="Logo Direita" class="logo logo-right">
+            <img src="./image1.png" alt="Logo Esquerda" class="logo logo-left">
+            <img src="./image3.png" alt="Logo Direita" class="logo logo-right">
             <div class="centered-title">
                 <p>Estado do Rio Grande do Norte</p>
                 <p>Prefeitura Municipal de Pau dos Ferros</p>
@@ -138,11 +158,11 @@ if (!$dados) {
 
         <h3 class="text-center">PARECER TÉCNICO</h3>
 
-        <?php if(!empty($dados['protocolo'])): ?>
-        <div class="protocol-number">
-            <strong>PROTOCOLO Nº:</strong> 
-            <span><?php echo htmlspecialchars($dados['protocolo']); ?></span>
-        </div>
+        <?php if (!empty($dados['protocolo'])): ?>
+            <div class="protocol-number">
+                <strong>PROTOCOLO Nº:</strong>
+                <span><?php echo htmlspecialchars($dados['protocolo']); ?></span>
+            </div>
         <?php endif; ?>
 
         <div class="content">
@@ -197,10 +217,10 @@ if (!$dados) {
                     <td><?php echo htmlspecialchars($dados['situacao'] ?? 'Pendente'); ?></td>
                 </tr>
                 <?php if ($dados['declaracao']): ?>
-                <tr>
-                    <td><strong>Declaração:</strong></td>
-                    <td>Aceita</td>
-                </tr>
+                    <tr>
+                        <td><strong>Declaração:</strong></td>
+                        <td>Aceita</td>
+                    </tr>
                 <?php endif; ?>
             </table>
         </div>
@@ -213,4 +233,5 @@ if (!$dados) {
         </div>
     </div>
 </body>
+
 </html>

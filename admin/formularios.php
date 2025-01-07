@@ -574,14 +574,13 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
 
                                         <div class="mt-4 pt-2">
                                             <a href="detalhes_formulario.php?id=<?php echo $item['id']; ?>&tipo=<?php
-                                                                                                                // Mapeia os tipos para os tipos suportados pelo detalhes_formulario.php
                                                                                                                 $tipoRedirect = $item['tipo'];
                                                                                                                 if ($tipoRedirect === 'IDOSO') {
-                                                                                                                    $tipoRedirect = 'PCD'; // IDOSO é tratado como PCD no detalhes
+                                                                                                                    $tipoRedirect = 'PCD';
                                                                                                                 }
                                                                                                                 echo $tipoRedirect;
-                                                                                                                ?>"
-                                                class="inline-flex items-center justify-center w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                                                                                                                ?>&pagina_anterior=<?php echo $pagina; ?>&search_anterior=<?php echo urlencode($search); ?>&tipo_anterior=<?php echo urlencode($tipo_filter); ?>&view_anterior=<?php echo urlencode($view_mode); ?>"
+                                                class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                                                 <span class="material-icons text-sm mr-2">visibility</span>
                                                 Visualizar detalhes
                                             </a>
@@ -656,13 +655,12 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                                                 <?php endif; ?>
 
                                                 <a href="detalhes_formulario.php?id=<?php echo $item['id']; ?>&tipo=<?php
-                                                                                                                    // Mapeia os tipos para os tipos suportados pelo detalhes_formulario.php
                                                                                                                     $tipoRedirect = $item['tipo'];
                                                                                                                     if ($tipoRedirect === 'IDOSO') {
-                                                                                                                        $tipoRedirect = 'PCD'; // IDOSO é tratado como PCD no detalhes
+                                                                                                                        $tipoRedirect = 'PCD';
                                                                                                                     }
                                                                                                                     echo $tipoRedirect;
-                                                                                                                    ?>"
+                                                                                                                    ?>&pagina_anterior=<?php echo $pagina; ?>&search_anterior=<?php echo urlencode($search); ?>&tipo_anterior=<?php echo urlencode($tipo_filter); ?>&view_anterior=<?php echo urlencode($view_mode); ?>"
                                                     class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
                                                     <span class="material-icons text-sm mr-2">visibility</span>
                                                     Detalhes

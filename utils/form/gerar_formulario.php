@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Verificar se temos ID e tipo na URL
     $id = $_GET['id'] ?? '';
     $tipo = $_GET['tipo_solicitacao'] ?? '';
-    
+
     if ($id && $tipo) {
         // Consultar banco de dados
         $sql = "SELECT * FROM solicitacoes_demutran WHERE id = ?";
@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $result = $stmt->get_result();
         $formData = $result->fetch_assoc();
-        
+
         if (!$formData) {
             die('Formulário não encontrado');
         }
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Formatar o texto do tipo de solicitação para exibição
 $tipoRequerente = $formData['tipo_solicitacao'] ?? '';
-switch($tipoRequerente) {
+switch ($tipoRequerente) {
     case 'defesa_previa':
         $tipoRequerente = 'Defesa Prévia';
         break;
@@ -76,7 +76,7 @@ $configs = [
     'texto_acao' => ''
 ];
 
-switch($tipoSolicitacao) {
+switch ($tipoSolicitacao) {
     case 'defesa_previa':
         $configs = [
             'titulo' => 'REQUERIMENTO PARA APRESENTAÇÃO DE DEFESA PRÉVIA',
@@ -129,134 +129,134 @@ $dataAtual = date('d') . ' de ' . $mesPortugues . ' de ' . date('Y');
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- Estilos Personalizados -->
     <style>
-    body {
-        margin-top: 20px;
-    }
-
-    .container {
-        max-width: 800px;
-    }
-
-    .header {
-        text-align: center;
-    }
-
-    /* Alinhamento e espaçamento do cabeçalho */
-    /* Ajuste para manter as logos fixas no topo */
-    .logo-container {
-        position: relative;
-    }
-
-    .logo {
-        position: absolute;
-        top: 10px;
-        /* Ajuste a distância do topo conforme necessário */
-        max-width: 80px;
-        height: auto;
-    }
-
-    .logo-left {
-        left: 10px;
-        /* Ajuste a distância da borda esquerda conforme necessário */
-    }
-
-    .logo-right {
-        right: 10px;
-        /* Ajuste a distância da borda direita conforme necessário */
-    }
-
-    .centered-title p {
-        margin: 2px 0;
-        /* Reduzir espaçamento entre linhas do título */
-    }
-
-
-    .row.align-items-center p {
-        margin: 0;
-        /* Reduzir o espaçamento entre os títulos */
-    }
-
-
-
-    .title {
-        text-align: center;
-        margin-top: 20px;
-    }
-
-    h3 {
-        font-weight: bold;
-        margin-top: 15px;
-    }
-
-    .content {
-        margin-top: 20px;
-    }
-
-    .section-title {
-        background-color: <?php echo $configs['bg_color'];
-        ?>;
-        padding: 10px;
-        margin-top: 20px;
-        font-weight: bold;
-        border-left: 4px solid <?php echo $configs['border_color'];
-        ?>;
-    }
-
-    /* Compactar tabelas para economia de espaço */
-    .data-table {
-        width: 100%;
-        margin-top: 10px;
-        border-spacing: 4px;
-        /* Reduz espaçamento entre as células */
-    }
-
-    .data-table td {
-        padding: 3px;
-        /* Reduz a quantidade de espaço em cada célula */
-        vertical-align: top;
-    }
-
-
-
-
-    .signature {
-        margin-top: 50px;
-        text-align: center;
-    }
-
-    .signature-line {
-        width: 50%;
-        border-top: 1px solid #000;
-        margin: 0 auto;
-    }
-
-    .date-location {
-        text-align: right;
-        margin-top: 20px;
-    }
-
-    /* Estilo da linha de assinatura */
-    .signature-line {
-        width: 60%;
-        border-top: 1px solid #000;
-        margin: 0 auto 10px;
-        /* Reduz o espaçamento */
-    }
-
-    /* Estilização para impressão */
-    @media print {
         body {
-            -webkit-print-color-adjust: exact;
+            margin-top: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+        }
+
+        .header {
+            text-align: center;
+        }
+
+        /* Alinhamento e espaçamento do cabeçalho */
+        /* Ajuste para manter as logos fixas no topo */
+        .logo-container {
+            position: relative;
+        }
+
+        .logo {
+            position: absolute;
+            top: 10px;
+            /* Ajuste a distância do topo conforme necessário */
+            max-width: 80px;
+            height: auto;
+        }
+
+        .logo-left {
+            left: 10px;
+            /* Ajuste a distância da borda esquerda conforme necessário */
+        }
+
+        .logo-right {
+            right: 10px;
+            /* Ajuste a distância da borda direita conforme necessário */
+        }
+
+        .centered-title p {
+            margin: 2px 0;
+            /* Reduzir espaçamento entre linhas do título */
+        }
+
+
+        .row.align-items-center p {
+            margin: 0;
+            /* Reduzir o espaçamento entre os títulos */
+        }
+
+
+
+        .title {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        h3 {
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .content {
+            margin-top: 20px;
         }
 
         .section-title {
-            -webkit-print-color-adjust: exact;
             background-color: <?php echo $configs['bg_color'];
-            ?> !important;
-            border-left-color: <?php echo $configs['border_color'];
-            ?> !important;
+                                ?>;
+            padding: 10px;
+            margin-top: 20px;
+            font-weight: bold;
+            border-left: 4px solid <?php echo $configs['border_color'];
+                                    ?>;
         }
-    }
+
+        /* Compactar tabelas para economia de espaço */
+        .data-table {
+            width: 100%;
+            margin-top: 10px;
+            border-spacing: 4px;
+            /* Reduz espaçamento entre as células */
+        }
+
+        .data-table td {
+            padding: 3px;
+            /* Reduz a quantidade de espaço em cada célula */
+            vertical-align: top;
+        }
+
+
+
+
+        .signature {
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .signature-line {
+            width: 50%;
+            border-top: 1px solid #000;
+            margin: 0 auto;
+        }
+
+        .date-location {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        /* Estilo da linha de assinatura */
+        .signature-line {
+            width: 60%;
+            border-top: 1px solid #000;
+            margin: 0 auto 10px;
+            /* Reduz o espaçamento */
+        }
+
+        /* Estilização para impressão */
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+            }
+
+            .section-title {
+                -webkit-print-color-adjust: exact;
+                background-color: <?php echo $configs['bg_color'];
+                                    ?> !important;
+                border-left-color: <?php echo $configs['border_color'];
+                                    ?> !important;
+            }
+        }
     </style>
 </head>
 
@@ -276,8 +276,8 @@ $dataAtual = date('d') . ' de ' . $mesPortugues . ' de ' . date('Y');
         <!-- Títulos -->
         <!-- Cabeçalho com logos e títulos centrais -->
         <div class="logo-container">
-            <img src="image1.png" alt="Logo Esquerda" class="logo logo-left">
-            <img src="image3.png" alt="Logo Direita" class="logo logo-right">
+            <img src="./image1.png" alt="Logo Esquerda" class="logo logo-left">
+            <img src="./image3.png" alt="Logo Direita" class="logo logo-right">
             <div class="centered-title text-center">
                 <p>Estado do Rio Grande do Norte</p>
                 <p>Prefeitura Municipal de Pau dos Ferros</p>
@@ -326,7 +326,9 @@ $dataAtual = date('d') . ' de ' . $mesPortugues . ' de ' . date('Y');
                 </tr>
                 <tr>
                     <td colspan="3"><strong>Residente à:</strong> <?php echo $endereco; ?>, Nº <?php echo $numero; ?>
-                        <?php if ($complemento != '') { echo 'Compl.: ' . $complemento; } ?>, Bairro:
+                        <?php if ($complemento != '') {
+                            echo 'Compl.: ' . $complemento;
+                        } ?>, Bairro:
                         <?php echo $bairro; ?></td>
                 </tr>
                 <tr>

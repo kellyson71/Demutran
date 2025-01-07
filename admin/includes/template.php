@@ -1,14 +1,15 @@
 <?php
-function contarNotificacoesNaoLidas($conn) {
-    // Obter data de 3 dias atrás
+function contarNotificacoesNaoLidas($conn)
+{
     $tresDiasAtras = date('Y-m-d H:i:s', strtotime('-3 days'));
-    
-    $sql = "SELECT 
-        (SELECT COUNT(*) FROM formularios_dat_central WHERE data_criacao >= ? AND is_read = 0) +
-        (SELECT COUNT(*) FROM Parecer WHERE data_submissao >= ? AND is_read = 0) +
-        (SELECT COUNT(*) FROM sac WHERE data_submissao >= ? AND is_read = 0) +
-        (SELECT COUNT(*) FROM solicitacao_cartao WHERE data_submissao >= ? AND is_read = 0) +
-        (SELECT COUNT(*) FROM solicitacoes_demutran WHERE data_submissao >= ? AND is_read = 0) as total";
+
+    $sql = "SELECT (
+        (SELECT COUNT(*) FROM formularios_dat_central WHERE data_criacao >= ? AND (is_read = 0 OR is_read IS NULL)) +
+        (SELECT COUNT(*) FROM Parecer WHERE data_submissao >= ? AND (is_read = 0 OR is_read IS NULL)) +
+        (SELECT COUNT(*) FROM sac WHERE data_submissao >= ? AND (is_read = 0 OR is_read IS NULL)) +
+        (SELECT COUNT(*) FROM solicitacao_cartao WHERE data_submissao >= ? AND (is_read = 0 OR is_read IS NULL)) +
+        (SELECT COUNT(*) FROM solicitacoes_demutran WHERE data_submissao >= ? AND (is_read = 0 OR is_read IS NULL))
+    ) as total";
     
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("sssss", $tresDiasAtras, $tresDiasAtras, $tresDiasAtras, $tresDiasAtras, $tresDiasAtras);
@@ -66,82 +67,76 @@ function getNotificacoesNaoLidas($conn, $usuario_id) {
     $sql = "SELECT * FROM (
         SELECT 
             'DAT' as tipo,
-            d.id,
-            d.token as titulo,
-            d.status as situacao,
-            d.data_criacao as data_submissao,
-            dat1.nome as nome,
-            dat1.email as email,
-            dat1.cidade as cidade,
-            dat1.tipo_acidente as subtipo,
-            d.is_read
-        FROM formularios_dat_central d
-        LEFT JOIN DAT1 dat1 ON dat1.token = d.token
-        WHERE d.data_criacao >= ? AND d.is_read = 0
+            id,
+            token as titulo,
+            status as situacao,
+            data_criacao as data_submissao,
+            NULL as nome,
+            NULL as email,
+            NULL as cidade,
+            NULL as subtipo
+        FROM formularios_dat_central
+        WHERE data_criacao >= ? AND (is_read = 0 OR is_read IS NULL)
         
         UNION ALL
         
         SELECT 
             'Parecer' as tipo,
-            p.id,
-            p.protocolo as titulo,
-            p.situacao,
-            p.data_submissao,
-            p.nome,
-            p.email,
-            p.local as cidade,
-            p.evento as subtipo,
-            p.is_read
-        FROM Parecer p
-        WHERE p.data_submissao >= ? AND p.is_read = 0
+            id,
+            protocolo as titulo,
+            situacao,
+            data_submissao,
+            nome,
+            email,
+            local as cidade,
+            evento as subtipo
+        FROM Parecer
+        WHERE data_submissao >= ? AND (is_read = 0 OR is_read IS NULL)
         
         UNION ALL
         
         SELECT 
             'SAC' as tipo,
-            s.id,
-            s.assunto as titulo,
-            s.situacao,
-            s.data_submissao,
-            s.nome,
-            s.email,
+            id,
+            assunto as titulo,
+            situacao,
+            data_submissao,
+            nome,
+            email,
             NULL as cidade,
-            s.tipo_contato as subtipo,
-            s.is_read
-        FROM sac s
-        WHERE s.data_submissao >= ? AND s.is_read = 0
+            tipo_contato as subtipo
+        FROM sac
+        WHERE data_submissao >= ? AND (is_read = 0 OR is_read IS NULL)
         
         UNION ALL
         
         SELECT 
             'Cartao' as tipo,
-            sc.id,
-            CONCAT(sc.tipo_solicitacao, ' - ', sc.n_cartao) as titulo,
-            sc.situacao,
-            sc.data_submissao,
-            sc.nome,
-            sc.email,
-            SUBSTRING_INDEX(sc.endereco, ',', -2) as cidade,
-            sc.tipo_solicitacao as subtipo,
-            sc.is_read
-        FROM solicitacao_cartao sc
-        WHERE sc.data_submissao >= ? AND sc.is_read = 0
+            id,
+            CONCAT(tipo_solicitacao, ' - ', n_cartao) as titulo,
+            situacao,
+            data_submissao,
+            nome,
+            email,
+            NULL as cidade,
+            tipo_solicitacao as subtipo
+        FROM solicitacao_cartao
+        WHERE data_submissao >= ? AND (is_read = 0 OR is_read IS NULL)
         
         UNION ALL
         
         SELECT 
             'Demutran' as tipo,
-            sd.id,
-            sd.tipo_solicitacao as titulo,
-            sd.situacao,
-            sd.data_submissao,
-            sd.nome,
-            sd.email,
-            sd.municipio as cidade,
-            sd.tipo_solicitacao as subtipo,
-            sd.is_read
-        FROM solicitacoes_demutran sd
-        WHERE sd.data_submissao >= ? AND sd.is_read = 0
+            id,
+            tipo_solicitacao as titulo,
+            situacao,
+            data_submissao,
+            nome,
+            email,
+            municipio as cidade,
+            tipo_solicitacao as subtipo
+        FROM solicitacoes_demutran
+        WHERE data_submissao >= ? AND (is_read = 0 OR is_read IS NULL)
         
     ) AS combined_results 
     ORDER BY data_submissao DESC 
@@ -173,24 +168,65 @@ function marcarComoLido($conn, $tipo, $registro_id) {
 
 // ...existing code...
 
-function getFormularioStyle($tipo_formulario, $subtipo = null) {
+function getFormularioStyle($tipo, $subtipo = null)
+{
     $styles = [
-        'DAT' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-600', 'border' => 'border-yellow-500', 'icon' => 'description'],
-        'SAC' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-600', 'border' => 'border-blue-500', 'icon' => 'support'],
-        'JARI' => ['bg' => 'bg-green-100', 'text' => 'text-green-600', 'border' => 'border-green-500', 'icon' => 'gavel'],
-        'PCD' => ['bg' => 'bg-purple-100', 'text' => 'text-purple-600', 'border' => 'border-purple-500', 'icon' => 'accessible'],
-        'IDOSO' => ['bg' => 'bg-orange-100', 'text' => 'text-orange-600', 'border' => 'border-orange-500', 'icon' => 'elderly'],
-        'Cartao' => ['bg' => 'bg-purple-100', 'text' => 'text-purple-600', 'border' => 'border-purple-500', 'icon' => 'credit_card'],
-        'Parecer' => ['bg' => 'bg-red-100', 'text' => 'text-red-600', 'border' => 'border-red-500', 'icon' => 'assignment']
+        'SAC' => [
+            'icon' => 'support_agent',
+            'text' => 'text-purple-600',
+            'bg' => 'bg-purple-100',
+            'border' => 'border-purple-500'
+        ],
+        'JARI' => [
+            'icon' => 'gavel', // ícone padrão para JARI
+            'text' => 'text-orange-600',
+            'bg' => 'bg-orange-100',
+            'border' => 'border-orange-500'
+        ],
+        'PCD' => [
+            'icon' => 'accessible',
+            'text' => 'text-blue-600',
+            'bg' => 'bg-blue-100',
+            'border' => 'border-blue-500'
+        ],
+        'IDOSO' => [
+            'icon' => 'elderly',
+            'text' => 'text-green-600',
+            'bg' => 'bg-green-100',
+            'border' => 'border-green-500'
+        ],
+        'DAT' => [
+            'icon' => 'description',
+            'text' => 'text-red-600',
+            'bg' => 'bg-red-100',
+            'border' => 'border-red-500'
+        ],
+        'Parecer' => [
+            'icon' => 'fact_check',
+            'text' => 'text-gray-600',
+            'bg' => 'bg-gray-100',
+            'border' => 'border-gray-500'
+        ]
     ];
 
-    // Se for PCD ou IDOSO, verificar se veio do tipo_solicitacao
-    if ($tipo_formulario === 'PCD' || $tipo_formulario === 'IDOSO') {
-        return $styles[$tipo_formulario];
+    // Ícones específicos para subtipos JARI
+    if ($tipo === 'JARI' && $subtipo) {
+        switch ($subtipo) {
+            case 'apresentacao_condutor':
+                $styles['JARI']['icon'] = 'person_add';
+                break;
+            case 'defesa_previa':
+                $styles['JARI']['icon'] = 'security';
+                break;
+            case 'jari':
+                $styles['JARI']['icon'] = 'balance';
+                break;
+        }
     }
 
-    return $styles[$tipo_formulario] ?? ['bg' => 'bg-gray-100', 'text' => 'text-gray-600', 'border' => 'border-gray-500', 'icon' => 'description'];
+    return $styles[$tipo] ?? $styles['SAC'];
 }
+
 
 function getTopbarHtml($pageTitle, $usuario_id) {
     global $conn;

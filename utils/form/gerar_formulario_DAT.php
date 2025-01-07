@@ -13,20 +13,22 @@ if (!$id) {
     die('ID não fornecido');
 }
 
-// Buscar todos os dados relacionados ao DAT
+// Buscar todos os dados relacionados ao DAT usando as tabelas corretas
 $sql = "
 SELECT 
     d1.*, 
     d2.*, 
     d4.*,
-    v.*,
+    uv.*,
+    vd.*,
     d4.informacoes_complementares_text,
     d4.meio_ambiente_text,
     d4.patrimonio_text
 FROM DAT4 d4
 LEFT JOIN DAT1 d1 ON d1.token = d4.token
 LEFT JOIN DAT2 d2 ON d2.token = d4.token
-LEFT JOIN vehicles v ON v.token = d4.token
+LEFT JOIN user_vehicles uv ON uv.token = d4.token
+LEFT JOIN vehicle_damages vd ON vd.user_vehicles_id = uv.id
 WHERE d4.id = ?";
 
 $stmt = $conn->prepare($sql);
@@ -39,8 +41,12 @@ if (!$dados) {
     die('DAT não encontrado');
 }
 
-// Buscar veículos envolvidos com mais detalhes
-$sql_veiculos = "SELECT * FROM vehicles WHERE token = ?";
+// Buscar veículos adicionais
+$sql_veiculos = "
+    SELECT vd.* 
+    FROM user_vehicles uv 
+    JOIN vehicle_damages vd ON vd.user_vehicles_id = uv.id 
+    WHERE uv.token = ?";
 $stmt = $conn->prepare($sql_veiculos);
 $stmt->bind_param('s', $dados['token']);
 $stmt->execute();
@@ -50,30 +56,31 @@ $veiculos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $imagePath = '../../assets/';
 
 // Função de formatação
-function formatValue($field, $value) {
+function formatValue($field, $value)
+{
     // Campos booleanos
     $booleanFields = ['estrangeiro', 'segurado', 'nao_habilitado', 'veiculo_articulado', 'has_insurance'];
     if (in_array($field, $booleanFields)) {
         return $value ? 'Sim' : 'Não';
     }
-    
+
     // Campos de data
     if (strpos($field, 'data_') !== false && $value) {
         return date('d/m/Y H:i:s', strtotime($value));
     }
-    
+
     // Campos monetários
     $moneyFields = ['valor_total', 'estimativa_danos', 'valor_mercadoria'];
     if (in_array($field, $moneyFields) && $value) {
         return 'R$ ' . number_format($value, 2, ',', '.');
     }
-    
+
     // Campos de texto longo
     $textFields = ['informacoes_complementares_text', 'meio_ambiente_text', 'patrimonio_text'];
     if (in_array($field, $textFields)) {
         return nl2br(htmlspecialchars($value));
     }
-    
+
     // Campos específicos
     $specificFields = [
         'sexo' => ['M' => 'Masculino', 'F' => 'Feminino'],
@@ -84,7 +91,7 @@ function formatValue($field, $value) {
         ],
         // Adicione mais mapeamentos conforme necessário
     ];
-    
+
     if (isset($specificFields[$field])) {
         return $specificFields[$field][$value] ?? $value;
     }
@@ -107,7 +114,23 @@ function formatValue($field, $value) {
             return !empty($partesDanificadas) ? implode(', ', $partesDanificadas) : 'Nenhuma parte danificada';
         }
     }
-    
+
+    // Campos booleanos de danos
+    $booleanDamageFields = [
+        'dianteira_direita',
+        'dianteira_esquerda',
+        'lateral_direita',
+        'lateral_esquerda',
+        'traseira_direita',
+        'traseira_esquerda',
+        'has_load_damage',
+        'has_insurance'
+    ];
+
+    if (in_array($field, $booleanDamageFields)) {
+        return $value ? 'Sim' : 'Não';
+    }
+
     return $value;
 }
 
@@ -214,9 +237,13 @@ $gruposDAT2 = [
 
 $gruposVehicles = [
     'Danos e Avarias' => [
-        'damage_system' => 'Sistema de Danos',
-        'damaged_parts' => 'Partes Danificadas',
-        'load_damage' => 'Danos à Carga',
+        'dianteira_direita' => 'Dianteira Direita',
+        'dianteira_esquerda' => 'Dianteira Esquerda',
+        'lateral_direita' => 'Lateral Direita',
+        'lateral_esquerda' => 'Lateral Esquerda',
+        'traseira_direita' => 'Traseira Direita',
+        'traseira_esquerda' => 'Traseira Esquerda',
+        'has_load_damage' => 'Danos à Carga',
         'estimativa_danos' => 'Estimativa de Danos'
     ],
     'Informações da Carga' => [
@@ -251,41 +278,51 @@ $gruposDAT4 = [
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Declaração de Acidente de Trânsito</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        body { 
+        body {
             margin: 20px 0;
             background: white;
         }
-        .container { 
+
+        .container {
             max-width: 800px;
             background: white;
             padding: 20px;
             margin: 0 auto;
         }
+
         .logo-container {
             position: relative;
             height: 120px;
             margin-bottom: 40px;
         }
+
         .logo {
             position: absolute;
             top: 0;
             max-width: 80px;
             height: auto;
         }
-        .logo-left { left: 0; }
-        .logo-right { right: 0; }
-        
+
+        .logo-left {
+            left: 0;
+        }
+
+        .logo-right {
+            right: 0;
+        }
+
         .centered-title {
             text-align: center;
             padding: 0 100px;
             margin-top: 20px;
         }
-        
+
         .section-title {
             background-color: #E3F2FD;
             padding: 8px 15px;
@@ -293,14 +330,14 @@ $gruposDAT4 = [
             font-weight: bold;
             border-left: 4px solid #2196F3;
         }
-        
+
         .data-container {
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
             padding: 15px;
         }
-        
+
         .data-row {
             flex: 1 1 300px;
             min-width: 300px;
@@ -308,113 +345,117 @@ $gruposDAT4 = [
             align-items: baseline;
             gap: 10px;
         }
-        
+
         .data-row .label {
             white-space: nowrap;
             min-width: 120px;
         }
-        
+
         .data-row .value {
             flex: 1;
         }
-        
+
         .text-block {
             flex: 1 1 100%;
         }
 
         @media print {
-            body { margin: 0; }
-            .container { 
+            body {
+                margin: 0;
+            }
+
+            .container {
                 width: 100%;
                 max-width: none;
                 padding: 15px;
             }
         }
-        
+
         .document-section {
             margin-bottom: 2rem;
             line-height: 1.8;
         }
-        
+
         .section-content {
             padding: 20px;
             background: #fff;
             border-radius: 4px;
         }
-        
+
         .info-group {
             margin-bottom: 1.5rem;
         }
-        
+
         .info-group h6 {
             color: #2196F3;
             border-bottom: 2px solid #E3F2FD;
             padding-bottom: 5px;
             margin-bottom: 15px;
         }
-        
+
         .info-row {
             display: inline-block;
             margin-right: 30px;
             margin-bottom: 10px;
         }
-        
+
         .info-label {
             color: #666;
             font-size: 0.9em;
         }
-        
+
         .info-value {
             color: #333;
             font-weight: 500;
         }
-        
+
         .text-block {
             margin-bottom: 1rem;
         }
-        
+
         .text-content {
             padding: 15px;
             background: #f9f9f9;
             border-radius: 4px;
             line-height: 1.6;
         }
-        
+
         .signatures-container {
             margin-top: 3rem;
             padding: 20px;
         }
-        
+
         .signature-block {
             margin: 2rem 0;
             text-align: center;
         }
-        
+
         .signature-line {
             border-bottom: 1px solid #000;
             width: 300px;
             margin: 10px auto;
         }
-        
+
         .signatures-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2rem;
             margin-top: 3rem;
         }
-        
+
         .signature-info {
             font-size: 0.9em;
             color: #666;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <!-- Cabeçalho -->
         <div class="logo-container">
-            <img src="<?php echo $imagePath; ?>icon.png" alt="Logo Esquerda" class="logo logo-left">
-            <img src="<?php echo $imagePath; ?>icon.png" alt="Logo Direita" class="logo logo-right">
+            <img src="./image1.png" alt="Logo Esquerda" class="logo logo-left">
+            <img src="./image3.png" alt="Logo Direita" class="logo logo-right">
             <div class="centered-title">
                 <p>Estado do Rio Grande do Norte</p>
                 <p>Prefeitura Municipal de Pau dos Ferros</p>
@@ -426,18 +467,18 @@ $gruposDAT4 = [
         <div class="document-section">
             <div class="section-title">DECLARAÇÃO DE ACIDENTE DE TRÂNSITO</div>
             <div class="section-content">
-                <?php foreach($gruposDAT1 as $titulo => $campos): ?>
+                <?php foreach ($gruposDAT1 as $titulo => $campos): ?>
                     <div class="info-group">
                         <h6><?php echo $titulo; ?></h6>
-                        <?php foreach($campos as $campo => $label): 
-                            if(isset($dados[$campo])) {
+                        <?php foreach ($campos as $campo => $label):
+                            if (isset($dados[$campo])) {
                                 $value = formatValue($campo, $dados[$campo]);
-                                if($value !== '' && $value !== null) { ?>
+                                if ($value !== '' && $value !== null) { ?>
                                     <div class="info-row">
                                         <div class="info-label"><?php echo $label; ?></div>
                                         <div class="info-value"><?php echo $value; ?></div>
                                     </div>
-                                <?php }
+                        <?php }
                             }
                         endforeach; ?>
                     </div>
@@ -448,18 +489,18 @@ $gruposDAT4 = [
         <div class="document-section">
             <div class="section-title">INFORMAÇÕES DO VEÍCULO E CONDUTOR</div>
             <div class="section-content">
-                <?php foreach($gruposDAT2 as $titulo => $campos): ?>
+                <?php foreach ($gruposDAT2 as $titulo => $campos): ?>
                     <div class="info-group">
                         <h6><?php echo $titulo; ?></h6>
-                        <?php foreach($campos as $campo => $label): 
-                            if(isset($dados[$campo])) {
+                        <?php foreach ($campos as $campo => $label):
+                            if (isset($dados[$campo])) {
                                 $value = formatValue($campo, $dados[$campo]);
-                                if($value !== '' && $value !== null) { ?>
+                                if ($value !== '' && $value !== null) { ?>
                                     <div class="info-row">
                                         <div class="info-label"><?php echo $label; ?></div>
                                         <div class="info-value"><?php echo $value; ?></div>
                                     </div>
-                                <?php }
+                        <?php }
                             }
                         endforeach; ?>
                     </div>
@@ -468,54 +509,54 @@ $gruposDAT4 = [
         </div>
 
         <?php if (!empty($veiculos)): ?>
-        <div class="document-section">
-            <div class="section-title">OUTROS VEÍCULOS ENVOLVIDOS</div>
-            <div class="section-content">
-                <?php foreach ($veiculos as $index => $veiculo): ?>
-                <div class="info-group">
-                    <h6>Veículo <?php echo $index + 2; ?></h6>
-                    <?php
-                    $outrosVeiculosFields = [
-                        'damage_system' => 'Sistema de Danos',
-                        'damaged_parts' => 'Partes Danificadas',
-                        'load_damage' => 'Danos à Carga',
-                        'estimativa_danos' => 'Danos Estimados',
-                        'nota_fiscal' => 'Nota Fiscal',
-                        'tipo_mercadoria' => 'Tipo de Mercadoria',
-                        'valor_total' => 'Valor Total',
-                        'has_insurance' => 'Possui Seguro',
-                        'seguradora' => 'Seguradora'
-                    ];
+            <div class="document-section">
+                <div class="section-title">OUTROS VEÍCULOS ENVOLVIDOS</div>
+                <div class="section-content">
+                    <?php foreach ($veiculos as $index => $veiculo): ?>
+                        <div class="info-group">
+                            <h6>Veículo <?php echo $index + 2; ?></h6>
+                            <?php
+                            $outrosVeiculosFields = [
+                                'damage_system' => 'Sistema de Danos',
+                                'damaged_parts' => 'Partes Danificadas',
+                                'load_damage' => 'Danos à Carga',
+                                'estimativa_danos' => 'Danos Estimados',
+                                'nota_fiscal' => 'Nota Fiscal',
+                                'tipo_mercadoria' => 'Tipo de Mercadoria',
+                                'valor_total' => 'Valor Total',
+                                'has_insurance' => 'Possui Seguro',
+                                'seguradora' => 'Seguradora'
+                            ];
 
-                    foreach($outrosVeiculosFields as $field => $label) {
-                        if (isset($veiculo[$field]) && !empty($veiculo[$field])) {
-                            $value = formatValue($field, $veiculo[$field]);
-                            if ($value !== '' && $value !== null) {
-                                echo "<div class='info-row'>";
-                                echo "<div class='info-label'>$label</div>";
-                                echo "<div class='info-value'>$value</div>";
-                                echo "</div>";
+                            foreach ($outrosVeiculosFields as $field => $label) {
+                                if (isset($veiculo[$field]) && !empty($veiculo[$field])) {
+                                    $value = formatValue($field, $veiculo[$field]);
+                                    if ($value !== '' && $value !== null) {
+                                        echo "<div class='info-row'>";
+                                        echo "<div class='info-label'>$label</div>";
+                                        echo "<div class='info-value'>$value</div>";
+                                        echo "</div>";
+                                    }
+                                }
                             }
-                        }
-                    }
-                    ?>
+                            ?>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
-                <?php endforeach; ?>
             </div>
-        </div>
         <?php endif; ?>
 
         <!-- Informações Complementares -->
         <div class="document-section">
             <div class="section-title">INFORMAÇÕES COMPLEMENTARES</div>
             <div class="section-content">
-                <?php foreach($gruposDAT4 as $titulo => $campos): ?>
+                <?php foreach ($gruposDAT4 as $titulo => $campos): ?>
                     <div class="info-group">
-                        <?php foreach($campos as $campo => $label): 
-                            if(isset($dados[$campo]) && !empty($dados[$campo])) {
+                        <?php foreach ($campos as $campo => $label):
+                            if (isset($dados[$campo]) && !empty($dados[$campo])) {
                                 $value = formatValue($campo, $dados[$campo]);
-                                if($value !== '' && $value !== null) { 
-                                    if(in_array($campo, ['informacoes_complementares_text', 'meio_ambiente_text', 'patrimonio_text'])) { ?>
+                                if ($value !== '' && $value !== null) {
+                                    if (in_array($campo, ['informacoes_complementares_text', 'meio_ambiente_text', 'patrimonio_text'])) { ?>
                                         <div class="text-block">
                                             <h6><?php echo $label; ?></h6>
                                             <div class="text-content">
@@ -527,7 +568,7 @@ $gruposDAT4 = [
                                             <div class="info-label"><?php echo $label; ?></div>
                                             <div class="info-value"><?php echo $value; ?></div>
                                         </div>
-                                    <?php }
+                        <?php }
                                 }
                             }
                         endforeach; ?>
@@ -539,7 +580,7 @@ $gruposDAT4 = [
         <!-- Assinaturas -->
         <div class="signatures-container">
             <p class="text-center mb-4">Pau dos Ferros/RN, <?php echo date('d/m/Y'); ?></p>
-            
+
             <div class="signatures-grid">
                 <div class="signature-block">
                     <div class="signature-line"></div>
@@ -549,7 +590,7 @@ $gruposDAT4 = [
                         CPF: <?php echo htmlspecialchars($dados['cpf'] ?? ''); ?>
                     </p>
                 </div>
-                
+
                 <div class="signature-block">
                     <div class="signature-line"></div>
                     <p class="mb-0">Responsável DEMUTRAN</p>
@@ -563,11 +604,12 @@ $gruposDAT4 = [
     </div>
 
     <?php if ($_GET['print'] ?? false): ?>
-    <script>
-        window.onload = function() {
-            window.print();
-        }
-    </script>
+        <script>
+            window.onload = function() {
+                window.print();
+            }
+        </script>
     <?php endif; ?>
 </body>
+
 </html>

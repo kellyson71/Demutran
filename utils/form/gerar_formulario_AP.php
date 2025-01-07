@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: gerar_formulario.php');
         exit;
     }
-    
+
     $_SESSION['form_data'] = $_POST;
     $tipoRequerente = $_POST['tipoRequerente'] ?? '';
     $nome = $_POST['nome'] ?? '';
@@ -124,143 +124,143 @@ if (isset($_SESSION['form_data'])) {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- Estilos Personalizados -->
     <style>
-    body {
-        margin-top: 20px;
-    }
-
-    .container {
-        max-width: 800px;
-    }
-
-    .header {
-        text-align: center;
-    }
-
-    /* Alinhamento e espaçamento do cabeçalho */
-    /* Ajuste para manter as logos fixas no topo */
-    .logo-container {
-        position: relative;
-    }
-
-    .logo {
-        position: absolute;
-        top: 10px;
-        /* Ajuste a distância do topo conforme necessário */
-        max-width: 80px;
-        height: auto;
-    }
-
-    .logo-left {
-        left: 10px;
-        /* Ajuste a distância da borda esquerda conforme necessário */
-    }
-
-    .logo-right {
-        right: 10px;
-        /* Ajuste a distância da borda direita conforme necessário */
-    }
-
-    .centered-title p {
-        margin: 2px 0;
-        /* Reduzir espaçamento entre linhas do título */
-    }
-
-
-    .row.align-items-center p {
-        margin: 0;
-        /* Reduzir o espaçamento entre os títulos */
-    }
-
-
-
-    .title {
-        text-align: center;
-        margin-top: 20px;
-    }
-
-    h3 {
-        font-weight: bold;
-        margin-top: 15px;
-    }
-
-    .content {
-        margin-top: 20px;
-    }
-
-    .section-title {
-        background-color: #E3F2FD;
-        /* Azul claro moderno */
-        padding: 10px;
-        margin-top: 20px;
-        font-weight: bold;
-        border-left: 4px solid #2196F3;
-        /* Borda lateral azul mais escura */
-    }
-
-    /* Compactar tabelas para economia de espaço */
-    .data-table {
-        width: 100%;
-        margin-top: 10px;
-        border-spacing: 4px;
-        /* Reduz espaçamento entre as células */
-    }
-
-    .data-table td {
-        padding: 3px;
-        /* Reduz a quantidade de espaço em cada célula */
-        vertical-align: top;
-    }
-
-
-
-
-    .signature {
-        margin-top: 50px;
-        text-align: center;
-    }
-
-    .signature-line {
-        width: 50%;
-        border-top: 1px solid #000;
-        margin: 0 auto;
-    }
-
-    .date-location {
-        text-align: right;
-        margin-top: 20px;
-    }
-
-    /* Estilo da linha de assinatura */
-    .signature-line {
-        width: 60%;
-        border-top: 1px solid #000;
-        margin: 0 auto 10px;
-        /* Reduz o espaçamento */
-    }
-
-    /* Estilização para impressão */
-    @media print {
         body {
-            -webkit-print-color-adjust: exact;
+            margin-top: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+        }
+
+        .header {
+            text-align: center;
+        }
+
+        /* Alinhamento e espaçamento do cabeçalho */
+        /* Ajuste para manter as logos fixas no topo */
+        .logo-container {
+            position: relative;
+        }
+
+        .logo {
+            position: absolute;
+            top: 10px;
+            /* Ajuste a distância do topo conforme necessário */
+            max-width: 80px;
+            height: auto;
+        }
+
+        .logo-left {
+            left: 10px;
+            /* Ajuste a distância da borda esquerda conforme necessário */
+        }
+
+        .logo-right {
+            right: 10px;
+            /* Ajuste a distância da borda direita conforme necessário */
+        }
+
+        .centered-title p {
+            margin: 2px 0;
+            /* Reduzir espaçamento entre linhas do título */
+        }
+
+
+        .row.align-items-center p {
+            margin: 0;
+            /* Reduzir o espaçamento entre os títulos */
+        }
+
+
+
+        .title {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        h3 {
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .content {
+            margin-top: 20px;
         }
 
         .section-title {
-            -webkit-print-color-adjust: exact;
-            background-color: #E3F2FD !important;
+            background-color: #E3F2FD;
+            /* Azul claro moderno */
+            padding: 10px;
+            margin-top: 20px;
+            font-weight: bold;
+            border-left: 4px solid #2196F3;
+            /* Borda lateral azul mais escura */
         }
-    }
 
-    /* Estilo para as duas assinaturas lado a lado */
-    .double-signature {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 50px;
-    }
+        /* Compactar tabelas para economia de espaço */
+        .data-table {
+            width: 100%;
+            margin-top: 10px;
+            border-spacing: 4px;
+            /* Reduz espaçamento entre as células */
+        }
 
-    .signature-block {
-        width: 45%;
-        text-align: center;
-    }
+        .data-table td {
+            padding: 3px;
+            /* Reduz a quantidade de espaço em cada célula */
+            vertical-align: top;
+        }
+
+
+
+
+        .signature {
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .signature-line {
+            width: 50%;
+            border-top: 1px solid #000;
+            margin: 0 auto;
+        }
+
+        .date-location {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        /* Estilo da linha de assinatura */
+        .signature-line {
+            width: 60%;
+            border-top: 1px solid #000;
+            margin: 0 auto 10px;
+            /* Reduz o espaçamento */
+        }
+
+        /* Estilização para impressão */
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+            }
+
+            .section-title {
+                -webkit-print-color-adjust: exact;
+                background-color: #E3F2FD !important;
+            }
+        }
+
+        /* Estilo para as duas assinaturas lado a lado */
+        .double-signature {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+        }
+
+        .signature-block {
+            width: 45%;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -280,8 +280,8 @@ if (isset($_SESSION['form_data'])) {
         <!-- Títulos -->
         <!-- Cabeçalho com logos e títulos centrais -->
         <div class="logo-container">
-            <img src="image1.png" alt="Logo Esquerda" class="logo logo-left">
-            <img src="image3.png" alt="Logo Direita" class="logo logo-right">
+            <img src="./image1.png" alt="Logo Esquerda" class="logo logo-left">
+            <img src="./image3.png" alt="Logo Direita" class="logo logo-right">
             <div class="centered-title text-center">
                 <p>Estado do Rio Grande do Norte</p>
                 <p>Prefeitura Municipal de Pau dos Ferros</p>

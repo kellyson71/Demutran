@@ -26,23 +26,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $noticia_id = $stmt->insert_id; // Pegando o ID da notícia recém criada
 
             // Criar diretório com o nome do ID da notícia
-            $target_dir = "./midia/" . $noticia_id;
+            $target_dir = "../midia/noticia/" . $noticia_id;
             if (!is_dir($target_dir)) {
                 mkdir($target_dir, 0777, true); // Criando o diretório com permissão
             }
 
             // Verificar e mover o arquivo de imagem
             if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] == UPLOAD_ERR_OK) {
-                $imagem_nome = basename($_FILES['imagem']['name']);
-                $target_file = $target_dir . '/' . $imagem_nome;
+                $ext = pathinfo($_FILES['imagem']['name'], PATHINFO_EXTENSION);
+                $capa_filename = "capa." . $ext;
+                $target_file = $target_dir . '/' . $capa_filename;
                 move_uploaded_file($_FILES['imagem']['tmp_name'], $target_file);
 
                 // Atualizar URL da imagem no banco de dados
+                $imagem_url = "midia/noticia/" . $noticia_id . "/" . $capa_filename;
                 $sql_update = "UPDATE noticias SET imagem_url = ? WHERE id = ?";
                 $stmt_update = $conn->prepare($sql_update);
-                $stmt_update->bind_param('si', $target_file, $noticia_id);
+                $stmt_update->bind_param('si', $imagem_url, $noticia_id);
                 $stmt_update->execute();
             }
+
+            // Processar imagens do conteúdo
+            $dom = new DOMDocument();
+            libxml_use_internal_errors(true); // Suprimir avisos do HTML mal formado
+            $dom->loadHTML(mb_convert_encoding($conteudo, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+            libxml_clear_errors();
+
+            $images = $dom->getElementsByTagName('img');
+            $i = 1;
+
+            foreach ($images as $img) {
+                if ($img instanceof DOMElement) {
+                    $img_src = $img->getAttribute('src');
+
+                    // Se for uma imagem em base64
+                    if (strpos($img_src, 'data:image/') === 0) {
+                        $img_data = base64_decode(explode(',', $img_src)[1]);
+                        $finfo = new finfo(FILEINFO_MIME_TYPE);
+                        $mime_type = $finfo->buffer($img_data);
+                        $ext = explode('/', $mime_type)[1];
+
+                        $new_filename = "imagem" . $i . "." . $ext;
+                        $img_path = $target_dir . '/' . $new_filename;
+                        file_put_contents($img_path, $img_data);
+
+                        $new_src = "midia/noticia/" . $noticia_id . "/" . $new_filename;
+                        $img->setAttribute('src', $new_src);
+                        $i++;
+                    }
+                }
+            }
+
+            // Atualizar o conteúdo com os novos caminhos das imagens
+            $conteudo_atualizado = $dom->saveHTML();
+            $sql_update = "UPDATE noticias SET conteudo = ? WHERE id = ?";
+            $stmt_update = $conn->prepare($sql_update);
+            $stmt_update->bind_param('si', $conteudo_atualizado, $noticia_id);
+            $stmt_update->execute();
 
             header('Location: gerenciar_noticias.php');
             exit();
@@ -201,7 +241,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
 
                             <div>
-                                <label for="editor" class="block text-sm font-medium text-gray-700 mb-1">Conteúdo</label>
+                                <label for="editor"
+                                    class="block text-sm font-medium text-gray-700 mb-1">Conteúdo</label>
                                 <div id="editor"></div>
                                 <input type="hidden" name="conteudo" id="conteudo">
                             </div>
@@ -256,14 +297,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             toolbar: [
                 ['bold', 'italic', 'underline', 'strike'],
                 ['blockquote', 'code-block'],
-                [{ 'header': 1 }, { 'header': 2 }],
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                [{ 'script': 'sub'}, { 'script': 'super' }],
-                [{ 'indent': '-1'}, { 'indent': '+1' }],
-                [{ 'size': ['small', false, 'large', 'huge'] }],
-                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                [{ 'color': [] }, { 'background': [] }],
-                [{ 'align': [] }],
+                [{
+                    'header': 1
+                }, {
+                    'header': 2
+                }],
+                [{
+                    'list': 'ordered'
+                }, {
+                    'list': 'bullet'
+                }],
+                [{
+                    'script': 'sub'
+                }, {
+                    'script': 'super'
+                }],
+                [{
+                    'indent': '-1'
+                }, {
+                    'indent': '+1'
+                }],
+                [{
+                    'size': ['small', false, 'large', 'huge']
+                }],
+                [{
+                    'header': [1, 2, 3, 4, 5, 6, false]
+                }],
+                [{
+                    'color': []
+                }, {
+                    'background': []
+                }],
+                [{
+                    'align': []
+                }],
                 ['link', 'image'],
                 ['clean']
             ]

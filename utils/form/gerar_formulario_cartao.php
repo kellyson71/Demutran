@@ -3,10 +3,11 @@ session_start();
 require_once '../../env/config.php';
 
 // Função para obter dados do formulário baseado no tipo e ID
-function getDadosFormulario($conn, $tipo, $id) {
+function getDadosFormulario($conn, $tipo, $id)
+{
     $tabela = '';
     $sql = '';
-    
+
     switch ($tipo) {
         case 'pcd':
             $tabela = 'solicitacao_cartao';
@@ -15,7 +16,7 @@ function getDadosFormulario($conn, $tipo, $id) {
         case 'defesa':
             $tabela = 'solicitacoes_demutran';
             $sql = "SELECT * FROM $tabela WHERE id = ?";
-            break;  
+            break;
         case 'parecer':
             $tabela = 'Parecer';
             $sql = "SELECT * FROM $tabela WHERE id = ?";
@@ -55,4 +56,7 @@ switch ($tipo) {
         die('Tipo de formulário inválido');
 }
 
-?>
+?> <div class="logo-container">
+    <img src="./image1.png" alt="Logo Esquerda" class="logo logo-left">
+    <img src="./image3.png" alt="Logo Direita" class="logo logo-right">
+    <div class="centered-title">

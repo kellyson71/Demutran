@@ -1,12 +1,19 @@
-./descomentador.py
+# Arquivos Python
+descomentador.py
+
+# Diretórios do sistema
 sandbox/
-Defesa/midia/
-fpdf
-PCD/midia/
-env/config.php
-sandbox/
+fpdf/
 utils/vendor/
 assets/
 lib/
 env/
-midia/
+
+# Todas as pastas midia em qualquer lugar do projeto
+**/midia/
+**/midia/**
+Defesa/midia/
+PCD/midia/
+
+# Arquivos de configuração
+env/config.php

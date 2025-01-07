@@ -144,6 +144,78 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 
             <!-- Main -->
             <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+                <!-- Botão Voltar -->
+                <div class="mb-4 flex justify-between items-center">
+                    <div>
+                        <?php
+                        // Recupera os parâmetros da URL anterior
+                        $pagina = $_GET['pagina_anterior'] ?? '';
+                        $search = $_GET['search_anterior'] ?? '';
+                        $tipo_filtro = $_GET['tipo_anterior'] ?? '';
+                        $view = $_GET['view_anterior'] ?? '';
+
+                        // Constrói a URL de retorno com os parâmetros
+                        $params = [];
+                        if ($pagina) $params[] = "pagina=" . urlencode($pagina);
+                        if ($search) $params[] = "search=" . urlencode($search);
+                        if ($tipo_filtro) $params[] = "tipo=" . urlencode($tipo_filtro);
+                        if ($view) $params[] = "view=" . urlencode($view);
+
+                        $url_retorno = "formularios.php" . (!empty($params) ? "?" . implode("&", $params) : "");
+                        ?>
+                        <a href="<?php echo $url_retorno; ?>"
+                            class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors duration-200 shadow-sm">
+                            <span class="material-icons mr-2">arrow_back</span>
+                            Voltar
+                        </a>
+                    </div>
+                    <div>
+                        <?php
+                        // Determina a URL do formulário baseado no tipo
+                        $form_url = '';
+                        switch ($tipo) {
+                            case 'JARI':
+                                // Buscar o subtipo (tipo_solicitacao) para JARI
+                                $sql = "SELECT tipo_solicitacao FROM solicitacoes_demutran WHERE id = ?";
+                                $stmt = $conn->prepare($sql);
+                                $stmt->bind_param('i', $id);
+                                $stmt->execute();
+                                $result = $stmt->get_result();
+                                $dados_jari = $result->fetch_assoc();
+
+                                if ($dados_jari['tipo_solicitacao'] === 'apresentacao_condutor') {
+                                    $form_url = "../utils/form/gerar_formulario_AP.php";
+                                } else {
+                                    $form_url = "../utils/form/gerar_formulario.php";
+                                }
+                                break;
+                            case 'PCD':
+                                $form_url = "../utils/form/gerar_formulario_cartao.php";
+                                break;
+                            case 'DAT':
+                                $form_url = "../utils/form/gerar_formulario_DAT.php";
+                                break;
+                            case 'Parecer':
+                                $form_url = "../utils/form/gerar_formulario_parecer.php";
+                                break;
+                            default:
+                                $form_url = "../utils/form/gerar_formulario.php";
+                        }
+
+                        // Adiciona parâmetros necessários
+                        $form_url .= "?id=" . urlencode($id) . "&tipo=" . urlencode($tipo);
+                        if (isset($dados_jari['tipo_solicitacao'])) {
+                            $form_url .= "&tipo_solicitacao=" . urlencode($dados_jari['tipo_solicitacao']);
+                        }
+                        ?>
+                        <a href="<?php echo $form_url; ?>" target="_blank"
+                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 shadow-sm">
+                            <span class="material-icons mr-2">description</span>
+                            Ver Formulário
+                        </a>
+                    </div>
+                </div>
+
                 <!-- Cabeçalho do formulário -->
                 <div class="mb-8 title-animation">
                     <div class="title-header rounded-lg p-6 text-white">
