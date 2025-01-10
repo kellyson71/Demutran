@@ -5,12 +5,20 @@ include '../env/config.php';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     try {
         // Validar dados básicos
-        $requiredFields = ['nome_solicitante', 'telefone', 'cpf_cnpj', 'email', 'local', 'evento', 'ponto_referencia', 'data_horario'];
+        $requiredFields = ['nome_solicitante', 'telefone', 'cpf_cnpj', 'email', 'local', 'evento', 'ponto_referencia', 'data_evento', 'horario_inicio', 'horario_fim'];
         foreach ($requiredFields as $field) {
             if (empty($_POST[$field])) {
                 throw new Exception("Campo $field é obrigatório");
             }
         }
+
+        // Modificar a conversão da data
+        $data_evento = DateTime::createFromFormat('d/m/Y', $_POST['data_evento']);
+        if (!$data_evento) {
+            throw new Exception("Formato de data inválido");
+        }
+        $data_formatada = $data_evento->format('d/m/Y');
+        $data_horario = $data_formatada . " " . $_POST['horario_inicio'] . " às " . $_POST['horario_fim'];
 
         // Gerar protocolo
         $protocolo = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
@@ -30,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST['local'],
             $_POST['evento'],
             $_POST['ponto_referencia'],
-            $_POST['data_horario'],
+            $data_horario,
             $declaracao
         );
 
@@ -118,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <p><strong>Próximos Passos:</strong></p>
                         <ol style='margin-left: 20px;'>
                             <li>Sua solicitação será analisada pela equipe técnica do DEMUTRAN</li>
-                            <li>O prazo para emissão do parecer é de até 8 dias úteis</li>
+                            <li>O prazo para emissão do parecer é de até 4 dias úteis</li>
                             <li>Você receberá um e-mail quando o parecer estiver pronto para retirada</li>
                             <li>O documento deverá ser retirado presencialmente na sede do DEMUTRAN</li>
                             <li>Lembre-se de apresentar um documento de identificação no momento da retirada</li>

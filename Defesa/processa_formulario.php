@@ -178,7 +178,7 @@ foreach ($columns as $column) {
 // Modifique a validação inicial
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validar se os arquivos obrigatórios foram enviados
-    $required_files = ['doc_requerimento', 'cnh'];
+    $required_files = ['doc_requerimento', 'crlv', 'notif_DEMUTRAN'];
     $missing_files = [];
 
     foreach ($required_files as $file) {
@@ -234,6 +234,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $gmail = verificaTexto($gmail);
 
     // Captura os dados do formulário
+    $tipo_requerente = verificaTexto($_POST['tipo_requerente']); // Adicionar esta linha
     $nome = verificaTexto($_POST['nome']);
     $cpf = verificaTexto($_POST['cpf']);
     $endereco = verificaTexto($_POST['endereco']);
@@ -257,21 +258,53 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $defesa = verificaTexto($_POST['defesa']);
 
     // Inserir registro com os dados
-    $sql = "INSERT INTO solicitacoes_demutran (
-        tipo_solicitacao, nome, cpf, endereco, numero, complemento, bairro, cep, municipio, telefone, placa, marcaModelo, cor, especie, categoria, ano, autoInfracao, dataInfracao, horaInfracao, localInfracao, enquadramento, defesa,
-        doc_requerimento_url, cnh_url, cnh_condutor_url, notif_DEMUTRAN_url, crlv_url, comprovante_residencia_url, doc_complementares_urls, signed_document_url, gmail
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $sql =
+    "INSERT INTO solicitacoes_demutran (
+        tipo_solicitacao, 
+        tipo_requerente,
+        nome, 
+        cpf, 
+        endereco, 
+        numero, 
+        complemento, 
+        bairro, 
+        cep, 
+        municipio, 
+        telefone, 
+        placa, 
+        marcaModelo, 
+        cor, 
+        especie, 
+        categoria, 
+        ano, 
+        autoInfracao, 
+        dataInfracao, 
+        horaInfracao, 
+        localInfracao, 
+        enquadramento, 
+        defesa,
+        doc_requerimento_url, 
+        cnh_url, 
+        cnh_condutor_url, 
+        notif_DEMUTRAN_url, 
+        crlv_url, 
+        comprovante_residencia_url, 
+        doc_complementares_urls, 
+        signed_document_url, 
+        gmail
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
-
+    
+    // Verifique se a preparação foi bem-sucedida
     if (!$stmt) {
         returnError("Erro na preparação da declaração: " . $conn->error);
     }
 
-    // Inserimos valores temporários; as URLs serão atualizadas após o upload
     $stmt->bind_param(
-        "sssssssssssssssssssssssssssssss",
+        "ssssssssssssssssssssssssssssssss",
         $tipo_solicitacao,
+        $tipo_requerente,
         $nome,
         $cpf,
         $endereco,

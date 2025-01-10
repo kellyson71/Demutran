@@ -209,6 +209,29 @@ button:hover {
     background-color: #009640;
 }
 
+.radio-group {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.radio-option input[type="radio"] {
+    width: auto;
+    margin: 0;
+}
+
+.radio-option label {
+    position: static;
+    color: #333;
+    pointer-events: auto;
+}
+
 @media (max-width: 600px) {
     .form-container {
         width: 90%;

@@ -28,6 +28,7 @@ function exibirDetalhesRecurso($conn, $id)
             <div class="space-y-4">
                 <?php
                 echo createEditableField('Nome', $recurso['nome'], 'nome');
+                echo createEditableField('Tipo de Requerente', ucfirst($recurso['tipo_requerente']), 'tipo_requerente'); // Nova linha
                 echo createEditableField('CPF', $recurso['cpf'], 'cpf');
                 echo createEditableField('Email', $recurso['email'], 'email');
                 echo createEditableField('Telefone', $recurso['telefone'], 'telefone');

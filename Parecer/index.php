@@ -132,7 +132,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                 <div>
                     <span class="font-medium">Informações importantes:</span>
                     <ul class="mt-1.5 list-disc list-inside">
-                        <li>A solicitação deverá ser feita no mínimo 08 dias antes do evento</li>
+                        <li>A solicitação deverá ser feita no mínimo 04 dias antes do evento</li>
                         <li>O parecer será entregue presencialmente</li>
                     </ul>
                 </div>
@@ -210,12 +210,31 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                         placeholder="Exemplo: Próximo ao Mercado Central">
                 </div>
 
-                <!-- Data/Horário -->
-                <div class="mb-4">
-                    <label for="data_horario" class="block text-gray-700 mb-2">Data/Horário:</label>
-                    <input type="text" id="data_horario" name="data_horario" required
-                        class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                        placeholder="Selecione a data e horário">
+                <!-- Substitua o bloco de data e hora por este -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <!-- Data do Evento -->
+                    <div>
+                        <label for="data_evento" class="block text-gray-700 mb-2">Data do Evento:</label>
+                        <input type="text" id="data_evento" name="data_evento" required
+                            class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            placeholder="Selecione a data">
+                    </div>
+
+                    <!-- Horário de Início -->
+                    <div>
+                        <label for="horario_inicio" class="block text-gray-700 mb-2">Horário de Início:</label>
+                        <input type="text" id="horario_inicio" name="horario_inicio" required
+                            class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            placeholder="Selecione o horário">
+                    </div>
+
+                    <!-- Horário de Término -->
+                    <div>
+                        <label for="horario_fim" class="block text-gray-700 mb-2">Horário de Término:</label>
+                        <input type="text" id="horario_fim" name="horario_fim" required
+                            class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            placeholder="Selecione o horário">
+                    </div>
                 </div>
 
                 <!-- Declaração de Veracidade -->
@@ -273,28 +292,34 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             mobileMenu.classList.toggle("hidden");
         });
 
-        // Inicializa o Flatpickr para o campo de data/hora
-        flatpickr("#data_horario", {
-            enableTime: true,
-            dateFormat: "d/m/Y H:i",
-            time_24hr: true,
-            minDate: new Date().fp_incr(8), // Adiciona 8 dias à data atual
+        // Configuração do Flatpickr para data
+        flatpickr("#data_evento", {
+            dateFormat: "d/m/Y",
+            minDate: new Date().fp_incr(4),
             locale: {
                 firstDayOfWeek: 1,
                 weekdays: {
                     shorthand: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
-                    longhand: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira',
-                        'Sexta-feira', 'Sábado'
-                    ],
+                    longhand: ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
                 },
                 months: {
                     shorthand: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-                    longhand: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto',
-                        'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-                    ],
+                    longhand: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
                 },
             }
         });
+
+        // Configuração do Flatpickr para horários
+        const configHorario = {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            minuteIncrement: 30,
+        };
+
+        flatpickr("#horario_inicio", configHorario);
+        flatpickr("#horario_fim", configHorario);
 
         // Modificar o envio do formulário para mostrar o loading
         document.querySelector('form').addEventListener('submit', function(e) {

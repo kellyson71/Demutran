@@ -86,7 +86,7 @@
         >
         <a
           href="../Parecer/index.php"
-          class="block px-4 py-2 text-white hover:bg-green-500"
+          class="block px-4 px-2 text-white hover:bg-green-500"
           >Parecer</a
         >
         <a
@@ -213,6 +213,23 @@
               </option>
               <option value="jari">JARI</option>
             </select>
+          </div>
+
+          <!-- Tipo de Requerente - NOVO CAMPO -->
+          <div class="mb-4">
+            <label class="block text-gray-700 mb-2">
+              <i class="fas fa-user-tag"></i> Você é:
+            </label>
+            <div class="radio-group">
+              <div class="radio-option">
+                <input type="radio" id="proprietario" name="tipo_requerente" value="proprietario" required>
+                <label for="proprietario">Proprietário</label>
+              </div>
+              <div class="radio-option">
+                <input type="radio" id="condutor" name="tipo_requerente" value="condutor" required>
+                <label for="condutor">Condutor</label>
+              </div>
+            </div>
           </div>
 
           <!-- Campos específicos para Apresentação do Condutor -->
@@ -676,7 +693,7 @@
           <!-- Document Upload Section -->
           <div class="mb-4">
             <label for="doc_requerimento" class="block text-gray-700 mb-2">
-              <i class="far fa-file-alt"></i> Requerimento da Defesa:
+              <i class="far fa-file-alt"></i> Requerimento da Defesa <span class="text-red-500">*</span>
             </label>
             <input
               type="file"
@@ -688,7 +705,7 @@
 
           <div class="mb-4">
             <label for="cnh" class="block text-gray-700 mb-2">
-              <i class="far fa-id-card"></i> CNH:
+              <i class="far fa-id-card"></i> Documento de Identificação (CNH, RG ou outro documento oficial com foto):
             </label>
             <input
               type="file"
@@ -700,7 +717,7 @@
 
           <div class="mb-4">
             <label for="cnh_condutor" class="block text-gray-700 mb-2">
-              <i class="far fa-id-card"></i> CNH do Condutor:
+              <i class="far fa-id-card"></i> Documento de Identificação do Condutor:
             </label>
             <input
               type="file"
@@ -712,7 +729,7 @@
 
           <div class="mb-4">
             <label for="notif_DEMUTRAN" class="block text-gray-700 mb-2">
-              <i class="far fa-file-alt"></i> Notificação DEMUTRAN:
+              <i class="far fa-file-alt"></i> Notificação DEMUTRAN <span class="text-red-500">*</span>
             </label>
             <input
               type="file"
@@ -724,7 +741,7 @@
 
           <div class="mb-4">
             <label for="crlv" class="block text-gray-700 mb-2">
-              <i class="far fa-file-alt"></i> CRLV:
+              <i class="far fa-file-alt"></i> CRLV <span class="text-red-500">*</span>
             </label>
             <input
               type="file"
@@ -1218,6 +1235,11 @@
                 if (elemento) elemento.style.display = "block";
             });
         }
+    });
+    </script>
+  </body>
+</html>
+
     });
     </script>
   </body>
