@@ -56,6 +56,16 @@ function getSidebarHtml($currentPage) {
             </a>";
     }
     $html .= '</nav>';
+
+    // Adiciona a seção de links extras com borda superior
+    $html .= '
+    <div class="mt-6 pt-6 border-t border-gray-200">
+        <a href="../" class="flex items-center p-2 text-blue-600 hover:bg-blue-50 rounded group">
+            <span class="material-icons">home</span>
+            <span class="ml-3">Página Inicial</span>
+        </a>
+    </div>';
+
     return $html;
 }
 

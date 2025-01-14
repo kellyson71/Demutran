@@ -496,87 +496,54 @@
       }
 
       document.addEventListener("DOMContentLoaded", () => {
-        const form = document.getElementById("SoliForm");
-        form.addEventListener("submit", function (event) {
+        const form = document.getElementById('SoliForm');
+        form.addEventListener("submit", function(event) {
           event.preventDefault();
-          submitForm();
-        });
-      });
+          
+          const submitButton = document.getElementById('submitButton');
+          const loadingButton = document.getElementById('loadingButton');
+          
+          // Mostrar loading
+          submitButton.classList.add("hidden");
+          loadingButton.classList.remove("hidden");
+          
+          const formData = new FormData(form);
 
-      function submitForm() {
-        const form = document.getElementById("SoliForm");
-        const formData = new FormData(form);
-        const submitButton = document.getElementById("submitButton");
-        const loadingButton = document.getElementById("loadingButton");
-
-        // Desativa o botão imediatamente
-        submitButton.disabled = true;
-        submitButton.classList.add("opacity-50", "cursor-not-allowed");
-
-        // Toggle buttons
-        submitButton.classList.add("hidden");
-        loadingButton.classList.remove("hidden");
-
-        // Verificação dos arquivos PDF
-        for (let [key, value] of formData.entries()) {
-          if (
-            value instanceof File &&
-            value.name !== "" &&
-            value.type !== "application/pdf"
-          ) {
-            alert("Todos os arquivos devem estar no formato PDF.");
-            // Reativa o botão em caso de erro
-            submitButton.disabled = false;
-            submitButton.classList.remove("opacity-50", "cursor-not-allowed");
-            return;
-          }
-        }
-
-        fetch("processa_formulario.php", {
-          method: "POST",
-          body: formData,
-        })
-          .then((response) => response.text())
-          .then((data) => {
-            const feedback = document.getElementById("feedback");
-            feedback.innerHTML =
-              "Sua solicitação foi enviada com sucesso. Você receberá um comprovante da solicitação por e-mail em breve.";
-            feedback.classList.add(
-              "bg-green-100",
-              "text-green-700",
-              "p-4",
-              "rounded",
-              "mb-4"
-            );
-            feedback.classList.remove("hidden");
-            
-            // Mantém o botão desativado após sucesso
-            form.reset();
-            submitButton.disabled = true;
-            submitButton.classList.add("opacity-50", "cursor-not-allowed");
+          fetch("processa_formulario.php", {
+            method: "POST",
+            body: formData
           })
-          .catch((error) => {
-            const feedback = document.getElementById("feedback");
+          .then(response => response.text())
+          .then(data => {
+            const feedback = document.getElementById('feedback');
+            feedback.innerHTML = "Formulário enviado com sucesso!";
+            feedback.classList.remove("hidden");
+            feedback.classList.add("bg-green-100", "text-green-700", "p-4", "rounded", "mb-4");
+            
+            // Redirecionar após 2 segundos
+            setTimeout(() => {
+              window.location.href = '../';
+            }, 2000);
+          })
+          .catch(error => {
+            const feedback = document.getElementById('feedback');
             feedback.innerHTML = "Ocorreu um erro ao enviar o formulário.";
-            feedback.classList.add(
-              "bg-red-100",
-              "text-red-700",
-              "p-4",
-              "rounded",
-              "mb-4"
-            );
             feedback.classList.remove("hidden");
+            feedback.classList.add("bg-red-100", "text-red-700", "p-4", "rounded", "mb-4");
             
-            // Reativa o botão em caso de erro
-            submitButton.disabled = false;
-            submitButton.classList.remove("opacity-50", "cursor-not-allowed");
-          })
-          .finally(() => {
-            // Restore buttons
+            // Reabilitar o botão em caso de erro
             submitButton.classList.remove("hidden");
             loadingButton.classList.add("hidden");
+            
+            // Ocultar mensagem após 3 segundos
+            setTimeout(() => {
+              feedback.classList.add("hidden");
+            }, 3000);
+
+            console.error("Erro:", error);
           });
-      }
+        });
+      });
 
       function validarCEP(cep) {
         const cepLimpo = cep.replace(/\D/g, '');

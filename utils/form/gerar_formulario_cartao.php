@@ -56,7 +56,9 @@ switch ($tipo) {
         die('Tipo de formulário inválido');
 }
 
-?> <div class="logo-container">
+?>
+
+<!-- <div class="logo-container">
     <img src="./image1.png" alt="Logo Esquerda" class="logo logo-left">
     <img src="./image3.png" alt="Logo Direita" class="logo logo-right">
-    <div class="centered-title">
+    <div class="centered-title"> -->

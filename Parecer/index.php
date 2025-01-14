@@ -304,7 +304,9 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                 },
                 months: {
                     shorthand: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-                    longhand: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+                    longhand: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto',
+                        'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+                    ],
                 },
             }
         });
@@ -324,6 +326,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
         // Modificar o envio do formulário para mostrar o loading
         document.querySelector('form').addEventListener('submit', function(e) {
             e.preventDefault();
+            const form = this;
             const submitButton = document.getElementById('submitButton');
             submitButton.disabled = true;
             submitButton.innerHTML = `
@@ -333,7 +336,71 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
             </svg>
             Processando...
         `;
-            this.submit();
+
+            const formData = new FormData(form);
+
+            fetch('processa_formulario.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Limpar feedbacks anteriores
+                        const oldFeedbacks = document.querySelectorAll('.feedback-message');
+                        oldFeedbacks.forEach(f => f.remove());
+
+                        // Criar novo feedback
+                        const feedback = document.createElement('div');
+                        feedback.className = 'feedback-message fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded-lg shadow-lg z-50';
+                        feedback.innerHTML = `
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>${data.message}</span>
+                        </div>
+                    `;
+                        document.body.appendChild(feedback);
+
+                        // Redirecionar após 3 segundos
+                        setTimeout(() => {
+                            window.location.href = '../';
+                        }, 3000);
+                    } else {
+                        throw new Error(data.message);
+                    }
+                })
+                .catch(error => {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = `
+                    <span class="flex items-center">
+                        <i class="fas fa-check mr-2"></i>
+                        <span>Enviar</span>
+                    </span>
+                `;
+
+                    // Limpar feedbacks anteriores
+                    const oldFeedbacks = document.querySelectorAll('.feedback-message');
+                    oldFeedbacks.forEach(f => f.remove());
+
+                    // Criar feedback de erro
+                    const feedback = document.createElement('div');
+                    feedback.className = 'feedback-message fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg shadow-lg z-50';
+                    feedback.innerHTML = `
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        <span>${error.message || 'Ocorreu um erro ao enviar o formulário.'}</span>
+                    </div>
+                `;
+                    document.body.appendChild(feedback);
+
+                    setTimeout(() => {
+                        feedback.remove();
+                    }, 4000);
+                });
         });
     </script>
 </body>

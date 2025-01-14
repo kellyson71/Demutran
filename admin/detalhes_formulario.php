@@ -270,7 +270,7 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                         }
 
                         // Adiciona parâmetros necessários
-                        $form_url .= "?id=" . urlencode($id) . "&tipo=" . urlencode($tipo);
+                        $form_url .= "?id=" . urlencode($id) . "&tipo=" . urlencode(strtolower($tipo));
                         if (isset($dados_jari['tipo_solicitacao'])) {
                             $form_url .= "&tipo_solicitacao=" . urlencode($dados_jari['tipo_solicitacao']);
                         }
@@ -319,15 +319,20 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                         <!-- Botão de Exclusão -->
                         <button id="btnExcluir"
                             class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 shadow-md">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                    clip-rule="evenodd" />
                             </svg>
                             Excluir Formulário
                         </button>
-                        
+
                         <!-- Botão Concluir (existente) -->
-                        <button id="btnConcluir" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 shadow-md">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <button id="btnConcluir"
+                            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                fill="currentColor">
                                 <path fill-rule="evenodd"
                                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                                     clip-rule="evenodd" />
@@ -338,17 +343,21 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                 </div>
 
                 <!-- Modal de Confirmação de Exclusão -->
-                <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+                <div id="deleteModal"
+                    class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
                     <div class="bg-white rounded-lg p-6 w-96 shadow-xl">
                         <div class="mb-4">
                             <h3 class="text-lg font-bold text-gray-900">Confirmar Exclusão</h3>
-                            <p class="text-gray-700 mt-2">Tem certeza que deseja excluir este formulário? Esta ação não pode ser desfeita.</p>
+                            <p class="text-gray-700 mt-2">Tem certeza que deseja excluir este formulário? Esta ação não
+                                pode ser desfeita.</p>
                         </div>
                         <div class="flex justify-end space-x-3">
-                            <button onclick="closeDeleteModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
+                            <button onclick="closeDeleteModal()"
+                                class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
                                 Cancelar
                             </button>
-                            <button onclick="confirmarExclusao()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center gap-2">
+                            <button onclick="confirmarExclusao()"
+                                class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center gap-2">
                                 <i class="material-icons text-sm">delete</i>
                                 Excluir
                             </button>
@@ -619,7 +628,7 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                         if (btnExcluir) {
                             btnExcluir.addEventListener('click', showDeleteModal);
                         }
-                        
+
                         // Fecha o modal de exclusão quando clica fora
                         const deleteModal = document.getElementById('deleteModal');
                         if (deleteModal) {

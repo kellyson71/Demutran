@@ -107,12 +107,12 @@ try {
         }
 
         // Registra a exclusão no log
-        $usuario = $_SESSION['usuario_nome'];
+        $usuario_id = $_SESSION['usuario_id'];
         $data_hora = date('Y-m-d H:i:s');
-        $sql_log = "INSERT INTO log_acoes (usuario, acao, tipo_formulario, id_formulario, data_hora) 
+        $sql_log = "INSERT INTO log_acoes (usuario_id, acao, tipo_formulario, formulario_id, data_hora) 
                     VALUES (?, 'Excluiu', ?, ?, ?)";
         $stmt_log = $conn->prepare($sql_log);
-        $stmt_log->bind_param('ssss', $usuario, $tipo, $id, $data_hora);
+        $stmt_log->bind_param('isss', $usuario_id, $tipo, $id, $data_hora);
         $stmt_log->execute();
 
         // Commit da transação

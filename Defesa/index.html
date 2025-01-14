@@ -1071,8 +1071,9 @@
         .then(data => {
             if (data.success) {
                 showCustomAlert("Solicitação enviada com sucesso!");
-                document.getElementById("DefesaForm").reset();
-                showFirstTab();
+                setTimeout(() => {
+                    window.location.href = '../';
+                }, 2000);
             } else {
                 throw new Error(data.message || "Erro ao processar a solicitação");
             }
@@ -1080,8 +1081,6 @@
         .catch(error => {
             console.error("Erro:", error);
             showCustomAlert(error.message || "Erro ao enviar a solicitação. Por favor, tente novamente.");
-        })
-        .finally(() => {
             submitButton.classList.remove("hidden");
             loadingButton.classList.add("hidden");
         });
@@ -1236,11 +1235,56 @@
             });
         }
     });
-    </script>
-  </body>
-</html>
 
-    });
+      document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector('form');
+        form.addEventListener("submit", function(event) {
+          event.preventDefault();
+          const submitButton = form.querySelector('button[type="submit"]');
+          submitButton.disabled = true;
+          submitButton.textContent = 'Enviando...';
+          submitForm(submitButton);
+        });
+      });
+
+      function submitForm(submitButton) {
+        const form = document.querySelector('form');
+        const formData = new FormData(form);
+
+        fetch("processa_formulario.php", {
+          method: "POST",
+          body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+          const feedback = document.createElement('div');
+          feedback.className = 'alert alert-success';
+          feedback.innerHTML = "Formulário enviado com sucesso!";
+          form.insertBefore(feedback, form.firstChild);
+          
+          // Redirecionar após 2 segundos
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 2000);
+        })
+        .catch(error => {
+          const feedback = document.createElement('div');
+          feedback.className = 'alert alert-danger';
+          feedback.innerHTML = "Ocorreu um erro ao enviar o formulário.";
+          form.insertBefore(feedback, form.firstChild);
+          
+          // Reabilitar o botão em caso de erro
+          submitButton.disabled = false;
+          submitButton.textContent = 'Enviar';
+          
+          // Ocultar mensagem após 3 segundos
+          setTimeout(() => {
+            feedback.remove();
+          }, 3000);
+
+          console.error("Erro:", error);
+        });
+      }
     </script>
   </body>
 </html>

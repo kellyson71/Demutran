@@ -121,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <ul style='margin-left: 20px;'>
                             <li>Local: {$_POST['local']}</li>
                             <li>Evento: {$_POST['evento']}</li>
-                            <li>Data/Horário: {$_POST['data_horario']}</li>
+                            <li>Data/Horário: {$data_horario}</li>
                         </ul>
                         <p><strong>Próximos Passos:</strong></p>
                         <ol style='margin-left: 20px;'>
@@ -151,23 +151,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             // Incluir e executar o envio de email
             require_once '../utils/mail.php';
-
         }
 
-        $_SESSION['success_message'] = "Solicitação enviada com sucesso! Seu protocolo é: $protocolo";
+        echo json_encode(['success' => true, 'message' => "Solicitação enviada com sucesso! Seu protocolo é: $protocolo"]);
+        exit;
         
     } catch (Exception $e) {
-        $_SESSION['error_message'] = $e->getMessage();
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        exit;
     }
 
     // Fechar conexões
     if (isset($stmt)) $stmt->close();
     $conn->close();
-
-    // Redirecionar de volta
-    header('Location: index.php');
-    exit;
 }
 
-// Se não for POST, redirecionar
-header('Location: index.php');
+// Se não for POST, retornar erro
+if ($_SERVER["REQUEST_METHOD"] != "POST") {
+    echo json_encode(['success' => false, 'message' => 'Método não permitido']);
+    exit;
+}

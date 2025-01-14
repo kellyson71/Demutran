@@ -292,6 +292,13 @@
               "mb-4"
             );
             feedback.classList.remove("hidden");
+            
+            // Redirecionar após 2 segundos em caso de sucesso
+            if (data.includes("sucesso")) {
+              setTimeout(() => {
+                window.location.href = '../';
+              }, 2000);
+            }
           })
           .catch((error) => {
             const feedback = document.getElementById("feedback");
@@ -305,15 +312,14 @@
             );
             feedback.classList.remove("hidden");
             console.error("Erro:", error);
-          })
-          .finally(() => {
-            // Restore buttons
+            
+            // Restaurar botões apenas em caso de erro
             submitButton.classList.remove("hidden");
             loadingButton.classList.add("hidden");
-
+            
             setTimeout(() => {
               feedback.classList.add("hidden");
-            }, 5000);
+            }, 3000);
           });
       }
     </script>

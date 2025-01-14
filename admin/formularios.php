@@ -103,6 +103,7 @@ while ($row = $dat->fetch_assoc()) {
 // Obter parâmetros de pesquisa e filtro
 $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
 $tipo_filter = isset($_GET['tipo']) ? $_GET['tipo'] : '';
+$apenas_nao_lidos = isset($_GET['nao_lidos']) && $_GET['nao_lidos'] === 'true';
 
 // Definir os tipos e tabelas correspondentes
 $tipos = [
@@ -110,7 +111,7 @@ $tipos = [
     'JARI' => 'solicitacoes_demutran',
     'PCD' => 'solicitacao_cartao',
     'DAT' => 'formularios_dat_central',
-    'Parecer' => 'Parecer'  // New table
+    'Parecer' => 'Parecer'
 ];
 
 // Inicializar array de submissões
@@ -148,10 +149,14 @@ foreach ($tipos as $tipo => $tabela) {
     if ($should_process) {
         if ($tabela === 'solicitacao_cartao') {
             // Tratamento para PCD e IDOSO
-            $sql = "SELECT *, UPPER(tipo_solicitacao) as tipo FROM $tabela ORDER BY id DESC LIMIT $fetch_limit";
+            $sql = "SELECT *, UPPER(tipo_solicitacao) as tipo FROM $tabela";
+            if ($apenas_nao_lidos) {
+                $sql .= " WHERE (is_read = 0 OR is_read IS NULL)";
+            }
+            $sql .= " ORDER BY id DESC LIMIT $fetch_limit";
+
             $result = $conn->query($sql);
             while ($row = $result->fetch_assoc()) {
-                // Garantir que o tipo seja maiúsculo e corresponda exatamente a 'PCD' ou 'IDOSO'
                 $row['tipo'] = strtoupper($row['tipo_solicitacao']);
                 if (
                     empty($tipo_filter) ||
@@ -164,10 +169,19 @@ foreach ($tipos as $tipo => $tabela) {
         } elseif ($tabela === 'solicitacoes_demutran') {
             // Tratamento para JARI
             $sql = "SELECT *, tipo_solicitacao as subtipo FROM $tabela";
-            // Adiciona WHERE apenas se for um subtipo específico de JARI
+            $where_conditions = [];
+
             if ($is_jari_subtipo && $tipo_filter !== 'JARI_GRUPO') {
-                $sql .= " WHERE tipo_solicitacao = '" . $conn->real_escape_string($jari_subtipo) . "'";
+                $where_conditions[] = "tipo_solicitacao = '" . $conn->real_escape_string($jari_subtipo) . "'";
             }
+            if ($apenas_nao_lidos) {
+                $where_conditions[] = "(is_read = 0 OR is_read IS NULL)";
+            }
+
+            if (!empty($where_conditions)) {
+                $sql .= " WHERE " . implode(' AND ', $where_conditions);
+            }
+
             $sql .= " ORDER BY id DESC LIMIT $fetch_limit";
 
             $result = $conn->query($sql);
@@ -178,7 +192,13 @@ foreach ($tipos as $tipo => $tabela) {
             }
         } else {
             // Processamento para outras tabelas
-            $result = obterSubmissoesPaginadas($conn, $tabela, $fetch_limit, 0);
+            $sql = "SELECT * FROM $tabela";
+            if ($apenas_nao_lidos) {
+                $sql .= " WHERE (is_read = 0 OR is_read IS NULL)";
+            }
+            $sql .= " ORDER BY id DESC LIMIT $fetch_limit";
+
+            $result = $conn->query($sql);
             while ($row = $result->fetch_assoc()) {
                 $row['tipo'] = $tipo;
 
@@ -224,11 +244,22 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
 ?>
 
 <!DOCTYPE html>
-<html lang="pt-BR" x-data="{ open: false, viewMode: '<?php echo $view_mode; ?>' }" x-init="$refs.loading.classList.add('hidden');
+<html lang="pt-BR" x-data="{ 
+    open: false, 
+    viewMode: '<?php echo $view_mode; ?>', 
+    showUnreadOnly: <?php echo $apenas_nao_lidos ? 'true' : 'false'; ?> 
+}" x-init="$refs.loading.classList.add('hidden');
     $watch('viewMode', value => {
         fetch('?view=' + value);
         localStorage.setItem('preferredView', value);
-    })">
+    });
+    $watch('showUnreadOnly', value => {
+        window.location.href = '?' + new URLSearchParams({
+            ...Object.fromEntries(new URLSearchParams(window.location.search)),
+            nao_lidos: value,
+            pagina: 1
+        }).toString();
+    });">
 
 <head>
     <meta charset="UTF-8">
@@ -458,7 +489,33 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                 </div>
 
                 <!-- View Toggle -->
-                <div class="flex justify-end mb-4">
+                <div class="flex justify-end mb-4 space-x-4">
+                    <!-- Toggle Não Lidos -->
+                    <div class="inline-flex rounded-lg border border-gray-200 bg-white p-1">
+                        <button @click="showUnreadOnly = !showUnreadOnly" type="button"
+                            :class="{ 'bg-blue-100 text-blue-600': showUnreadOnly, 'hover:bg-gray-50': !showUnreadOnly }"
+                            class="inline-flex items-center px-3 py-1.5 rounded-md transition-all duration-200">
+                            <span class="material-icons text-lg mr-1">mark_email_unread</span>
+                            Não Lidos
+                            <?php
+                            // Contar total de não lidos
+                            $total_nao_lidos = array_reduce($submissoes, function ($carry, $item) {
+                                return $carry + (!isset($item['is_read']) || $item['is_read'] == 0 ? 1 : 0);
+                            }, 0);
+                            ?>
+                            <span class="ml-2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                <?php echo $total_nao_lidos; ?>
+                            </span>
+                            <?php if ($apenas_nao_lidos): ?>
+                            <a href="?<?php echo http_build_query(array_merge($_GET, ['nao_lidos' => null])); ?>"
+                                class="ml-2 text-blue-600 hover:text-blue-800">
+                                <span class="material-icons text-sm">close</span>
+                            </a>
+                            <?php endif; ?>
+                        </button>
+                    </div>
+
+                    <!-- Visualização Grade/Lista -->
                     <div class="inline-flex rounded-lg border border-gray-200 bg-white p-1">
                         <button @click="viewMode = 'grid'" type="button"
                             :class="{ 'bg-blue-100 text-blue-600': viewMode === 'grid', 'hover:bg-gray-50': viewMode !== 'grid' }"
@@ -483,7 +540,9 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                     <?php if (empty($submissoes_pagina)): ?>
                     <div class="bg-white rounded-lg shadow-sm p-6 text-center flex flex-col items-center">
                         <span class="material-icons text-gray-400 mb-4" style="font-size: 48px;">inbox</span>
-                        <p class="text-gray-600 text-lg">Nenhum formulário encontrado.</p>
+                        <p class="text-gray-600 text-lg">
+                            <?php echo $apenas_nao_lidos ? 'Nenhum formulário não lido encontrado.' : 'Nenhum formulário encontrado.'; ?>
+                        </p>
                     </div>
                     <?php else: ?>
                     <?php foreach ($submissoes_pagina as $item): ?>
@@ -696,13 +755,13 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                 <!-- Paginação -->
                 <div class="flex justify-center mt-6 space-x-2">
                     <?php if ($pagina > 1): ?>
-                    <a href="?pagina=<?php echo $pagina - 1; ?>&search=<?php echo urlencode($search); ?>&tipo=<?php echo urlencode($tipo_filter); ?>"
+                    <a href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $pagina - 1])); ?>"
                         class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Anterior</a>
                     <?php endif; ?>
                     <span class="px-4 py-2 bg-gray-100 text-gray-700 rounded">Página <?php echo $pagina; ?> de
                         <?php echo $total_pages; ?></span>
                     <?php if ($pagina < $total_pages): ?>
-                    <a href="?pagina=<?php echo $pagina + 1; ?>&search=<?php echo urlencode($search); ?>&tipo=<?php echo urlencode($tipo_filter); ?>"
+                    <a href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $pagina + 1])); ?>"
                         class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Próxima</a>
                     <?php endif; ?>
                 </div>

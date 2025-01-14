@@ -1,9 +1,0 @@
-CREATE TABLE IF NOT EXISTS log_acoes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario VARCHAR(100) NOT NULL,
-    acao VARCHAR(50) NOT NULL,
-    tipo_formulario VARCHAR(50) NOT NULL,
-    id_formulario VARCHAR(50) NOT NULL,
-    data_hora DATETIME NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
