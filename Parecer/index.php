@@ -278,6 +278,109 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
         </div>
     </div>
 
+    <!-- Modal de Sucesso -->
+    <div id="success-modal" tabindex="-1" aria-hidden="true"
+        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-screen max-h-full bg-gray-900/50 backdrop-blur-sm">
+        <div class="relative p-4 w-full max-w-2xl max-h-full">
+            <!-- Modal content -->
+            <div class="relative bg-white rounded-xl shadow-2xl transform transition-all">
+                <!-- Modal header -->
+                <div class="flex items-center justify-between p-6 md:p-6 border-b rounded-t">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-green-100 rounded-full p-2">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900">
+                            Solicitação Enviada com Sucesso!
+                        </h3>
+                    </div>
+                    <button type="button"
+                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center transition-colors duration-200"
+                        data-modal-hide="success-modal">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                        </svg>
+                        <span class="sr-only">Fechar modal</span>
+                    </button>
+                </div>
+                <!-- Modal body -->
+                <div class="p-6 md:p-6 space-y-4">
+                    <div class="flex items-center gap-4 p-4 bg-green-50 rounded-lg">
+                        <div class="flex-shrink-0">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-base leading-relaxed text-gray-600">
+                            Sua solicitação de parecer foi enviada com sucesso! Nossa equipe analisará seu pedido e
+                            retornará em breve.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg">
+                        <div class="flex-shrink-0">
+                            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div class="text-base leading-relaxed text-gray-600">
+                            <p class="font-medium">Número do Protocolo: <span id="protocolNumber"
+                                    class="text-yellow-700"></span></p>
+                            <p class="text-sm mt-1">Guarde este número para acompanhamento da sua solicitação</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-blue-50 rounded-lg">
+                        <div class="flex-shrink-0">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </div>
+                        <p class="text-base leading-relaxed text-gray-600">
+                            Um comprovante da sua solicitação será enviado para o email cadastrado (<span
+                                class="font-medium" id="emailConfirmation"></span>). Por favor, verifique também sua
+                            caixa de spam.
+                        </p>
+                    </div>
+                </div>
+                <!-- Modal footer -->
+                <div
+                    class="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 p-6 md:p-6 border-t border-gray-200 rounded-b">
+                    <button onclick="window.location.href='../'" type="button"
+                        class="w-full sm:w-auto text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Voltar para Início
+                    </button>
+                    <button onclick="window.location.reload()" type="button"
+                        class="w-full sm:w-auto py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-green-700 focus:z-10 focus:ring-4 focus:ring-gray-100 transition-colors duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                            </path>
+                        </svg>
+                        Nova Solicitação
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Inclua o Bootstrap JS para modais (se necessário) -->
@@ -346,61 +449,68 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Limpar feedbacks anteriores
-                        const oldFeedbacks = document.querySelectorAll('.feedback-message');
-                        oldFeedbacks.forEach(f => f.remove());
+                        // Mostrar o modal de sucesso
+                        const modal = document.getElementById("success-modal");
+                        modal.classList.remove("hidden");
+                        modal.classList.add("flex");
 
-                        // Criar novo feedback
-                        const feedback = document.createElement('div');
-                        feedback.className = 'feedback-message fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded-lg shadow-lg z-50';
-                        feedback.innerHTML = `
-                        <div class="flex items-center">
-                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <span>${data.message}</span>
-                        </div>
-                    `;
-                        document.body.appendChild(feedback);
+                        // Adicionar o email ao texto de confirmação
+                        const emailConfirmation = document.getElementById("emailConfirmation");
+                        const emailInput = document.getElementById("email");
+                        if (emailConfirmation && emailInput) {
+                            emailConfirmation.textContent = emailInput.value;
+                        }
 
-                        // Redirecionar após 3 segundos
-                        setTimeout(() => {
-                            window.location.href = '../';
-                        }, 3000);
+                        // Atualizar o número do protocolo com o valor retornado do servidor
+                        const protocolNumber = document.getElementById("protocolNumber");
+                        if (protocolNumber) {
+                            // Extrair o protocolo da mensagem de sucesso
+                            const protocolo = data.message.split(": ")[1];
+                            protocolNumber.textContent = protocolo;
+                        }
+
+                        // Limpar o formulário
+                        form.reset();
                     } else {
-                        throw new Error(data.message);
+                        throw new Error(data.message || "Erro ao processar a solicitação");
                     }
                 })
                 .catch(error => {
                     submitButton.disabled = false;
                     submitButton.innerHTML = `
-                    <span class="flex items-center">
-                        <i class="fas fa-check mr-2"></i>
-                        <span>Enviar</span>
-                    </span>
-                `;
-
-                    // Limpar feedbacks anteriores
-                    const oldFeedbacks = document.querySelectorAll('.feedback-message');
-                    oldFeedbacks.forEach(f => f.remove());
+                <span class="flex items-center">
+                    <i class="fas fa-check mr-2"></i>
+                    <span>Enviar</span>
+                </span>
+            `;
 
                     // Criar feedback de erro
                     const feedback = document.createElement('div');
-                    feedback.className = 'feedback-message fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg shadow-lg z-50';
+                    feedback.className =
+                        'feedback-message fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg shadow-lg z-50';
                     feedback.innerHTML = `
-                    <div class="flex items-center">
-                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                        <span>${error.message || 'Ocorreu um erro ao enviar o formulário.'}</span>
-                    </div>
-                `;
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    <span>${error.message || 'Ocorreu um erro ao enviar o formulário.'}</span>
+                </div>
+            `;
                     document.body.appendChild(feedback);
 
                     setTimeout(() => {
                         feedback.remove();
                     }, 4000);
                 });
+        });
+
+        // Adicionar funcionalidade para fechar o modal
+        document.querySelectorAll('[data-modal-hide="success-modal"]').forEach(button => {
+            button.addEventListener('click', () => {
+                const modal = document.getElementById("success-modal");
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            });
         });
     </script>
 </body>

@@ -233,13 +233,15 @@ try {
         throw new Exception('Erro ao atualizar status: ' . $stmt->error);
     }
 
-    // Registrar no log apenas após todas as operações terem sucesso
-    $usuario = $_SESSION['usuario_nome'];
+    // Modificar esta parte do código onde registra o log
+    $usuario_id = $_SESSION['usuario_id'];
     $data_hora = date('Y-m-d H:i:s');
-    $sql_log = "INSERT INTO log_acoes (usuario, acao, tipo_formulario, id_formulario, data_hora) 
-                VALUES (?, 'Concluiu', ?, ?, ?)";
+    $acao = 'Concluiu';
+
+    $sql_log = "INSERT INTO log_acoes (usuario_id, acao, tipo_formulario, formulario_id, data_hora) 
+                VALUES (?, ?, ?, ?, ?)";
     $stmt_log = $conn->prepare($sql_log);
-    $stmt_log->bind_param('ssss', $usuario, $tipo, $id, $data_hora);
+    $stmt_log->bind_param('issss', $usuario_id, $acao, $tipo, $id, $data_hora);
     $stmt_log->execute();
 
     // Retorna apenas uma resposta JSON

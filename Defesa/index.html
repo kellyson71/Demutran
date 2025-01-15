@@ -1006,18 +1006,39 @@
       }
 
       function submitForm() {
-        const form = document.getElementById("DefesaForm");
-        const tipoSolicitacao =
-          document.getElementById("tipo_solicitacao").value;
-
+        // Cria uma cópia do formulário original
+        const originalForm = document.getElementById("DefesaForm");
+        const tempForm = originalForm.cloneNode(true);
+        
+        // Configura o formulário temporário
+        tempForm.style.display = 'none';
+        document.body.appendChild(tempForm);
+        
+        // Define action baseado no tipo de solicitação
+        const tipoSolicitacao = document.getElementById("tipo_solicitacao").value;
+        
         if (!tipoSolicitacao) {
-          showCustomAlert("Selecione um tipo de solicitação válido");
-          return;
+            showCustomAlert("Selecione um tipo de solicitação válido");
+            return;
         }
 
-        form.target = "_blank";
-        form.submit();
-      }
+        // Define a action correta
+        tempForm.action = tipoSolicitacao === "apresentacao_condutor" 
+            ? "../utils/form/gerar_formulario_AP.php" 
+            : "../utils/form/gerar_formulario.php";
+        
+        // Configura método e target
+        tempForm.method = "POST";
+        tempForm.target = "_blank";
+        
+        // Submit do formulário
+        tempForm.submit();
+        
+        // Remove o formulário temporário após o envio
+        setTimeout(() => {
+            document.body.removeChild(tempForm);
+        }, 100);
+    }
 
       function handleFinalSubmission(event) {
         event.preventDefault();

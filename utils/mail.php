@@ -4,7 +4,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 require_once(__DIR__ . '/../lib/vendor/autoload.php');
 
 // Configuração do modo de teste
-$TEST_MODE = true; // Mude para false quando quiser enviar emails reais
+$TEST_MODE = false; // Mude para false quando quiser enviar emails reais
 
 error_log("chamado ");
 
@@ -36,11 +36,11 @@ function sendMail($email, $nome, $assunto, $mensagem)
         $mail->Encoding = 'base64';
 
         // Adicionar imagem embutida
-        $mail->AddEmbeddedImage('./assets/icon.png', 'logo_demutran');
+        // $mail->AddEmbeddedImage('./assets/icon.png', 'logo_demutran');
 
-        $mail->Username = 'test@potocolo.estagiopaudosferros.com';
-        $mail->setFrom('test@potocolo.estagiopaudosferros.com', 'Prefeitura de Pau dos Ferros');
-        $mail->Password = 'Teste123!';
+        $mail->Username = 'demutran@demutranpaudosferros.com.br';
+        $mail->setFrom('demutran@demutranpaudosferros.com.br', 'demutran de Pau dos Ferros');
+        $mail->Password = 'WRVGAxCbrJ8wdM$';
         $mail->Port = 465;
 
         $mail->addAddress($email, $nome);

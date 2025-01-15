@@ -20,17 +20,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $data_formatada = $data_evento->format('d/m/Y');
         $data_horario = $data_formatada . " " . $_POST['horario_inicio'] . " às " . $_POST['horario_fim'];
 
-        // Gerar protocolo
-        $protocolo = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
-
-        // Inserir dados básicos
+        // Inserir primeiro com protocolo temporário para obter o ID
+        $protocolo_temp = "TEMP" . time();
         $stmt = $conn->prepare("INSERT INTO Parecer (protocolo, nome, telefone, cpf_cnpj, email, local, evento, 
                                ponto_referencia, data_horario, declaracao) 
                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         
         $declaracao = isset($_POST['declaracao']) ? 1 : 0;
-        $stmt->bind_param("sssssssssi", 
-            $protocolo,
+        $stmt->bind_param(
+            "sssssssssi",
+            $protocolo_temp,
             $_POST['nome_solicitante'],
             $_POST['telefone'],
             $_POST['cpf_cnpj'],
@@ -47,6 +46,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         $lastId = $conn->insert_id;
+
+        // Modificar o formato do protocolo para remover os zeros à esquerda
+        $protocolo = sprintf(
+            "PAR%s%s%s%d", // Removido %05d para %d para eliminar os zeros à esquerda
+            date('Y'),
+            date('d'),
+            date('m'),
+            $lastId
+        );
+
+        // Atualizar o registro com o protocolo final
+        $stmt = $conn->prepare("UPDATE Parecer SET protocolo = ? WHERE id = ?");
+        $stmt->bind_param(
+            "si",
+            $protocolo,
+            $lastId
+        );
+
+        if (!$stmt->execute()) {
+            throw new Exception("Erro ao atualizar protocolo: " . $stmt->error);
+        }
 
         // Nova estrutura de diretório para uploads
         $uploadDir = '../midia/parecer/' . $lastId . '/';
@@ -107,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST = array(
                 'email' => $_POST['email'],
                 'nome' => $_POST['nome_solicitante'],
-                'assunto' => "Solicitação de Parecer DEMUTRAN - Protocolo #{$protocolo}",
+                'assunto' => "Solicitação de Parecer DEMUTRAN - Protocolo {$protocolo}",
                 'mensagem' => "
                 <html>
                 <body style='font-family: Arial, sans-serif;'>
