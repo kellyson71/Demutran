@@ -1,14 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Formulário de Defesa</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         /* Copiado do gerar_formulario2.php */
-        body { margin-top: 20px; }
-        .container { max-width: 800px; }
-        
+        body {
+            margin-top: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+        }
+
         /* Estilo do cabeçalho e logos */
         .logo-container {
             position: relative;
@@ -131,7 +137,12 @@
         }
     </style>
 </head>
+
 <body>
+    <?php
+    require_once '../../components/print-components.php';
+    echo renderPrintComponents();
+    ?>
     <div class="container">
         <div class="logo-container">
             <img src="image1.png" alt="Logo Esquerda" class="logo logo-left">
@@ -209,7 +220,7 @@
                     }
                 }
 
-                if($dados['tipo_solicitacao'] == 'apresentacao_condutor') {
+                if ($dados['tipo_solicitacao'] == 'apresentacao_condutor') {
                     $campos_condutor = [
                         'cnh' => 'CNH',
                         'uf' => 'UF',
@@ -226,11 +237,11 @@
                 ?>
             </table>
 
-            <?php if(!empty($dados['defesa'])): ?>
-            <div class="section-title">FUNDAMENTAÇÃO DA DEFESA</div>
-            <div class="p-4" style="background-color: #f8f9fa; border-radius: 4px;">
-                <?php echo nl2br(htmlspecialchars($dados['defesa'])); ?>
-            </div>
+            <?php if (!empty($dados['defesa'])): ?>
+                <div class="section-title">FUNDAMENTAÇÃO DA DEFESA</div>
+                <div class="p-4" style="background-color: #f8f9fa; border-radius: 4px;">
+                    <?php echo nl2br(htmlspecialchars($dados['defesa'])); ?>
+                </div>
             <?php endif; ?>
         </div>
 
@@ -248,4 +259,5 @@
         </div>
     </div>
 </body>
+
 </html>

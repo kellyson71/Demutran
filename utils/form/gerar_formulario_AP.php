@@ -1,5 +1,7 @@
 <?php
 session_start();
+require_once '../../components/print-components.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Garantir que estamos recebendo um formulário de apresentação de condutor
     if ($_POST['tipo_solicitacao'] !== 'apresentacao_condutor') {
@@ -265,7 +267,7 @@ if (isset($_SESSION['form_data'])) {
 </head>
 
 <body>
-
+    <?php echo renderPrintComponents(); ?>
     <div class="container">
         <!-- Cabeçalho com logos -->
         <!-- <div class="row header">

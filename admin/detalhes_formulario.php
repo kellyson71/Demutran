@@ -262,6 +262,9 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                             case 'DAT':
                                 $form_url = "../utils/form/gerar_formulario_DAT.php";
                                 break;
+                            case 'SAC':
+                                $form_url = "../utils/form/gerar_formulario_sac.php"; // Adicionando o caso do SAC
+                                break;
                             case 'Parecer':
                                 $form_url = "../utils/form/gerar_formulario_parecer.php";
                                 break;

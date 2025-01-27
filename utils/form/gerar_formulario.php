@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../env/config.php';
+require_once '../../components/print-components.php';
 
 // Obter dados do formulário via POST ou GET
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -261,6 +262,7 @@ $dataAtual = date('d') . ' de ' . $mesPortugues . ' de ' . date('Y');
 </head>
 
 <body>
+    <?php echo renderPrintComponents(); ?>
 
     <div class="container">
         <!-- Cabeçalho com logos -->

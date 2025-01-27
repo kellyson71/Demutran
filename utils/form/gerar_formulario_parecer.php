@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../env/config.php';
+require_once '../../components/print-components.php';
 
 // Obter ID da URL
 $id = $_GET['id'] ?? '';
@@ -144,6 +145,7 @@ if (!$dados) {
 </head>
 
 <body>
+    <?php echo renderPrintComponents(); ?>
     <div class="container">
         <div class="logo-container">
             <img src="./image1.png" alt="Logo Esquerda" class="logo logo-left">

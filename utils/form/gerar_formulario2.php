@@ -2,48 +2,60 @@
 if (!isset($dados)) {
     die('Acesso direto não permitido');
 }
+require_once '../../components/print-components.php';
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Solicitação de Cartão PCD</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        body { 
+        body {
             margin: 20px 0;
             background: white;
         }
-        .container { 
+
+        .container {
             max-width: 800px;
             background: white;
             padding: 20px;
             margin: 0 auto;
         }
+
         .logo-container {
             position: relative;
             height: 120px;
             margin-bottom: 40px;
         }
+
         .logo {
             position: absolute;
             top: 0;
             max-width: 80px;
             height: auto;
         }
-        .logo-left { left: 0; }
-        .logo-right { right: 0; }
-        
+
+        .logo-left {
+            left: 0;
+        }
+
+        .logo-right {
+            right: 0;
+        }
+
         .centered-title {
             text-align: center;
             padding: 0 100px;
             margin-top: 20px;
         }
+
         .centered-title p {
             margin: 2px 0;
             line-height: 1.4;
         }
-        
+
         .section-title {
             background-color: #E3F2FD;
             padding: 8px 15px;
@@ -51,45 +63,55 @@ if (!isset($dados)) {
             font-weight: bold;
             border-left: 4px solid #2196F3;
         }
-        
+
         .data-table {
             width: 100%;
             margin: 10px 0;
         }
+
         .data-table td {
             padding: 6px;
             vertical-align: top;
         }
-        
+
         .signature-section {
             margin-top: 50px;
             text-align: center;
         }
+
         .signature-line {
             width: 60%;
             border-top: 1px solid #000;
             margin: 0 auto 5px;
         }
-        
+
         @media print {
-            body { margin: 0; background: white; }
-            .container { 
+            body {
+                margin: 0;
+                background: white;
+            }
+
+            .container {
                 width: 100%;
                 max-width: none;
                 margin: 0;
                 padding: 15px;
             }
+
             .section-title {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+
             .no-print {
                 display: none;
             }
         }
     </style>
 </head>
+
 <body>
+    <?php echo renderPrintComponents(); ?>
     <div class="container">
         <!-- Cabeçalho -->
         <div class="logo-container">
@@ -104,7 +126,7 @@ if (!isset($dados)) {
         </div>
 
         <h3 class="text-center mb-4">
-            <?php 
+            <?php
             $titulo = "SOLICITAÇÃO DE CARTÃO DE ESTACIONAMENTO ";
             $titulo .= strtoupper($dados['tipo_solicitacao'] ?? 'PCD');
             echo $titulo;
@@ -160,29 +182,29 @@ if (!isset($dados)) {
 
         <!-- Dados do Responsável Legal (se existir) -->
         <?php if (!empty($dados['cpf_representante']) || !empty($dados['nome_representante'])): ?>
-        <div class="section-title mt-4">DADOS DO RESPONSÁVEL</div>
-        <table class="data-table">
-            <tr>
-                <td width="30%"><strong>Nome do Responsável:</strong></td>
-                <td><?php echo htmlspecialchars($dados['nome_representante'] ?? 'Não informado'); ?></td>
-            </tr>
-            <tr>
-                <td><strong>CPF do Responsável:</strong></td>
-                <td><?php echo htmlspecialchars($dados['cpf_representante'] ?? 'Não informado'); ?></td>
-            </tr>
-            <tr>
-                <td><strong>Endereço do Responsável:</strong></td>
-                <td><?php echo htmlspecialchars($dados['endereco_representante'] ?? 'Não informado'); ?></td>
-            </tr>
-            <tr>
-                <td><strong>Email do Responsável:</strong></td>
-                <td><?php echo htmlspecialchars($dados['email_representante'] ?? 'Não informado'); ?></td>
-            </tr>
-            <tr>
-                <td><strong>Telefone do Responsável:</strong></td>
-                <td><?php echo htmlspecialchars($dados['telefone_representante'] ?? 'Não informado'); ?></td>
-            </tr>
-        </table>
+            <div class="section-title mt-4">DADOS DO RESPONSÁVEL</div>
+            <table class="data-table">
+                <tr>
+                    <td width="30%"><strong>Nome do Responsável:</strong></td>
+                    <td><?php echo htmlspecialchars($dados['nome_representante'] ?? 'Não informado'); ?></td>
+                </tr>
+                <tr>
+                    <td><strong>CPF do Responsável:</strong></td>
+                    <td><?php echo htmlspecialchars($dados['cpf_representante'] ?? 'Não informado'); ?></td>
+                </tr>
+                <tr>
+                    <td><strong>Endereço do Responsável:</strong></td>
+                    <td><?php echo htmlspecialchars($dados['endereco_representante'] ?? 'Não informado'); ?></td>
+                </tr>
+                <tr>
+                    <td><strong>Email do Responsável:</strong></td>
+                    <td><?php echo htmlspecialchars($dados['email_representante'] ?? 'Não informado'); ?></td>
+                </tr>
+                <tr>
+                    <td><strong>Telefone do Responsável:</strong></td>
+                    <td><?php echo htmlspecialchars($dados['telefone_representante'] ?? 'Não informado'); ?></td>
+                </tr>
+            </table>
         <?php endif; ?>
 
         <!-- Informações do Cartão -->
@@ -204,8 +226,8 @@ if (!isset($dados)) {
             <div class="signature-line"></div>
             <p>Assinatura do Solicitante</p>
             <?php if ($dados['representante_legal'] === 'sim'): ?>
-            <div class="signature-line mt-4"></div>
-            <p>Assinatura do Representante Legal</p>
+                <div class="signature-line mt-4"></div>
+                <p>Assinatura do Representante Legal</p>
             <?php endif; ?>
             <div class="signature-line mt-4"></div>
             <p>Assinatura do Responsável - DEMUTRAN</p>
@@ -213,11 +235,12 @@ if (!isset($dados)) {
     </div>
 
     <?php if (isset($_GET['print']) && $_GET['print'] === 'true'): ?>
-    <script>
-        window.onload = function() {
-            window.print();
-        }
-    </script>
+        <script>
+            window.onload = function() {
+                window.print();
+            }
+        </script>
     <?php endif; ?>
 </body>
+
 </html>
