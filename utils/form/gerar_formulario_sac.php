@@ -314,7 +314,7 @@ $statusColor = getStatusColor($situacao);
 <div class="section-title">DETALHES DA SOLICITAÇÃO</div>
 <div class="data-row">
     <table class="data-table">
-        <tr>
+        <!-- <tr>
             <td width="50%"><strong>Tipo de Contato:</strong> <?php echo $tipo_contato; ?></td>
             <td>
                 <strong>Status:</strong>
@@ -322,7 +322,7 @@ $statusColor = getStatusColor($situacao);
                     <?php echo $situacao; ?>
                 </span>
             </td>
-        </tr>
+        </tr> -->
         <tr>
             <td colspan="2"><strong>Assunto:</strong> <?php echo $assunto; ?></td>
         </tr>
