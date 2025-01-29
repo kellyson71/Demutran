@@ -1,123 +1,152 @@
 <?php
 session_start();
-require_once '../../env/config.php';
-require_once '../../components/print-components.php';
 
-// Obter dados do formulário via POST ou GET
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $_SESSION['form_data'] = $_POST;
-    $formData = $_POST;
-} else {
-    // Verificar se temos ID e tipo na URL
-    $id = $_GET['id'] ?? '';
-    $tipo = $_GET['tipo_solicitacao'] ?? '';
+// Configurar cabeçalhos para evitar cache
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
 
-    if ($id && $tipo) {
-        // Consultar banco de dados
-        $sql = "SELECT * FROM solicitacoes_demutran WHERE id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $formData = $result->fetch_assoc();
+// Verificar se é uma requisição POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die('Método não permitido');
+}
 
-        if (!$formData) {
-            die('Formulário não encontrado');
-        }
-    } else if (isset($_SESSION['form_data'])) {
-        $formData = $_SESSION['form_data'];
-    } else {
-        die('Dados do formulário não encontrados');
+// Validar dados obrigatórios
+$required_fields = ['nome', 'cpf', 'endereco', 'bairro', 'municipio', 'placa'];
+foreach ($required_fields as $field) {
+    if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) {
+        die('Campos obrigatórios não preenchidos');
     }
 }
 
-// Formatar o texto do tipo de solicitação para exibição
-$tipoRequerente = $formData['tipo_solicitacao'] ?? '';
-switch ($tipoRequerente) {
-    case 'defesa_previa':
-        $tipoRequerente = 'Defesa Prévia';
-        break;
-    case 'jari':
-        $tipoRequerente = 'JARI';
-        break;
-    default:
-        $tipoRequerente = 'Não informado';
+try {
+    require_once '../../env/config.php';
+    require_once '../../components/print-components.php';
+
+    // Armazenar dados do formulário na sessão
+    $_SESSION['form_data'] = $_POST;
+    $formData = $_POST;
+
+    // Resto do código existente...
+    // Obter dados do formulário via POST ou GET
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $_SESSION['form_data'] = $_POST;
+        $formData = $_POST;
+    } else {
+        // Verificar se temos ID e tipo na URL
+        $id = $_GET['id'] ?? '';
+        $tipo = $_GET['tipo_solicitacao'] ?? '';
+
+        if ($id && $tipo) {
+            // Consultar banco de dados
+            $sql = "SELECT * FROM solicitacoes_demutran WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $formData = $result->fetch_assoc();
+
+            if (!$formData) {
+                die('Formulário não encontrado');
+            }
+        } else if (isset($_SESSION['form_data'])) {
+            $formData = $_SESSION['form_data'];
+        } else {
+            die('Dados do formulário não encontrados');
+        }
+    }
+
+    // Formatar o texto do tipo de solicitação para exibição
+    $tipoRequerente = $formData['tipo_solicitacao'] ?? '';
+    switch ($tipoRequerente) {
+        case 'defesa_previa':
+            $tipoRequerente = 'Defesa Prévia';
+            break;
+        case 'jari':
+            $tipoRequerente = 'JARI';
+            break;
+        default:
+            $tipoRequerente = 'Não informado';
+    }
+
+    // Extrair dados do formulário
+    $nome = $formData['nome'] ?? '';
+    $cpf = $formData['cpf'] ?? '';
+    $endereco = $formData['endereco'] ?? '';
+    $numero = $formData['numero'] ?? '';
+    $complemento = $formData['complemento'] ?? '';
+    $bairro = $formData['bairro'] ?? '';
+    $cep = $formData['cep'] ?? '';
+    $municipio = $formData['municipio'] ?? '';
+    $telefone = $formData['telefone'] ?? '';
+    $placa = $formData['placa'] ?? '';
+    $marcaModelo = $formData['marcaModelo'] ?? '';
+    $cor = $formData['cor'] ?? '';
+    $especie = $formData['especie'] ?? '';
+    $categoria = $formData['categoria'] ?? '';
+    $ano = $formData['ano'] ?? '';
+    $autoInfracao = $formData['autoInfracao'] ?? '';
+    $dataInfracao = $formData['dataInfracao'] ?? '';
+    $horaInfracao = $formData['horaInfracao'] ?? '';
+    $localInfracao = $formData['localInfracao'] ?? '';
+    $enquadramento = $formData['enquadramento'] ?? '';
+    $defesa = $formData['defesa'] ?? '';
+
+    // Configurações baseadas no tipo de solicitação
+    $tipoSolicitacao = $formData['tipo_solicitacao'] ?? '';
+    $configs = [
+        'titulo' => '',
+        'bg_color' => '',
+        'border_color' => '',
+        'destinatario' => '',
+        'texto_acao' => ''
+    ];
+
+    switch ($tipoSolicitacao) {
+        case 'defesa_previa':
+            $configs = [
+                'titulo' => 'REQUERIMENTO PARA APRESENTAÇÃO DE DEFESA PRÉVIA',
+                'bg_color' => '#E3F2FD',
+                'border_color' => '#2196F3',
+                'destinatario' => 'Ilustríssimo Senhor Gerente Executivo do Departamento Municipal de Trânsito – DEMUTRAN de Pau dos Ferros/RN',
+                'texto_acao' => 'Vem interpor Defesa Prévia'
+            ];
+            break;
+        case 'jari':
+            $configs = [
+                'titulo' => 'REQUERIMENTO PARA APRESENTAÇÃO DE RECURSO À JARI',
+                'bg_color' => '#FFF3E0',
+                'border_color' => '#FF9800',
+                'destinatario' => 'Ilustríssimo Senhor Presidente da Junta Administrativa de Recursos de Infrações - JARI',
+                'texto_acao' => 'Vem interpor Recurso'
+            ];
+            break;
+        default:
+            die('Tipo de solicitação inválido');
+    }
+
+    // Formatar data atual para português
+    $meses = array(
+        'January' => 'janeiro',
+        'February' => 'fevereiro',
+        'March' => 'março',
+        'April' => 'abril',
+        'May' => 'maio',
+        'June' => 'junho',
+        'July' => 'julho',
+        'August' => 'agosto',
+        'September' => 'setembro',
+        'October' => 'outubro',
+        'November' => 'novembro',
+        'December' => 'dezembro'
+    );
+    $mesIngles = date('F');
+    $mesPortugues = $meses[$mesIngles];
+    $dataAtual = date('d') . ' de ' . $mesPortugues . ' de ' . date('Y');
+} catch (Exception $e) {
+    error_log('Erro ao gerar formulário: ' . $e->getMessage());
+    die('Erro ao gerar o formulário. Por favor, tente novamente.');
 }
-
-// Extrair dados do formulário
-$nome = $formData['nome'] ?? '';
-$cpf = $formData['cpf'] ?? '';
-$endereco = $formData['endereco'] ?? '';
-$numero = $formData['numero'] ?? '';
-$complemento = $formData['complemento'] ?? '';
-$bairro = $formData['bairro'] ?? '';
-$cep = $formData['cep'] ?? '';
-$municipio = $formData['municipio'] ?? '';
-$telefone = $formData['telefone'] ?? '';
-$placa = $formData['placa'] ?? '';
-$marcaModelo = $formData['marcaModelo'] ?? '';
-$cor = $formData['cor'] ?? '';
-$especie = $formData['especie'] ?? '';
-$categoria = $formData['categoria'] ?? '';
-$ano = $formData['ano'] ?? '';
-$autoInfracao = $formData['autoInfracao'] ?? '';
-$dataInfracao = $formData['dataInfracao'] ?? '';
-$horaInfracao = $formData['horaInfracao'] ?? '';
-$localInfracao = $formData['localInfracao'] ?? '';
-$enquadramento = $formData['enquadramento'] ?? '';
-$defesa = $formData['defesa'] ?? '';
-
-// Configurações baseadas no tipo de solicitação
-$tipoSolicitacao = $formData['tipo_solicitacao'] ?? '';
-$configs = [
-    'titulo' => '',
-    'bg_color' => '',
-    'border_color' => '',
-    'destinatario' => '',
-    'texto_acao' => ''
-];
-
-switch ($tipoSolicitacao) {
-    case 'defesa_previa':
-        $configs = [
-            'titulo' => 'REQUERIMENTO PARA APRESENTAÇÃO DE DEFESA PRÉVIA',
-            'bg_color' => '#E3F2FD',
-            'border_color' => '#2196F3',
-            'destinatario' => 'Ilustríssimo Senhor Gerente Executivo do Departamento Municipal de Trânsito – DEMUTRAN de Pau dos Ferros/RN',
-            'texto_acao' => 'Vem interpor Defesa Prévia'
-        ];
-        break;
-    case 'jari':
-        $configs = [
-            'titulo' => 'REQUERIMENTO PARA APRESENTAÇÃO DE RECURSO À JARI',
-            'bg_color' => '#FFF3E0',
-            'border_color' => '#FF9800',
-            'destinatario' => 'Ilustríssimo Senhor Presidente da Junta Administrativa de Recursos de Infrações - JARI',
-            'texto_acao' => 'Vem interpor Recurso'
-        ];
-        break;
-    default:
-        die('Tipo de solicitação inválido');
-}
-
-// Formatar data atual para português
-$meses = array(
-    'January' => 'janeiro',
-    'February' => 'fevereiro',
-    'March' => 'março',
-    'April' => 'abril',
-    'May' => 'maio',
-    'June' => 'junho',
-    'July' => 'julho',
-    'August' => 'agosto',
-    'September' => 'setembro',
-    'October' => 'outubro',
-    'November' => 'novembro',
-    'December' => 'dezembro'
-);
-$mesIngles = date('F');
-$mesPortugues = $meses[$mesIngles];
-$dataAtual = date('d') . ' de ' . $mesPortugues . ' de ' . date('Y');
 ?>
 
 <!DOCTYPE html>

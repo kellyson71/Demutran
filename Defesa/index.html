@@ -268,6 +268,58 @@
                     placeholder="Exemplo: 12345678901"
                     class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
             </div>
+            <!-- CNH do Condutor -->
+            <div class="mb-4">
+                <label for="cnh_numero" class="block text-gray-700 mb-2">
+                    <i class="fas fa-id-card"></i> Número da CNH:
+                </label>
+                <input
+                    type="text"
+                    id="cnh_numero"
+                    name="cnh_numero"
+                    placeholder="Exemplo: 12345678901"
+                    class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+            </div>
+
+            <!-- UF da CNH -->
+            <div class="mb-4">
+                <label for="cnh_uf" class="block text-gray-700 mb-2">
+                    <i class="fas fa-map-marker-alt"></i> UF da CNH:
+                </label>
+                <select
+                    id="cnh_uf"
+                    name="cnh_uf"
+                    class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <option value="">Selecione a UF</option>
+                    <option value="AC">AC</option>
+                    <option value="AL">AL</option>
+                    <option value="AP">AP</option>
+                    <option value="AM">AM</option>
+                    <option value="BA">BA</option>
+                    <option value="CE">CE</option>
+                    <option value="DF">DF</option>
+                    <option value="ES">ES</option>
+                    <option value="GO">GO</option>
+                    <option value="MA">MA</option>
+                    <option value="MT">MT</option>
+                    <option value="MS">MS</option>
+                    <option value="MG">MG</option>
+                    <option value="PA">PA</option>
+                    <option value="PB">PB</option>
+                    <option value="PR">PR</option>
+                    <option value="PE">PE</option>
+                    <option value="PI">PI</option>
+                    <option value="RJ">RJ</option>
+                    <option value="RN">RN</option>
+                    <option value="RS">RS</option>
+                    <option value="RO">RO</option>
+                    <option value="RR">RR</option>
+                    <option value="SC">SC</option>
+                    <option value="SP">SP</option>
+                    <option value="SE">SE</option>
+                    <option value="TO">TO</option>
+                </select>
+            </div>
           </div>
 
           <!-- Campos específicos para Defesa Prévia -->
@@ -1072,18 +1124,67 @@
       }
 
       function submitForm() {
+    try {
         const form = document.getElementById("DefesaForm");
-        const tipoSolicitacao =
-          document.getElementById("tipo_solicitacao").value;
+        const tipoSolicitacao = document.getElementById("tipo_solicitacao").value;
 
         if (!tipoSolicitacao) {
-          showCustomAlert("Selecione um tipo de solicitação válido");
-          return;
+            showCustomAlert("Selecione um tipo de solicitação válido");
+            return;
         }
 
-        form.target = "_blank";
-        form.submit();
-      }
+        // Criar um novo formulário temporário
+        const tempForm = document.createElement('form');
+        tempForm.method = 'POST';
+        tempForm.target = '_blank';
+        tempForm.action = tipoSolicitacao === "apresentacao_condutor" 
+            ? "../utils/form/gerar_formulario_AP.php"
+            : "../utils/form/gerar_formulario.php";
+
+        // Copiar todos os campos do formulário original
+        const formData = new FormData(form);
+        for (let [key, value] of formData.entries()) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = value;
+            tempForm.appendChild(input);
+        }
+
+        // Adicionar timestamp para evitar cache
+        const timestampInput = document.createElement('input');
+        timestampInput.type = 'hidden';
+        timestampInput.name = 'timestamp';
+        timestampInput.value = new Date().getTime();
+        tempForm.appendChild(timestampInput);
+
+        // Adicionar o formulário ao documento, enviar e remover
+        document.body.appendChild(tempForm);
+        tempForm.submit();
+        document.body.removeChild(tempForm);
+
+    } catch (error) {
+        console.error('Erro ao submeter formulário:', error);
+        showCustomAlert("Erro ao gerar o documento. Por favor, tente novamente.");
+    }
+}
+
+// Função auxiliar para verificar se a janela pop-up foi bloqueada
+function checkPopupBlocked(popupWindow) {
+    return new Promise((resolve) => {
+        try {
+            if (!popupWindow || popupWindow.closed || typeof popupWindow.closed == 'undefined') {
+                showCustomAlert("Por favor, permita pop-ups para este site para gerar o documento.");
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+        } catch (e) {
+            showCustomAlert("Por favor, permita pop-ups para este site para gerar o documento.");
+            resolve(true);
+        }
+    });
+}
 
       function handleFinalSubmission(event) {
         event.preventDefault();
@@ -1322,6 +1423,31 @@
             modal.classList.add("hidden");
             modal.classList.remove("flex");
         });
+    });
+
+    // Adicione no início do seu script
+    window.addEventListener('error', function(event) {
+        // Ignora erros de extensões do Chrome/navegador
+        if (event.filename && (
+            event.filename.includes('chrome-extension') ||
+            event.filename.includes('mozilla-extension') ||
+            event.filename.includes('safari-extension') ||
+            event.message.includes('permission error')
+        )) {
+            event.preventDefault();
+            return;
+        }
+    });
+
+    window.addEventListener('unhandledrejection', function(event) {
+        // Ignora erros de extensões relacionados a permissão
+        if (event.reason && (
+            event.reason.name === 'n' ||
+            (event.reason.message && event.reason.message.includes('permission error'))
+        )) {
+            event.preventDefault();
+            return;
+        }
     });
     </script>
   </body>

@@ -3,53 +3,12 @@ session_start();
 require_once '../../components/print-components.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Garantir que estamos recebendo um formulário de apresentação de condutor
-    if ($_POST['tipo_solicitacao'] !== 'apresentacao_condutor') {
-        header('Location: gerar_formulario.php');
-        exit;
-    }
-
+    // Validar e processar os dados recebidos
     $_SESSION['form_data'] = $_POST;
-    $tipoRequerente = $_POST['tipoRequerente'] ?? '';
-    $nome = $_POST['nome'] ?? '';
-    $cpf = $_POST['cpf'] ?? '';
-    $endereco = $_POST['endereco'] ?? '';
-    $numero = $_POST['numero'] ?? '';
-    $complemento = $_POST['complemento'] ?? '';
-    $bairro = $_POST['bairro'] ?? '';
-    $cep = $_POST['cep'] ?? '';
-    $municipio = $_POST['municipio'] ?? '';
-    $telefone = $_POST['telefone'] ?? '';
-    $placa = $_POST['placa'] ?? '';
-    $marcaModelo = $_POST['marcaModelo'] ?? '';
-    $autoInfracao = $_POST['autoInfracao'] ?? '';
+    $formData = $_POST;
 
-    // Campos específicos de apresentação do condutor
-    $identidade = $_POST['identidade'] ?? '';
-    $orgao_emissor = 'DEMUTRAN   21787-0'; // Valor fixo conforme especificado
-
-    $_SESSION['form_data'] = [
-        'tipoRequerente' => $tipoRequerente,
-        'nome' => $nome,
-        'cpf' => $cpf,
-        'endereco' => $endereco,
-        'numero' => $numero,
-        'complemento' => $complemento,
-        'bairro' => $bairro,
-        'cep' => $cep,
-        'municipio' => $municipio,
-        'telefone' => $telefone,
-        'placa' => $placa,
-        'marcaModelo' => $marcaModelo,
-        'autoInfracao' => $autoInfracao,
-        'identidade' => $identidade,
-        'orgao_emissor' => $orgao_emissor
-    ];
-}
-// Verifica se o formulário foi enviado
-if (isset($_SESSION['form_data'])) {
-    $formData = $_SESSION['form_data'];
-    $tipoRequerente = $formData['tipoRequerente'] ?? '';
+    // Campos básicos
+    $tipoRequerente = $formData['tipo_requerente'] ?? '';
     $nome = $formData['nome'] ?? '';
     $cpf = $formData['cpf'] ?? '';
     $endereco = $formData['endereco'] ?? '';
@@ -59,61 +18,40 @@ if (isset($_SESSION['form_data'])) {
     $cep = $formData['cep'] ?? '';
     $municipio = $formData['municipio'] ?? '';
     $telefone = $formData['telefone'] ?? '';
+    $email = $formData['gmail'] ?? ''; // Usar o campo gmail como email
+
+    // Dados do veículo
     $placa = $formData['placa'] ?? '';
     $marcaModelo = $formData['marcaModelo'] ?? '';
-    $cor = $formData['cor'] ?? '';
-    $especie = $formData['especie'] ?? '';
-    $categoria = $formData['categoria'] ?? '';
-    $ano = $formData['ano'] ?? '';
     $autoInfracao = $formData['autoInfracao'] ?? '';
-    $dataInfracao = $formData['dataInfracao'] ?? '';
-    $horaInfracao = $formData['horaInfracao'] ?? '';
-    $localInfracao = $formData['localInfracao'] ?? '';
-    $enquadramento = $formData['enquadramento'] ?? '';
-    $defesa = $formData['defesa'] ?? '';
+
+    // Campos específicos de apresentação do condutor
     $identidade = $formData['identidade'] ?? '';
-    $orgao_emissor = $formData['orgao_emissor'] ?? '';
-
-    // Processar o arquivo enviado
-    if (isset($_FILES['signedDocument'])) {
-        $arquivoTmp = $_FILES['signedDocument']['tmp_name'];
-        $nomeArquivo = $_FILES['signedDocument']['name'];
-        $destino = 'uploads/' . $nomeArquivo;
-
-        // Verifica se o diretório existe, senão cria
-        if (!is_dir('uploads')) {
-            mkdir('uploads', 0777, true);
-        }
-
-        // Move o arquivo para o diretório de destino
-        move_uploaded_file($arquivoTmp, $destino);
-    }
-
-    // Formatar data para exibição
-    $dataAtual = date('d') . ' de ' . date('F') . ' de ' . date('Y');
-
-    // Mapear os meses para português
-    $meses = array(
-        'January' => 'janeiro',
-        'February' => 'fevereiro',
-        'March' => 'março',
-        'April' => 'abril',
-        'May' => 'maio',
-        'June' => 'junho',
-        'July' => 'julho',
-        'August' => 'agosto',
-        'September' => 'setembro',
-        'October' => 'outubro',
-        'November' => 'novembro',
-        'December' => 'dezembro'
-    );
-    $mesIngles = date('F');
-    $mesPortugues = $meses[$mesIngles];
-    $dataAtual = date('d') . ' de ' . $mesPortugues . ' de ' . date('Y');
+    $orgao_emissor = 'DEMUTRAN   21787-0';
+    $cnh_numero = $formData['cnh_numero'] ?? '';
+    $cnh_uf = $formData['cnh_uf'] ?? '';
 } else {
-    echo 'Dados do formulário não encontrados na sessão.';
-    exit;
+    die('Método não permitido');
 }
+
+// Formatar data atual
+$meses = array(
+    'January' => 'janeiro',
+    'February' => 'fevereiro',
+    'March' => 'março',
+    'April' => 'abril',
+    'May' => 'maio',
+    'June' => 'junho',
+    'July' => 'julho',
+    'August' => 'agosto',
+    'September' => 'setembro',
+    'October' => 'outubro',
+    'November' => 'novembro',
+    'December' => 'dezembro'
+);
+$mesIngles = date('F');
+$mesPortugues = $meses[$mesIngles];
+$dataAtual = date('d') . ' de ' . $mesPortugues . ' de ' . date('Y');
 ?>
 
 <!DOCTYPE html>
@@ -333,8 +271,9 @@ if (isset($_SESSION['form_data'])) {
                     <td><strong>CPF:</strong> <?php echo $cpf; ?></td>
                 </tr>
                 <tr>
-                    <td><strong>CNH:</strong> [CNH]</td>
-                    <td><strong>UF:</strong> [UF]</td>
+                    <td><strong>CNH:</strong> <?php echo $cnh_numero; ?></td>
+                    <td><strong>UF:</strong> <?php echo $cnh_uf; ?></td>
+                    <td><strong>E-mail:</strong> <?php echo $email; ?></td>
                 </tr>
                 <tr>
                     <td colspan="3"><strong>Residente à:</strong> <?php echo $endereco; ?>, Nº <?php echo $numero; ?>
@@ -346,7 +285,6 @@ if (isset($_SESSION['form_data'])) {
                     <td><strong>Município:</strong> <?php echo $municipio; ?></td>
                 </tr>
                 <tr>
-                    <td><strong>E-mail:</strong> [Email]</td>
                     <td><strong>Telefone:</strong> <?php echo $telefone; ?></td>
                 </tr>
             </table>
