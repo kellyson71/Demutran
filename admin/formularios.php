@@ -1,48 +1,85 @@
 <?php
+
+declare(strict_types=1);
+
 session_start();
-include '../env/config.php';
-include './includes/template.php';  // Adicionar include do template
+require_once '../env/config.php';
+require_once './includes/template.php';
 
-// Atualizar view_mode se houver uma mudança via GET
-if (isset($_GET['view'])) {
-    $_SESSION['view_mode'] = $_GET['view'];
-}
-
-// Usar o modo de visualização da sessão ou o padrão 'grid'
-$view_mode = $_SESSION['view_mode'] ?? 'grid';
-
+// Verificação de autenticação
 if (!isset($_SESSION['usuario_id'])) {
     header('Location: login.php');
     exit();
 }
 
-
-
-$notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
-
-function obterSubmissoesPaginadas($conn, $tabela, $limite, $offset)
+// Funções auxiliares
+function setViewMode(): string
 {
-    $sql = "SELECT * FROM $tabela ORDER BY id DESC LIMIT $limite OFFSET $offset";
-    return $conn->query($sql);
+    if (isset($_GET['view'])) {
+        $_SESSION['view_mode'] = $_GET['view'];
+    }
+    return $_SESSION['view_mode'] ?? 'grid';
 }
 
-// Add this helper function near the top with other functions
-function safeString($value)
+function obterSubmissoesPaginadas(mysqli $conn, string $tabela, int $limite, int $offset): mysqli_result
+{
+    $sql = "SELECT * FROM $tabela ORDER BY id DESC LIMIT ? OFFSET ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('ii', $limite, $offset);
+    $stmt->execute();
+    return $stmt->get_result();
+}
+
+function safeString(?string $value): string
 {
     return htmlspecialchars($value ?? 'Não informado', ENT_QUOTES, 'UTF-8');
 }
 
-// Adicionar função auxiliar para obter o título correto
-function getTipoJariLabel($subtipo)
+function getTipoJariLabel(string $subtipo): array
 {
-    $labels = [
-        'apresentacao_condutor' => ['titulo' => 'Apresentação de Condutor', 'subtitulo' => 'Indicação do condutor infrator'],
-        'defesa_previa' => ['titulo' => 'Defesa Prévia', 'subtitulo' => 'Contestação de infração'],
-        'jari' => ['titulo' => 'Recurso JARI', 'subtitulo' => 'Junta Administrativa de Recursos de Infrações']
-    ];
-
-    return $labels[$subtipo] ?? ['titulo' => 'JARI', 'subtitulo' => 'Tipo não especificado'];
+    return [
+        'apresentacao_condutor' => ['titulo' => 'Apresentação de Condutor'],
+        'defesa_previa' => ['titulo' => 'Defesa Prévia'],
+        'jari' => ['titulo' => 'Recurso JARI']
+    ][$subtipo] ?? ['titulo' => 'JARI'];
 }
+
+function renderStatusBadge(string $situacao): string
+{
+    if ($situacao === 'Concluído') {
+        return '<span class="status-badge bg-green-100 text-green-800 ml-2">Concluído</span>';
+    }
+    return '';
+}
+
+function renderItemHeader(array $item): string
+{
+    $titulo = $item['tipo'] === 'JARI' && isset($item['subtipo'])
+        ? getTipoJariLabel($item['subtipo'])['titulo']
+        : $item['tipo'];
+
+    return "
+        <h3 class='text-lg font-semibold text-gray-800 flex items-center'>
+            {$titulo}
+            " . renderStatusBadge($item['situacao']) . "
+        </h3>
+    ";
+}
+
+function renderInfoLine(string $label, ?string $value): string
+{
+    $value = htmlspecialchars($value ?? 'Não informado');
+    return "
+        <div class='flex justify-between items-center border-b border-gray-100 pb-2'>
+            <span class='text-sm text-gray-600'>{$label}</span>
+            <span class='text-sm font-medium text-gray-800'>{$value}</span>
+        </div>
+    ";
+}
+
+// Inicialização de variáveis
+$view_mode = setViewMode();
+$notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 
 // Variáveis de paginação
 $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
@@ -67,18 +104,14 @@ while ($row = $jari->fetch_assoc()) {
     $submissoes[] = $row;
 }
 while ($row = $pcd->fetch_assoc()) {
-    // Define o tipo baseado no tipo_solicitacao
     $row['tipo'] = strtoupper($row['tipo_solicitacao']); // Converte 'pcd' ou 'idoso' para maiúsculas
     $submissoes[] = $row;
 }
-// Processamento das submissões de 'DAT'
 while ($row = $dat->fetch_assoc()) {
     $row['tipo'] = 'DAT';
-    // Inicializar valores padrão
     $row['preenchimento_status'] = 'Incompleto'; // Valor padrão
     $row['email'] = 'Não informado'; // Valor padrão
 
-    // Buscar informações adicionais da tabela formularios_dat_central
     $token = $conn->real_escape_string($row['token']);
     $sql_dat_info = "SELECT fc.*, d1.nome 
                      FROM formularios_dat_central fc 
@@ -98,7 +131,6 @@ while ($row = $dat->fetch_assoc()) {
 
     $submissoes[] = $row;
 }
-
 
 // Obter parâmetros de pesquisa e filtro
 $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
@@ -228,8 +260,17 @@ if (!empty($search)) {
     });
 }
 
-// Ordenar submissões por data
+// Ordenar submissões por status (pendentes primeiro) e depois por data
 usort($submissoes, function ($a, $b) {
+    // Primeiro critério: status (pendentes primeiro)
+    $statusA = ($a['situacao'] ?? '') === 'Concluído' ? 1 : 0;
+    $statusB = ($b['situacao'] ?? '') === 'Concluído' ? 1 : 0;
+
+    if ($statusA !== $statusB) {
+        return $statusA - $statusB;
+    }
+
+    // Segundo critério: data (mais recentes primeiro)
     return strtotime($b['data_submissao']) - strtotime($a['data_submissao']);
 });
 
@@ -279,23 +320,45 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
     <script src="//unpkg.com/alpinejs" defer></script>
 
     <style>
-    [x-cloak] {
-        display: none;
-    }
+        [x-cloak] {
+            display: none;
+        }
+
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-completed {
+            opacity: 0.75;
+        }
+
+        .card-completed:hover {
+            opacity: 1;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            margin-left: 0.5rem;
+        }
     </style>
 
     <!-- Script para filtros -->
     <script>
-    function filtrar(tipo) {
-        var cards = document.querySelectorAll('.form-card');
-        cards.forEach(function(card) {
-            if (tipo === 'todos' || card.dataset.tipo === tipo) {
-                card.classList.remove('hidden');
-            } else {
-                card.classList.add('hidden');
-            }
-        });
-    }
+        function filtrar(tipo) {
+            var cards = document.querySelectorAll('.form-card');
+            cards.forEach(function(card) {
+                if (tipo === 'todos' || card.dataset.tipo === tipo) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
     </script>
 </head>
 
@@ -460,29 +523,29 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
 
                             <!-- Active Filters (if any) -->
                             <?php if (!empty($_GET['search']) || !empty($_GET['tipo'])): ?>
-                            <div class="mt-4 flex items-center space-x-2">
-                                <span class="text-sm text-gray-500">Filtros ativos:</span>
-                                <?php if (!empty($_GET['search'])): ?>
-                                <span
-                                    class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-                                    "<?php echo htmlspecialchars($_GET['search']); ?>"
-                                    <a href="?<?php echo http_build_query(array_merge($_GET, ['search' => ''])); ?>"
-                                        class="ml-2 text-blue-600 hover:text-blue-800">
-                                        <span class="material-icons text-sm">close</span>
-                                    </a>
-                                </span>
-                                <?php endif; ?>
-                                <?php if (!empty($_GET['tipo'])): ?>
-                                <span
-                                    class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-800">
-                                    Tipo: <?php echo htmlspecialchars($_GET['tipo']); ?>
-                                    <a href="?<?php echo http_build_query(array_merge($_GET, ['tipo' => ''])); ?>"
-                                        class="ml-2 text-gray-600 hover:text-gray-800">
-                                        <span class="material-icons text-sm">close</span>
-                                    </a>
-                                </span>
-                                <?php endif; ?>
-                            </div>
+                                <div class="mt-4 flex items-center space-x-2">
+                                    <span class="text-sm text-gray-500">Filtros ativos:</span>
+                                    <?php if (!empty($_GET['search'])): ?>
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                                            "<?php echo htmlspecialchars($_GET['search']); ?>"
+                                            <a href="?<?php echo http_build_query(array_merge($_GET, ['search' => ''])); ?>"
+                                                class="ml-2 text-blue-600 hover:text-blue-800">
+                                                <span class="material-icons text-sm">close</span>
+                                            </a>
+                                        </span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($_GET['tipo'])): ?>
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-800">
+                                            Tipo: <?php echo htmlspecialchars($_GET['tipo']); ?>
+                                            <a href="?<?php echo http_build_query(array_merge($_GET, ['tipo' => ''])); ?>"
+                                                class="ml-2 text-gray-600 hover:text-gray-800">
+                                                <span class="material-icons text-sm">close</span>
+                                            </a>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
                             <?php endif; ?>
                         </form>
                     </div>
@@ -507,10 +570,10 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                                 <?php echo $total_nao_lidos; ?>
                             </span>
                             <?php if ($apenas_nao_lidos): ?>
-                            <a href="?<?php echo http_build_query(array_merge($_GET, ['nao_lidos' => null])); ?>"
-                                class="ml-2 text-blue-600 hover:text-blue-800">
-                                <span class="material-icons text-sm">close</span>
-                            </a>
+                                <a href="?<?php echo http_build_query(array_merge($_GET, ['nao_lidos' => null])); ?>"
+                                    class="ml-2 text-blue-600 hover:text-blue-800">
+                                    <span class="material-icons text-sm">close</span>
+                                </a>
                             <?php endif; ?>
                         </button>
                     </div>
@@ -538,216 +601,233 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                     'space-y-3': viewMode === 'list'
                 }">
                     <?php if (empty($submissoes_pagina)): ?>
-                    <div class="bg-white rounded-lg shadow-sm p-6 text-center flex flex-col items-center">
-                        <span class="material-icons text-gray-400 mb-4" style="font-size: 48px;">inbox</span>
-                        <p class="text-gray-600 text-lg">
-                            <?php echo $apenas_nao_lidos ? 'Nenhum formulário não lido encontrado.' : 'Nenhum formulário encontrado.'; ?>
-                        </p>
-                    </div>
+                        <div class="bg-white rounded-lg shadow-sm p-6 text-center flex flex-col items-center">
+                            <span class="material-icons text-gray-400 mb-4" style="font-size: 48px;">inbox</span>
+                            <p class="text-gray-600 text-lg">
+                                <?php echo $apenas_nao_lidos ? 'Nenhum formulário não lido encontrado.' : 'Nenhum formulário encontrado.'; ?>
+                            </p>
+                        </div>
                     <?php else: ?>
-                    <?php foreach ($submissoes_pagina as $item): ?>
-                    <?php $style = getFormularioStyle($item['tipo'], $item['subtipo'] ?? null); ?>
+                        <?php foreach ($submissoes_pagina as $item): ?>
+                            <?php $style = getFormularioStyle($item['tipo'], $item['subtipo'] ?? null); ?>
 
-                    <div class="form-card bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
-                        :class="{
+                            <div class="form-card bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 <?php echo ($item['situacao'] ?? '') === 'Concluído' ? 'card-completed' : ''; ?>"
+                                :class="{
                                     'border-l-4': viewMode === 'grid',
                                     [<?php echo "'$style[border]'"; ?>]: viewMode === 'grid',
                                     'border border-gray-200': viewMode === 'list',
                                     ['hover:border-<?php echo explode('-', $style['border'])[1]; ?>']: viewMode === 'list'
                                 }">
-                        <!-- Grid View -->
-                        <template x-if="viewMode === 'grid'">
-                            <div class="p-5">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex items-center">
-                                        <!-- Adicionar indicador de não lido -->
-                                        <div class="relative">
-                                            <span
-                                                class="material-icons <?php echo $style['text']; ?> mr-2"><?php echo $style['icon']; ?></span>
-                                            <?php if (!isset($item['is_read']) || $item['is_read'] == 0): ?>
-                                            <span
-                                                class="top-0 right-0 absolute w-3 h-3 bg-blue-500 border-2 border-white rounded-full"></span>
+                                <!-- Grid View -->
+                                <template x-if="viewMode === 'grid'">
+                                    <div class="p-5">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div class="flex items-center">
+                                                <!-- Adicionar indicador de não lido -->
+                                                <div class="relative">
+                                                    <span
+                                                        class="material-icons <?php echo $style['text']; ?> mr-2"><?php echo $style['icon']; ?></span>
+                                                    <?php if (!isset($item['is_read']) || $item['is_read'] == 0): ?>
+                                                        <span
+                                                            class="top-0 right-0 absolute w-3 h-3 bg-blue-500 border-2 border-white rounded-full"></span>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div>
+                                                    <?php echo renderItemHeader($item); ?>
+                                                </div>
+                                            </div>
+                                            <span class="text-sm text-gray-500">#<?php echo $item['id']; ?></span>
+                                        </div>
+
+                                        <div class="space-y-2">
+                                            <?php echo renderInfoLine('Solicitante', $item['nome']); ?>
+
+                                            <?php if ($item['tipo'] === 'SAC'): ?>
+                                                <?php echo renderInfoLine('Assunto', $item['assunto'] ?? 'Não informado'); ?>
+                                                <?php echo renderInfoLine('Departamento', $item['departamento'] ?? 'Não informado'); ?>
+
+                                            <?php elseif ($item['tipo'] === 'JARI'): ?>
+                                                <?php echo renderInfoLine('Auto de Infração', $item['autoInfracao'] ?? 'Não informado'); ?>
+                                                <?php echo renderInfoLine('Placa do Veículo', $item['placa'] ?? 'Não informado'); ?>
+                                                <?php echo renderInfoLine('Protocolo', str_pad($item['id'], 6, '0', STR_PAD_LEFT)); ?>
+                                                <?php echo renderInfoLine('Data', date('d/m/Y H:i', strtotime($item['data_submissao']))); ?>
+                                                <div x-data="{ expanded: false }"
+                                                    class="flex flex-col border-b border-gray-100 pb-2">
+                                                    <div class="flex justify-between items-center mb-1">
+                                                        <span class="text-sm text-gray-600">Defesa</span>
+                                                        <button @click="expanded = !expanded"
+                                                            class="text-xs text-blue-600 hover:text-blue-800 flex items-center">
+                                                            <span x-text="expanded ? 'Mostrar menos' : 'Ler mais'"></span>
+                                                            <span class="material-icons text-sm ml-1"
+                                                                x-text="expanded ? 'expand_less' : 'expand_more'"></span>
+                                                        </button>
+                                                    </div>
+                                                    <p class="text-sm text-gray-800 transition-all duration-200"
+                                                        :class="{ 'line-clamp-2': !expanded }">
+                                                        <?php echo htmlspecialchars($item['defesa'] ?? 'Não informada'); ?>
+                                                    </p>
+                                                </div>
+
+                                            <?php elseif ($item['tipo'] === 'PCD' || $item['tipo'] === 'IDOSO'): ?>
+                                                <?php echo renderInfoLine('CPF', $item['cpf'] ?? 'Não informado'); ?>
+                                                <?php echo renderInfoLine('Status do Cartão', isset($item['n_cartao']) ? 'Emitido: ' . htmlspecialchars($item['n_cartao']) : 'Pendente de Emissão'); ?>
+                                                <?php echo renderInfoLine('Validade', isset($item['data_validade']) ? date('d/m/Y', strtotime($item['data_validade'])) : 'A definir'); ?>
+
+                                            <?php elseif ($item['tipo'] === 'DAT'): ?>
+                                                <?php echo renderInfoLine('Local do Acidente', $item['local_acidente'] ?? 'Não informado'); ?>
+                                                <?php echo renderInfoLine('Data do Acidente', isset($item['data_acidente']) ? date('d/m/Y', strtotime($item['data_acidente'])) : 'Não informado'); ?>
+                                                <?php echo renderInfoLine('Status', $item['preenchimento_status'] === 'Completo' ? 'Completo' : 'Incompleto'); ?>
                                             <?php endif; ?>
+
+                                            <?php echo renderInfoLine('Protocolo', str_pad($item['id'], 6, '0', STR_PAD_LEFT)); ?>
+                                            <?php echo renderInfoLine('Data', date('d/m/Y H:i', strtotime($item['data_submissao']))); ?>
                                         </div>
-                                        <div>
-                                            <h3 class="text-lg font-semibold text-gray-800">
-                                                <?php if ($item['tipo'] === 'JARI' && isset($item['subtipo'])): ?>
-                                                <?php $labelInfo = getTipoJariLabel($item['subtipo']); ?>
-                                                <?php echo $labelInfo['titulo']; ?>
-                                                <div class="text-xs <?php echo $style['text']; ?>">
-                                                    <?php echo $labelInfo['subtitulo']; ?></div>
-                                                <?php else: ?>
-                                                <?php echo $item['tipo']; ?>
-                                                <?php endif; ?>
-                                            </h3>
-                                        </div>
-                                    </div>
-                                    <span class="text-sm text-gray-500">#<?php echo $item['id']; ?></span>
-                                </div>
 
-                                <div class="space-y-2">
-                                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                                        <span class="text-sm text-gray-600">Nome</span>
-                                        <span
-                                            class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['nome']); ?></span>
-                                    </div>
-
-                                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                                        <span class="text-sm text-gray-600">Data</span>
-                                        <span
-                                            class="text-sm font-medium text-gray-800"><?php echo date('d/m/Y', strtotime($item['data_submissao'])); ?></span>
-                                    </div>
-
-                                    <?php if ($item['tipo'] === 'PCD' || $item['tipo'] === 'IDOSO'): ?>
-                                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                                        <span class="text-sm text-gray-600">Nº do Cartão</span>
-                                        <span
-                                            class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['n_cartao'] ?? 'Não atribuído'); ?></span>
-                                    </div>
-                                    <?php endif; ?>
-
-                                    <?php if ($item['tipo'] === 'Parecer'): ?>
-                                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                                        <span class="text-sm text-gray-600">Local</span>
-                                        <span
-                                            class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['local']); ?></span>
-                                    </div>
-                                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                                        <span class="text-sm text-gray-600">Protocolo</span>
-                                        <span
-                                            class="text-sm font-medium text-gray-800"><?php echo htmlspecialchars($item['protocolo']); ?></span>
-                                    </div>
-                                    <?php endif; ?>
-
-                                    <?php if ($item['tipo'] === 'DAT'): ?>
-                                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                                        <span class="text-sm text-gray-600">Email</span>
-                                        <span class="text-sm font-medium text-gray-800">
-                                            <?php echo htmlspecialchars($item['email'] ?? 'Não informado'); ?>
-                                        </span>
-                                    </div>
-                                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                                        <span class="text-sm text-gray-600">Preenchimento</span>
-                                        <span class="text-sm font-medium <?php
-                                                                                        $preenchimento = $item['preenchimento_status'] ?? 'Incompleto';
-                                                                                        echo $preenchimento === 'Incompleto' ? 'text-red-600' : 'text-green-600';
-                                                                                        ?>">
-                                            <?php echo htmlspecialchars($preenchimento); ?>
-                                        </span>
-                                    </div>
-                                    <?php endif; ?>
-                                </div>
-
-                                <div class="mt-4 pt-2">
-                                    <a href="detalhes_formulario.php?id=<?php echo $item['id']; ?>&tipo=<?php
+                                        <div class="mt-4 pt-2">
+                                            <a href="detalhes_formulario.php?id=<?php echo $item['id']; ?>&tipo=<?php
                                                                                                                 $tipoRedirect = $item['tipo'];
                                                                                                                 if ($tipoRedirect === 'IDOSO') {
                                                                                                                     $tipoRedirect = 'PCD';
                                                                                                                 }
                                                                                                                 echo $tipoRedirect;
                                                                                                                 ?>&pagina_anterior=<?php echo $pagina; ?>&search_anterior=<?php echo urlencode($search); ?>&tipo_anterior=<?php echo urlencode($tipo_filter); ?>&view_anterior=<?php echo urlencode($view_mode); ?>"
-                                        class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                                        <span class="material-icons text-sm mr-2">visibility</span>
-                                        Visualizar detalhes
-                                    </a>
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- List View -->
-                        <template x-if="viewMode === 'list'">
-                            <div class="flex items-center p-4">
-                                <div class="flex items-center justify-between w-full">
-                                    <!-- Left section: Icon and Basic Info -->
-                                    <div class="flex items-center space-x-4">
-                                        <!-- Adicionar indicador de não lido -->
-                                        <div class="relative">
-                                            <div class="<?php echo $style['bg']; ?> p-2 rounded-lg">
-                                                <span
-                                                    class="material-icons <?php echo $style['text']; ?>"><?php echo $style['icon']; ?></span>
-                                            </div>
-                                            <?php if (!isset($item['is_read']) || $item['is_read'] == 0): ?>
-                                            <span
-                                                class="top-0 right-0 absolute w-3 h-3 bg-blue-500 border-2 border-white rounded-full"></span>
-                                            <?php endif; ?>
-                                        </div>
-                                        <div>
-                                            <div class="flex items-center space-x-2">
-                                                <h3 class="font-semibold text-gray-800">
-                                                    <?php echo safeString($item['nome'] ?? ($item['solicitante'] ?? '')); ?>
-                                                </h3>
-                                                <span
-                                                    class="px-2 py-1 text-xs rounded-full <?php echo $style['bg']; ?> <?php echo $style['text']; ?>">
-                                                    <?php if ($item['tipo'] === 'JARI' && isset($item['subtipo'])): ?>
-                                                    <?php $labelInfo = getTipoJariLabel($item['subtipo']); ?>
-                                                    <?php echo $labelInfo['titulo']; ?>
-                                                    <?php else: ?>
-                                                    <?php echo $item['tipo']; ?>
-                                                    <?php endif; ?>
-                                                </span>
-                                                <?php if ($item['tipo'] === 'JARI' && isset($item['subtipo'])): ?>
-                                                <span
-                                                    class="text-xs text-gray-500"><?php echo getTipoJariLabel($item['subtipo'])['subtitulo']; ?></span>
-                                                <?php endif; ?>
-                                                <?php if (!isset($item['is_read']) || $item['is_read'] == 0): ?>
-                                                <span
-                                                    class="text-xs bg-blue-500 text-white px-2 py-1 rounded-full">Novo</span>
-                                                <?php endif; ?>
-                                            </div>
-                                            <p class="text-sm text-gray-500">
-                                                ID: #<?php echo $item['id']; ?> •
-                                                Submetido em:
-                                                <?php echo date('d/m/Y', strtotime($item['data_submissao'])); ?>
-                                                <?php if ($item['tipo'] === 'PCD' || $item['tipo'] === 'IDOSO'): ?>
-                                                • Cartão:
-                                                <?php echo htmlspecialchars($item['n_cartao'] ?? 'Não atribuído'); ?>
-                                                <?php endif; ?>
-                                            </p>
+                                                class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                                                <span class="material-icons text-sm mr-2">visibility</span>
+                                                Visualizar detalhes
+                                            </a>
                                         </div>
                                     </div>
+                                </template>
 
-                                    <!-- Right section: Status and Action -->
-                                    <div class="flex items-center space-x-4">
-                                        <?php if ($item['tipo'] === 'Parecer'): ?>
-                                        <div class="hidden md:block text-right">
-                                            <p class="text-sm text-gray-600">Local:
-                                                <?php echo safeString($item['local']); ?></p>
-                                            <p class="text-sm text-gray-600">Protocolo:
-                                                <?php echo safeString($item['protocolo']); ?></p>
-                                        </div>
-                                        <?php endif; ?>
+                                <!-- List View -->
+                                <template x-if="viewMode === 'list'">
+                                    <div class="flex items-center p-4">
+                                        <div class="flex items-center justify-between w-full">
+                                            <!-- Left section: Icon and Basic Info -->
+                                            <div class="flex items-center space-x-4">
+                                                <!-- Adicionar indicador de não lido -->
+                                                <div class="relative">
+                                                    <div class="<?php echo $style['bg']; ?> p-2 rounded-lg">
+                                                        <span
+                                                            class="material-icons <?php echo $style['text']; ?>"><?php echo $style['icon']; ?></span>
+                                                    </div>
+                                                    <?php if (!isset($item['is_read']) || $item['is_read'] == 0): ?>
+                                                        <span
+                                                            class="top-0 right-0 absolute w-3 h-3 bg-blue-500 border-2 border-white rounded-full"></span>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div>
+                                                    <div class="flex items-center space-x-2">
+                                                        <h3 class="font-semibold text-gray-800 flex items-center">
+                                                            #<?php echo str_pad($item['id'], 6, '0', STR_PAD_LEFT); ?> -
+                                                            <?php echo safeString($item['nome']); ?>
+                                                            <span
+                                                                class="px-2 py-1 text-xs rounded-full <?php echo $style['bg']; ?> <?php echo $style['text']; ?> ml-2">
+                                                                <?php if ($item['tipo'] === 'JARI' && isset($item['subtipo'])): ?>
+                                                                    <?php echo getTipoJariLabel($item['subtipo'])['titulo']; ?>
+                                                                <?php else: ?>
+                                                                    <?php echo $item['tipo']; ?>
+                                                                <?php endif; ?>
+                                                            </span>
+                                                            <?php if ($item['situacao'] === 'Concluído'): ?>
+                                                                <span
+                                                                    class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full ml-2">Concluído</span>
+                                                            <?php endif; ?>
+                                                            <?php if (!isset($item['is_read']) || $item['is_read'] == 0): ?>
+                                                                <span
+                                                                    class="text-xs bg-blue-500 text-white px-2 py-1 rounded-full ml-2">Novo</span>
+                                                            <?php endif; ?>
+                                                        </h3>
+                                                        <p class="text-sm text-gray-500">
+                                                            <?php if ($item['tipo'] === 'SAC'): ?>
+                                                                Assunto:
+                                                                <?php echo htmlspecialchars($item['assunto'] ?? 'Não informado'); ?>
+                                                                •
+                                                                Departamento:
+                                                                <?php echo htmlspecialchars($item['departamento'] ?? 'Não informado'); ?>
+                                                            <?php elseif ($item['tipo'] === 'JARI'): ?>
+                                                                Auto: <a
+                                                                    href="detalhes_formulario.php?id=<?php echo $item['id']; ?>&tipo=JARI"
+                                                                    class="text-blue-600 hover:text-blue-800">
+                                                                    <?php echo htmlspecialchars($item['autoInfracao'] ?? 'Não informado'); ?>
+                                                                </a> •
+                                                                Placa:
+                                                                <?php echo htmlspecialchars($item['placa'] ?? 'Não informado'); ?> •
+                                                                Protocolo:
+                                                                #<?php echo str_pad($item['id'], 6, '0', STR_PAD_LEFT); ?> •
+                                                                <span x-data="{ expanded: false }">
+                                                                    Defesa:
+                                                                    <span :class="{ 'line-clamp-1': !expanded }" class="inline">
+                                                                        <?php echo htmlspecialchars($item['defesa'] ?? 'Não informada'); ?>
+                                                                    </span>
+                                                                    <button @click="expanded = !expanded"
+                                                                        class="text-xs text-blue-600 hover:text-blue-800 inline-flex items-center ml-1">
+                                                                        <span x-text="expanded ? 'menos' : 'mais'"></span>
+                                                                        <span class="material-icons text-sm"
+                                                                            x-text="expanded ? 'expand_less' : 'expand_more'"></span>
+                                                                    </button>
+                                                                </span>
+                                                            <?php elseif ($item['tipo'] === 'PCD' || $item['tipo'] === 'IDOSO'): ?>
+                                                                CPF:
+                                                                <?php echo htmlspecialchars($item['cpf'] ?? 'Não informado'); ?> •
+                                                                Cartão:
+                                                                <?php echo isset($item['n_cartao']) ? htmlspecialchars($item['n_cartao']) : 'Pendente'; ?>
+                                                            <?php elseif ($item['tipo'] === 'DAT'): ?>
+                                                                Local:
+                                                                <?php echo htmlspecialchars($item['local_acidente'] ?? 'Não informado'); ?>
+                                                                •
+                                                                Data do Acidente:
+                                                                <?php echo isset($item['data_acidente']) ? date('d/m/Y', strtotime($item['data_acidente'])) : 'Não informado'; ?>
+                                                            <?php endif; ?>
+                                                            •
+                                                            <?php echo date('d/m/Y H:i', strtotime($item['data_submissao'])); ?>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
 
-                                        <?php if ($item['tipo'] === 'DAT'): ?>
-                                        <div class="hidden md:flex items-center space-x-4 text-sm">
-                                            <span class="text-gray-500">
-                                                <?php echo htmlspecialchars($item['email'] ?? 'Não informado'); ?>
-                                            </span>
-                                            <span class="px-2 py-1 rounded-full text-xs <?php
+                                            <!-- Right section: Status and Action -->
+                                            <div class="flex items-center space-x-4">
+                                                <?php if ($item['tipo'] === 'Parecer'): ?>
+                                                    <div class="hidden md:block text-right">
+                                                        <p class="text-sm text-gray-600">Local:
+                                                            <?php echo safeString($item['local']); ?></p>
+                                                        <p class="text-sm text-gray-600">Protocolo:
+                                                            <?php echo safeString($item['protocolo']); ?></p>
+                                                    </div>
+                                                <?php endif; ?>
+
+                                                <?php if ($item['tipo'] === 'DAT'): ?>
+                                                    <div class="hidden md:flex items-center space-x-4 text-sm">
+                                                        <span class="text-gray-500">
+                                                            <?php echo htmlspecialchars($item['email'] ?? 'Não informado'); ?>
+                                                        </span>
+                                                        <span class="px-2 py-1 rounded-full text-xs <?php
                                                                                                     $preenchimento = $item['preenchimento_status'] ?? 'Incompleto';
                                                                                                     echo $preenchimento === 'Incompleto' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
                                                                                                     ?>">
-                                                <?php echo htmlspecialchars($preenchimento); ?>
-                                            </span>
-                                        </div>
-                                        <?php endif; ?>
+                                                            <?php echo htmlspecialchars($preenchimento); ?>
+                                                        </span>
+                                                    </div>
+                                                <?php endif; ?>
 
-                                        <a href="detalhes_formulario.php?id=<?php echo $item['id']; ?>&tipo=<?php
+                                                <a href="detalhes_formulario.php?id=<?php echo $item['id']; ?>&tipo=<?php
                                                                                                                     $tipoRedirect = $item['tipo'];
                                                                                                                     if ($tipoRedirect === 'IDOSO') {
                                                                                                                         $tipoRedirect = 'PCD';
                                                                                                                     }
                                                                                                                     echo $tipoRedirect;
                                                                                                                     ?>&pagina_anterior=<?php echo $pagina; ?>&search_anterior=<?php echo urlencode($search); ?>&tipo_anterior=<?php echo urlencode($tipo_filter); ?>&view_anterior=<?php echo urlencode($view_mode); ?>"
-                                            class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                                            <span class="material-icons text-sm mr-2">visibility</span>
-                                            Detalhes
-                                        </a>
+                                                    class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                                                    <span class="material-icons text-sm mr-2">visibility</span>
+                                                    Detalhes
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                </template>
                             </div>
-                        </template>
-                    </div>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
 
@@ -755,14 +835,14 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                 <!-- Paginação -->
                 <div class="flex justify-center mt-6 space-x-2">
                     <?php if ($pagina > 1): ?>
-                    <a href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $pagina - 1])); ?>"
-                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Anterior</a>
+                        <a href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $pagina - 1])); ?>"
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Anterior</a>
                     <?php endif; ?>
                     <span class="px-4 py-2 bg-gray-100 text-gray-700 rounded">Página <?php echo $pagina; ?> de
                         <?php echo $total_pages; ?></span>
                     <?php if ($pagina < $total_pages): ?>
-                    <a href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $pagina + 1])); ?>"
-                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Próxima</a>
+                        <a href="?<?php echo http_build_query(array_merge($_GET, ['pagina' => $pagina + 1])); ?>"
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Próxima</a>
                     <?php endif; ?>
                 </div>
 
