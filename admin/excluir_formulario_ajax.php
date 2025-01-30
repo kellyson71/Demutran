@@ -80,30 +80,48 @@ try {
                 $stmt->execute();
             }
         } else {
-            // Para outros tipos de formulário, mantém a lógica original
+            // Para outros tipos de formulário
             $tabela = match ($tipo) {
                 'SAC' => 'sac',
                 'JARI' => 'solicitacoes_demutran',
                 'PCD' => 'solicitacao_cartao',
-                'Parecer' => 'parecer',
+                'Parecer' => 'Parecer',
                 default => throw new Exception('Tipo de formulário inválido')
             };
 
             // Verifica se o registro existe
             $sql_check = "SELECT id FROM $tabela WHERE id = ?";
             $stmt_check = $conn->prepare($sql_check);
+
+            if (!$stmt_check) {
+                throw new Exception('Erro ao preparar consulta: ' . $conn->error);
+            }
+            
             $stmt_check->bind_param('i', $id);
             $stmt_check->execute();
+            $result = $stmt_check->get_result();
 
-            if (!$stmt_check->get_result()->fetch_assoc()) {
-                throw new Exception('Formulário não encontrado');
+            if (!$result->fetch_assoc()) {
+                throw new Exception("Registro não encontrado na tabela $tabela com ID $id");
             }
 
             // Executa a exclusão
             $sql = "DELETE FROM $tabela WHERE id = ?";
             $stmt = $conn->prepare($sql);
+
+            if (!$stmt) {
+                throw new Exception('Erro ao preparar exclusão: ' . $conn->error);
+            }
+            
             $stmt->bind_param('i', $id);
-            $stmt->execute();
+
+            if (!$stmt->execute()) {
+                throw new Exception('Erro ao executar exclusão: ' . $stmt->error);
+            }
+
+            if ($stmt->affected_rows === 0) {
+                throw new Exception('Nenhum registro foi excluído');
+            }
         }
 
         // Registra a exclusão no log
@@ -112,8 +130,16 @@ try {
         $sql_log = "INSERT INTO log_acoes (usuario_id, acao, tipo_formulario, formulario_id, data_hora) 
                     VALUES (?, 'Excluiu', ?, ?, ?)";
         $stmt_log = $conn->prepare($sql_log);
+
+        if (!$stmt_log) {
+            throw new Exception('Erro ao preparar log: ' . $conn->error);
+        }
+        
         $stmt_log->bind_param('isss', $usuario_id, $tipo, $id, $data_hora);
-        $stmt_log->execute();
+
+        if (!$stmt_log->execute()) {
+            throw new Exception('Erro ao registrar log: ' . $stmt_log->error);
+        }
 
         // Commit da transação
         $conn->commit();
@@ -128,6 +154,7 @@ try {
         throw $e;
     }
 } catch (Exception $e) {
+    error_log('Erro na exclusão: ' . $e->getMessage());
     http_response_code(500);
     echo json_encode([
         'success' => false,

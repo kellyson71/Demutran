@@ -773,9 +773,20 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 
                             if (data.success) {
                                 showModal('success');
+                                // Redireciona para formularios.php após exclusão bem-sucedida
+                                <?php
+                                // Constrói a URL de retorno com os parâmetros
+                                $params = [];
+                                if (isset($_GET['pagina_anterior'])) $params[] = "pagina=" . urlencode($_GET['pagina_anterior']);
+                                if (isset($_GET['search_anterior'])) $params[] = "search=" . urlencode($_GET['search_anterior']);
+                                if (isset($_GET['tipo_anterior'])) $params[] = "tipo=" . urlencode($_GET['tipo_anterior']);
+                                if (isset($_GET['view_anterior'])) $params[] = "view=" . urlencode($_GET['view_anterior']);
+
+                                $url_retorno = "formularios.php" . (!empty($params) ? "?" . implode("&", $params) : "");
+                                ?>
                                 setTimeout(() => {
-                                    window.location.href = 'formularios.php';
-                                }, 2000);
+                                    window.location.href = '<?php echo $url_retorno; ?>';
+                                }, 1500);
                             } else {
                                 throw new Error(data.message || 'Erro ao excluir formulário');
                             }
