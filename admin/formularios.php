@@ -1,287 +1,5 @@
 <?php
-
-declare(strict_types=1);
-
-session_start();
-require_once '../env/config.php';
-require_once './includes/template.php';
-
-// Verificação de autenticação
-if (!isset($_SESSION['usuario_id'])) {
-    header('Location: login.php');
-    exit();
-}
-
-// Funções auxiliares
-function setViewMode(): string
-{
-    if (isset($_GET['view'])) {
-        $_SESSION['view_mode'] = $_GET['view'];
-    }
-    return $_SESSION['view_mode'] ?? 'grid';
-}
-
-function obterSubmissoesPaginadas(mysqli $conn, string $tabela, int $limite, int $offset): mysqli_result
-{
-    $sql = "SELECT * FROM $tabela ORDER BY id DESC LIMIT ? OFFSET ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('ii', $limite, $offset);
-    $stmt->execute();
-    return $stmt->get_result();
-}
-
-function safeString(?string $value): string
-{
-    return htmlspecialchars($value ?? 'Não informado', ENT_QUOTES, 'UTF-8');
-}
-
-function getTipoJariLabel(string $subtipo): array
-{
-    return [
-        'apresentacao_condutor' => ['titulo' => 'Apresentação de Condutor'],
-        'defesa_previa' => ['titulo' => 'Defesa Prévia'],
-        'jari' => ['titulo' => 'Recurso JARI']
-    ][$subtipo] ?? ['titulo' => 'JARI'];
-}
-
-function renderStatusBadge(string $situacao): string
-{
-    if ($situacao === 'Concluído') {
-        return '<span class="status-badge bg-green-100 text-green-800 ml-2">Concluído</span>';
-    }
-    return '';
-}
-
-function renderItemHeader(array $item): string
-{
-    $titulo = $item['tipo'] === 'JARI' && isset($item['subtipo'])
-        ? getTipoJariLabel($item['subtipo'])['titulo']
-        : $item['tipo'];
-
-    return "
-        <h3 class='text-lg font-semibold text-gray-800 flex items-center'>
-            {$titulo}
-            " . renderStatusBadge($item['situacao']) . "
-        </h3>
-    ";
-}
-
-function renderInfoLine(string $label, ?string $value): string
-{
-    $value = htmlspecialchars($value ?? 'Não informado');
-    return "
-        <div class='flex justify-between items-center border-b border-gray-100 pb-2'>
-            <span class='text-sm text-gray-600'>{$label}</span>
-            <span class='text-sm font-medium text-gray-800'>{$value}</span>
-        </div>
-    ";
-}
-
-// Inicialização de variáveis
-$view_mode = setViewMode();
-$notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
-
-// Variáveis de paginação
-$pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
-$limite = 12;
-$offset = ($pagina - 1) * $limite;
-
-// Obter submissões paginadas de cada tabela
-$sac = obterSubmissoesPaginadas($conn, 'sac', $limite, $offset);
-$jari = obterSubmissoesPaginadas($conn, 'solicitacoes_demutran', $limite, $offset);
-$pcd = obterSubmissoesPaginadas($conn, 'solicitacao_cartao', $limite, $offset);
-$dat = obterSubmissoesPaginadas($conn, 'DAT4', $limite, $offset);
-
-// Combinar todas as submissões em um array
-$submissoes = [];
-
-while ($row = $sac->fetch_assoc()) {
-    $row['tipo'] = 'SAC';
-    $submissoes[] = $row;
-}
-while ($row = $jari->fetch_assoc()) {
-    $row['tipo'] = 'JARI';
-    $submissoes[] = $row;
-}
-while ($row = $pcd->fetch_assoc()) {
-    $row['tipo'] = strtoupper($row['tipo_solicitacao']); // Converte 'pcd' ou 'idoso' para maiúsculas
-    $submissoes[] = $row;
-}
-while ($row = $dat->fetch_assoc()) {
-    $row['tipo'] = 'DAT';
-    $row['preenchimento_status'] = 'Incompleto'; // Valor padrão
-    $row['email'] = 'Não informado'; // Valor padrão
-
-    $token = $conn->real_escape_string($row['token']);
-    $sql_dat_info = "SELECT fc.*, d1.nome 
-                     FROM formularios_dat_central fc 
-                     LEFT JOIN DAT1 d1 ON fc.token = d1.token 
-                     WHERE fc.token = '$token' 
-                     LIMIT 1";
-    $result_dat_info = $conn->query($sql_dat_info);
-
-    if ($result_dat_info && $result_dat_info->num_rows > 0) {
-        $dat_info = $result_dat_info->fetch_assoc();
-        $row['nome'] = $dat_info['nome'] ?? 'Nome não encontrado';
-        $row['email'] = $dat_info['email_usuario'] ?? 'Não informado';
-        $row['preenchimento_status'] = $dat_info['preenchimento_status'] ?? 'Incompleto';
-        $row['data_submissao'] = $dat_info['data_submissao'] ?? date('Y-m-d H:i:s');
-        $row['ultima_atualizacao'] = $dat_info['ultima_atualizacao'] ?? date('Y-m-d H:i:s');
-    }
-
-    $submissoes[] = $row;
-}
-
-// Obter parâmetros de pesquisa e filtro
-$search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
-$tipo_filter = isset($_GET['tipo']) ? $_GET['tipo'] : '';
-$apenas_nao_lidos = isset($_GET['nao_lidos']) && $_GET['nao_lidos'] === 'true';
-
-// Definir os tipos e tabelas correspondentes
-$tipos = [
-    'SAC' => 'sac',
-    'JARI' => 'solicitacoes_demutran',
-    'PCD' => 'solicitacao_cartao',
-    'DAT' => 'formularios_dat_central',
-    'Parecer' => 'Parecer'
-];
-
-// Inicializar array de submissões
-$submissoes = [];
-
-// Definir um limite maior para buscar mais registros para a filtragem
-$fetch_limit = 100;
-
-// Adicionar lógica para processar grupos no PHP (antes do foreach dos tipos)
-$tipo_filter = isset($_GET['tipo']) ? $_GET['tipo'] : '';
-
-// Expandir filtros de grupo para seus tipos correspondentes
-if ($tipo_filter == 'SAC_GRUPO') {
-    $tipos_selecionados = ['SAC'];
-} elseif ($tipo_filter == 'JARI_GRUPO') {
-    $tipos_selecionados = ['JARI'];
-} elseif ($tipo_filter == 'CREDENCIAIS_GRUPO') {
-    $tipos_selecionados = ['PCD', 'IDOSO'];
-} elseif ($tipo_filter == 'OUTROS_GRUPO') {
-    $tipos_selecionados = ['DAT', 'Parecer'];
-} else {
-    $tipos_selecionados = [$tipo_filter];
-}
-
-// Modificar a lógica de processamento das submissões
-foreach ($tipos as $tipo => $tabela) {
-    $is_jari_subtipo = strpos($tipo_filter, 'JARI_') === 0;
-    $jari_subtipo = $is_jari_subtipo ? substr($tipo_filter, 5) : null;
-
-    // Verificar se deve processar este tipo
-    $should_process = empty($tipo_filter) || // Sem filtro
-        in_array($tipo, $tipos_selecionados) || // Tipo específico ou grupo
-        ($tipo == 'JARI' && $is_jari_subtipo); // Subtipo JARI
-
-    if ($should_process) {
-        if ($tabela === 'solicitacao_cartao') {
-            // Tratamento para PCD e IDOSO
-            $sql = "SELECT *, UPPER(tipo_solicitacao) as tipo FROM $tabela";
-            if ($apenas_nao_lidos) {
-                $sql .= " WHERE (is_read = 0 OR is_read IS NULL)";
-            }
-            $sql .= " ORDER BY id DESC LIMIT $fetch_limit";
-
-            $result = $conn->query($sql);
-            while ($row = $result->fetch_assoc()) {
-                $row['tipo'] = strtoupper($row['tipo_solicitacao']);
-                if (
-                    empty($tipo_filter) ||
-                    in_array($row['tipo'], $tipos_selecionados) ||
-                    $tipo_filter == 'CREDENCIAIS_GRUPO'
-                ) {
-                    $submissoes[] = $row;
-                }
-            }
-        } elseif ($tabela === 'solicitacoes_demutran') {
-            // Tratamento para JARI
-            $sql = "SELECT *, tipo_solicitacao as subtipo FROM $tabela";
-            $where_conditions = [];
-
-            if ($is_jari_subtipo && $tipo_filter !== 'JARI_GRUPO') {
-                $where_conditions[] = "tipo_solicitacao = '" . $conn->real_escape_string($jari_subtipo) . "'";
-            }
-            if ($apenas_nao_lidos) {
-                $where_conditions[] = "(is_read = 0 OR is_read IS NULL)";
-            }
-
-            if (!empty($where_conditions)) {
-                $sql .= " WHERE " . implode(' AND ', $where_conditions);
-            }
-
-            $sql .= " ORDER BY id DESC LIMIT $fetch_limit";
-
-            $result = $conn->query($sql);
-            while ($row = $result->fetch_assoc()) {
-                $row['tipo'] = 'JARI';
-                $row['subtipo_label'] = ucfirst(str_replace('_', ' ', $row['subtipo']));
-                $submissoes[] = $row;
-            }
-        } else {
-            // Processamento para outras tabelas
-            $sql = "SELECT * FROM $tabela";
-            if ($apenas_nao_lidos) {
-                $sql .= " WHERE (is_read = 0 OR is_read IS NULL)";
-            }
-            $sql .= " ORDER BY id DESC LIMIT $fetch_limit";
-
-            $result = $conn->query($sql);
-            while ($row = $result->fetch_assoc()) {
-                $row['tipo'] = $tipo;
-
-                // Para 'DAT', buscar 'nome' na tabela 'DAT1'
-                if ($tipo == 'DAT') {
-                    $token = $conn->real_escape_string($row['token']);
-                    $sql_nome = "SELECT nome FROM DAT1 WHERE token = '$token' LIMIT 1";
-                    $result_nome = $conn->query($sql_nome);
-                    if ($result_nome->num_rows > 0) {
-                        $row_nome = $result_nome->fetch_assoc();
-                        $row['nome'] = $row_nome['nome'];
-                    } else {
-                        $row['nome'] = 'Nome não encontrado';
-                    }
-                }
-
-                $submissoes[] = $row;
-            }
-        }
-    }
-}
-
-// Aplicar filtro de pesquisa após coletar todas as submissões
-if (!empty($search)) {
-    $submissoes = array_filter($submissoes, function ($row) use ($search) {
-        return isset($row['nome']) && stripos($row['nome'], $search) !== false;
-    });
-}
-
-// Ordenar submissões por status (pendentes primeiro) e depois por data
-usort($submissoes, function ($a, $b) {
-    // Primeiro critério: status (pendentes primeiro)
-    $statusA = ($a['situacao'] ?? '') === 'Concluído' ? 1 : 0;
-    $statusB = ($b['situacao'] ?? '') === 'Concluído' ? 1 : 0;
-
-    if ($statusA !== $statusB) {
-        return $statusA - $statusB;
-    }
-
-    // Segundo critério: data (mais recentes primeiro)
-    return strtotime($b['data_submissao']) - strtotime($a['data_submissao']);
-});
-
-// Paginação
-$total_submissoes = count($submissoes);
-$per_page = 10;
-$total_pages = ceil($total_submissoes / $per_page);
-$pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
-$start = ($pagina - 1) * $per_page;
-$submissoes_pagina = array_slice($submissoes, $start, $per_page);
-
+require_once './includes/formularios/form_list.php';
 ?>
 
 <!DOCTYPE html>
@@ -578,6 +296,71 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                         </button>
                     </div>
 
+                    <!-- Toggle Pendentes -->
+                    <div class="inline-flex rounded-lg border border-gray-200 bg-white p-1">
+                        <a href="?<?php echo http_build_query(array_merge($_GET, ['pendentes' => $apenas_pendentes ? null : 'true', 'pagina' => 1])); ?>"
+                            class="inline-flex items-center px-3 py-1.5 rounded-md transition-all duration-200 <?php echo $apenas_pendentes ? 'bg-yellow-100 text-yellow-600' : 'hover:bg-gray-50'; ?>">
+                            <span class="material-icons text-lg mr-1">pending_actions</span>
+                            Pendentes
+                            <?php
+                            // Contar total de pendentes
+                            $total_pendentes = array_reduce($submissoes, function ($carry, $item) {
+                                return $carry + ((!isset($item['situacao']) || $item['situacao'] !== 'Concluído') ? 1 : 0);
+                            }, 0);
+                            ?>
+                            <span class="ml-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                <?php echo $total_pendentes; ?>
+                            </span>
+                            <?php if ($apenas_pendentes): ?>
+                                <a href="?<?php echo http_build_query(array_merge($_GET, ['pendentes' => null])); ?>"
+                                    class="ml-2 text-yellow-600 hover:text-yellow-800">
+                                    <span class="material-icons text-sm">close</span>
+                                </a>
+                            <?php endif; ?>
+                        </a>
+                    </div>
+
+                    <!-- Toggle Pareceres Próximos -->
+                    <div class="inline-flex rounded-lg border border-gray-200 bg-white p-1">
+                        <a href="?<?php echo http_build_query(array_merge($_GET, ['pareceres_proximos' => $apenas_pareceres_proximos ? null : 'true', 'pagina' => 1])); ?>"
+                            class="inline-flex items-center px-3 py-1.5 rounded-md transition-all duration-200 <?php echo $apenas_pareceres_proximos ? 'bg-purple-100 text-purple-600' : 'hover:bg-gray-50'; ?>">
+                            <span class="material-icons text-lg mr-1">event</span>
+                            Pareceres Próximos
+                            <?php
+                            // Contar pareceres próximos (7 dias)
+                            $total_pareceres_proximos = array_reduce($submissoes, function ($carry, $item) {
+                                if ($item['tipo'] === 'Parecer' && isset($item['data_horario'])) {
+                                    // Extrair a data do formato "DD/MM/YYYY HH:mm"
+                                    $partes = explode(' ', $item['data_horario']);
+                                    if (isset($partes[0])) {
+                                        $data = DateTime::createFromFormat('d/m/Y', $partes[0]);
+                                        if ($data) {
+                                            $hoje = new DateTime();
+                                            $hoje->setTime(0, 0, 0); // Definir hora para 00:00:00
+                                            $data->setTime(0, 0, 0); // Definir hora para 00:00:00
+
+                                            // Verificar se a data é futura e está dentro dos próximos 7 dias
+                                            if ($data >= $hoje && $data <= (new DateTime('+7 days'))) {
+                                                return $carry + 1;
+                                            }
+                                        }
+                                    }
+                                }
+                                return $carry;
+                            }, 0);
+                            ?>
+                            <span class="ml-2 bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                <?php echo $total_pareceres_proximos; ?>
+                            </span>
+                            <?php if ($apenas_pareceres_proximos): ?>
+                                <a href="?<?php echo http_build_query(array_merge($_GET, ['pareceres_proximos' => null])); ?>"
+                                    class="ml-2 text-purple-600 hover:text-purple-800">
+                                    <span class="material-icons text-sm">close</span>
+                                </a>
+                            <?php endif; ?>
+                        </a>
+                    </div>
+
                     <!-- Visualização Grade/Lista -->
                     <div class="inline-flex rounded-lg border border-gray-200 bg-white p-1">
                         <button @click="viewMode = 'grid'" type="button"
@@ -639,48 +422,10 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                                             <span class="text-sm text-gray-500">#<?php echo $item['id']; ?></span>
                                         </div>
 
+                                        <!-- Substituir o conteúdo do card por uma única chamada de função -->
                                         <div class="space-y-2">
                                             <?php echo renderInfoLine('Solicitante', $item['nome']); ?>
-
-                                            <?php if ($item['tipo'] === 'SAC'): ?>
-                                                <?php echo renderInfoLine('Assunto', $item['assunto'] ?? 'Não informado'); ?>
-                                                <?php echo renderInfoLine('Departamento', $item['departamento'] ?? 'Não informado'); ?>
-
-                                            <?php elseif ($item['tipo'] === 'JARI'): ?>
-                                                <?php echo renderInfoLine('Auto de Infração', $item['autoInfracao'] ?? 'Não informado'); ?>
-                                                <?php echo renderInfoLine('Placa do Veículo', $item['placa'] ?? 'Não informado'); ?>
-                                                <?php echo renderInfoLine('Protocolo', str_pad($item['id'], 6, '0', STR_PAD_LEFT)); ?>
-                                                <?php echo renderInfoLine('Data', date('d/m/Y H:i', strtotime($item['data_submissao']))); ?>
-                                                <div x-data="{ expanded: false }"
-                                                    class="flex flex-col border-b border-gray-100 pb-2">
-                                                    <div class="flex justify-between items-center mb-1">
-                                                        <span class="text-sm text-gray-600">Defesa</span>
-                                                        <button @click="expanded = !expanded"
-                                                            class="text-xs text-blue-600 hover:text-blue-800 flex items-center">
-                                                            <span x-text="expanded ? 'Mostrar menos' : 'Ler mais'"></span>
-                                                            <span class="material-icons text-sm ml-1"
-                                                                x-text="expanded ? 'expand_less' : 'expand_more'"></span>
-                                                        </button>
-                                                    </div>
-                                                    <p class="text-sm text-gray-800 transition-all duration-200"
-                                                        :class="{ 'line-clamp-2': !expanded }">
-                                                        <?php echo htmlspecialchars($item['defesa'] ?? 'Não informada'); ?>
-                                                    </p>
-                                                </div>
-
-                                            <?php elseif ($item['tipo'] === 'PCD' || $item['tipo'] === 'IDOSO'): ?>
-                                                <?php echo renderInfoLine('CPF', $item['cpf'] ?? 'Não informado'); ?>
-                                                <?php echo renderInfoLine('Status do Cartão', isset($item['n_cartao']) ? 'Emitido: ' . htmlspecialchars($item['n_cartao']) : 'Pendente de Emissão'); ?>
-                                                <?php echo renderInfoLine('Validade', isset($item['data_validade']) ? date('d/m/Y', strtotime($item['data_validade'])) : 'A definir'); ?>
-
-                                            <?php elseif ($item['tipo'] === 'DAT'): ?>
-                                                <?php echo renderInfoLine('Local do Acidente', $item['local_acidente'] ?? 'Não informado'); ?>
-                                                <?php echo renderInfoLine('Data do Acidente', isset($item['data_acidente']) ? date('d/m/Y', strtotime($item['data_acidente'])) : 'Não informado'); ?>
-                                                <?php echo renderInfoLine('Status', $item['preenchimento_status'] === 'Completo' ? 'Completo' : 'Incompleto'); ?>
-                                            <?php endif; ?>
-
-                                            <?php echo renderInfoLine('Protocolo', str_pad($item['id'], 6, '0', STR_PAD_LEFT)); ?>
-                                            <?php echo renderInfoLine('Data', date('d/m/Y H:i', strtotime($item['data_submissao']))); ?>
+                                            <?php echo renderizarInfoCard($item); ?>
                                         </div>
 
                                         <div class="mt-4 pt-2">
@@ -789,12 +534,7 @@ $submissoes_pagina = array_slice($submissoes, $start, $per_page);
                                             <!-- Right section: Status and Action -->
                                             <div class="flex items-center space-x-4">
                                                 <?php if ($item['tipo'] === 'Parecer'): ?>
-                                                    <div class="hidden md:block text-right">
-                                                        <p class="text-sm text-gray-600">Local:
-                                                            <?php echo safeString($item['local']); ?></p>
-                                                        <p class="text-sm text-gray-600">Protocolo:
-                                                            <?php echo safeString($item['protocolo']); ?></p>
-                                                    </div>
+                                                    <?php echo renderizarInfoParecer($item); ?>
                                                 <?php endif; ?>
 
                                                 <?php if ($item['tipo'] === 'DAT'): ?>
