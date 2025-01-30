@@ -321,44 +321,86 @@ require_once './includes/formularios/form_list.php';
                     </div>
 
                     <!-- Toggle Pareceres Próximos -->
-                    <div class="inline-flex rounded-lg border border-gray-200 bg-white p-1">
-                        <a href="?<?php echo http_build_query(array_merge($_GET, ['pareceres_proximos' => $apenas_pareceres_proximos ? null : 'true', 'pagina' => 1])); ?>"
-                            class="inline-flex items-center px-3 py-1.5 rounded-md transition-all duration-200 <?php echo $apenas_pareceres_proximos ? 'bg-purple-100 text-purple-600' : 'hover:bg-gray-50'; ?>">
-                            <span class="material-icons text-lg mr-1">event</span>
-                            Pareceres Próximos
-                            <?php
-                            // Contar pareceres próximos (7 dias)
-                            $total_pareceres_proximos = array_reduce($submissoes, function ($carry, $item) {
-                                if ($item['tipo'] === 'Parecer' && isset($item['data_horario'])) {
-                                    // Extrair a data do formato "DD/MM/YYYY HH:mm"
-                                    $partes = explode(' ', $item['data_horario']);
-                                    if (isset($partes[0])) {
-                                        $data = DateTime::createFromFormat('d/m/Y', $partes[0]);
-                                        if ($data) {
-                                            $hoje = new DateTime();
-                                            $hoje->setTime(0, 0, 0); // Definir hora para 00:00:00
-                                            $data->setTime(0, 0, 0); // Definir hora para 00:00:00
+                    <div class="inline-flex rounded-lg border border-gray-200 bg-white p-1"
+                        x-data="{ showDetails: false }">
+                        <div class="relative">
+                            <a href="?<?php echo http_build_query(array_merge($_GET, ['pareceres_proximos' => $apenas_pareceres_proximos ? null : 'true', 'pagina' => 1])); ?>"
+                                @mouseenter="showDetails = true" @mouseleave="showDetails = false"
+                                class="inline-flex items-center px-3 py-1.5 rounded-md transition-all duration-200 <?php echo $apenas_pareceres_proximos ? 'bg-purple-100 text-purple-600' : 'hover:bg-gray-50'; ?>">
+                                <span class="material-icons text-lg mr-1">event</span>
+                                Pareceres Próximos
+                                <?php
+                                // Array para armazenar detalhes dos pareceres próximos
+                                $pareceres_proximos_detalhes = array();
 
-                                            // Verificar se a data é futura e está dentro dos próximos 7 dias
-                                            if ($data >= $hoje && $data <= (new DateTime('+7 days'))) {
-                                                return $carry + 1;
+                                // Coletar detalhes dos pareceres próximos
+                                foreach ($submissoes as $item) {
+                                    if ($item['tipo'] === 'Parecer' && isset($item['data_horario'])) {
+                                        $partes = explode(' ', $item['data_horario']);
+                                        if (isset($partes[0])) {
+                                            $data = DateTime::createFromFormat('d/m/Y', $partes[0]);
+                                            if ($data) {
+                                                $hoje = new DateTime();
+                                                $hoje->setTime(0, 0, 0);
+                                                $data->setTime(0, 0, 0);
+
+                                                if ($data >= $hoje && $data <= (new DateTime('+7 days'))) {
+                                                    $pareceres_proximos_detalhes[] = array(
+                                                        'data' => $partes[0],
+                                                        'horario' => $partes[1] ?? 'Não definido',
+                                                        'local' => $item['local'] ?? 'Local não definido',
+                                                        'evento' => $item['evento'] ?? 'Evento não especificado'
+                                                    );
+                                                }
                                             }
                                         }
                                     }
                                 }
-                                return $carry;
-                            }, 0);
-                            ?>
-                            <span class="ml-2 bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full">
-                                <?php echo $total_pareceres_proximos; ?>
-                            </span>
+                                ?>
+                                <span class="ml-2 bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                    <?php echo count($pareceres_proximos_detalhes); ?>
+                                </span>
+
+                                <!-- Tooltip/Popover com detalhes -->
+                                <div x-show="showDetails" x-cloak
+                                    class="absolute left-0 top-full mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                                    @click.away="showDetails = false">
+                                    <div class="p-4">
+                                        <h4 class="text-sm font-semibold text-gray-700 mb-2">Próximos Pareceres</h4>
+                                        <?php if (empty($pareceres_proximos_detalhes)): ?>
+                                            <p class="text-sm text-gray-500">Nenhum parecer programado para os próximos 7
+                                                dias.</p>
+                                        <?php else: ?>
+                                            <div class="space-y-3">
+                                                <?php foreach ($pareceres_proximos_detalhes as $parecer): ?>
+                                                    <div class="border-b border-gray-100 pb-2 last:border-0">
+                                                        <div class="flex items-start">
+                                                            <span
+                                                                class="material-icons text-purple-500 mr-2 text-sm">event</span>
+                                                            <div class="flex-1">
+                                                                <p class="text-sm font-medium text-gray-700">
+                                                                    <?php echo $parecer['data']; ?> às
+                                                                    <?php echo $parecer['horario']; ?></p>
+                                                                <p class="text-xs text-gray-600">
+                                                                    <?php echo $parecer['local']; ?></p>
+                                                                <p class="text-xs text-gray-500">
+                                                                    <?php echo $parecer['evento']; ?></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </a>
                             <?php if ($apenas_pareceres_proximos): ?>
                                 <a href="?<?php echo http_build_query(array_merge($_GET, ['pareceres_proximos' => null])); ?>"
                                     class="ml-2 text-purple-600 hover:text-purple-800">
                                     <span class="material-icons text-sm">close</span>
                                 </a>
                             <?php endif; ?>
-                        </a>
+                        </div>
                     </div>
 
                     <!-- Visualização Grade/Lista -->
@@ -425,6 +467,7 @@ require_once './includes/formularios/form_list.php';
                                         <!-- Substituir o conteúdo do card por uma única chamada de função -->
                                         <div class="space-y-2">
                                             <?php echo renderInfoLine('Solicitante', $item['nome']); ?>
+                                            <?php echo renderInfoLine('Data', date('d/m/Y H:i', strtotime($item['data_submissao'])) . ' <span class="text-gray-500 text-xs ml-1">(' . tempoRelativo($item['data_submissao']) . ')</span>', true); ?>
                                             <?php echo renderizarInfoCard($item); ?>
                                         </div>
 
@@ -526,6 +569,8 @@ require_once './includes/formularios/form_list.php';
                                                             <?php endif; ?>
                                                             •
                                                             <?php echo date('d/m/Y H:i', strtotime($item['data_submissao'])); ?>
+                                                            <span
+                                                                class="text-gray-500 text-xs ml-1">(<?php echo tempoRelativo($item['data_submissao']); ?>)</span>
                                                         </p>
                                                     </div>
                                                 </div>

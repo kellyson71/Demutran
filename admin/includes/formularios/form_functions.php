@@ -59,13 +59,35 @@ function renderItemHeader(array $item): string
     ";
 }
 
-function renderInfoLine(string $label, ?string $value): string
+function renderInfoLine(string $label, ?string $value, bool $allowHtml = false): string
 {
-    $value = htmlspecialchars($value ?? 'Não informado');
+    $value = $allowHtml ? ($value ?? 'Não informado') : htmlspecialchars($value ?? 'Não informado', ENT_QUOTES, 'UTF-8');
     return "
         <div class='flex justify-between items-center border-b border-gray-100 pb-2'>
             <span class='text-sm text-gray-600'>{$label}</span>
             <span class='text-sm font-medium text-gray-800'>{$value}</span>
         </div>
     ";
+}
+
+function tempoRelativo(string $data): string
+{
+    $timestamp = strtotime($data);
+    $agora = time();
+    $diff = $agora - $timestamp;
+
+    if ($diff < 60) {
+        return "agora mesmo";
+    } elseif ($diff < 3600) {
+        $minutos = floor($diff / 60);
+        return "há " . $minutos . ($minutos == 1 ? " minuto" : " minutos");
+    } elseif ($diff < 86400) {
+        $horas = floor($diff / 3600);
+        return "há " . $horas . ($horas == 1 ? " hora" : " horas");
+    } elseif ($diff < 604800) {
+        $dias = floor($diff / 86400);
+        return "há " . $dias . ($dias == 1 ? " dia" : " dias");
+    } else {
+        return date('d/m/Y H:i', $timestamp);
+    }
 }
