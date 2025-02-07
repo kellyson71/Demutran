@@ -257,6 +257,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $enquadramento = verificaTexto($_POST['enquadramento']);
     $defesa = verificaTexto($_POST['defesa']);
 
+    // Captura os novos campos
+    $cnh_numero = verificaTexto($_POST['cnh_numero']);
+    $cnh_uf = verificaTexto($_POST['cnh_uf']);
+
     // Inserir registro com os dados
     $sql =
     "INSERT INTO solicitacoes_demutran (
@@ -291,8 +295,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         comprovante_residencia_url, 
         doc_complementares_urls, 
         signed_document_url, 
-        gmail
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        gmail,
+        cnh_numero,
+        cnh_uf
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
     
@@ -302,7 +308,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     $stmt->bind_param(
-        "ssssssssssssssssssssssssssssssss",
+        "ssssssssssssssssssssssssssssssssss",
         $tipo_solicitacao,
         $tipo_requerente,
         $nome,
@@ -334,7 +340,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $comprovante_residencia_url,
         $doc_complementares_urls,
         $signed_document_url,
-        $gmail
+        $gmail,
+        $cnh_numero,
+        $cnh_uf
     );
 
     if ($stmt->execute()) {

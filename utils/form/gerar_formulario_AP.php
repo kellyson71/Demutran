@@ -1,35 +1,85 @@
 <?php
 session_start();
+require_once '../../env/config.php';
 require_once '../../components/print-components.php';
 
+// Define o órgão emissor como constante
+define('ORGAO_EMISSOR', 'DEMUTRAN   21787-0');
+
+// Função para verificar se um valor está vazio
+function verificaValor($valor)
+{
+    return (!empty($valor) && $valor !== 'null') ? $valor : 'não informado';
+}
+
+// Verifica se está recebendo dados via POST ou GET
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validar e processar os dados recebidos
-    $_SESSION['form_data'] = $_POST;
+    // Processa dados do POST
     $formData = $_POST;
 
     // Campos básicos
-    $tipoRequerente = $formData['tipo_requerente'] ?? '';
-    $nome = $formData['nome'] ?? '';
-    $cpf = $formData['cpf'] ?? '';
-    $endereco = $formData['endereco'] ?? '';
-    $numero = $formData['numero'] ?? '';
-    $complemento = $formData['complemento'] ?? '';
-    $bairro = $formData['bairro'] ?? '';
-    $cep = $formData['cep'] ?? '';
-    $municipio = $formData['municipio'] ?? '';
-    $telefone = $formData['telefone'] ?? '';
-    $email = $formData['gmail'] ?? ''; // Usar o campo gmail como email
+    $tipoRequerente = verificaValor($formData['tipo_requerente']);
+    $nome = verificaValor($formData['nome']);
+    $cpf = verificaValor($formData['cpf']);
+    $endereco = verificaValor($formData['endereco']);
+    $numero = verificaValor($formData['numero']);
+    $complemento = verificaValor($formData['complemento']);
+    $bairro = verificaValor($formData['bairro']);
+    $cep = verificaValor($formData['cep']);
+    $municipio = verificaValor($formData['municipio']);
+    $telefone = verificaValor($formData['telefone']);
+    $email = verificaValor($formData['gmail']);
 
-    // Dados do veículo
-    $placa = $formData['placa'] ?? '';
-    $marcaModelo = $formData['marcaModelo'] ?? '';
-    $autoInfracao = $formData['autoInfracao'] ?? '';
+    // Dados do veículo e infração
+    $placa = verificaValor($formData['placa']);
+    $marcaModelo = verificaValor($formData['marcaModelo']);
+    $autoInfracao = verificaValor($formData['autoInfracao']);
+    $identidade = verificaValor($formData['identidade']);
+    $registro_cnh_infrator = verificaValor($formData['registro_cnh_infrator']);
+    // $cnh_uf = verificaValor($formData['cnh_uf']);
+} else if (isset($_GET['id'])) {
+    // Processa dados do GET (quando vem da página de detalhes)
+    $id = $_GET['id'];
 
-    // Campos específicos de apresentação do condutor
-    $identidade = $formData['identidade'] ?? '';
-    $orgao_emissor = 'DEMUTRAN   21787-0';
-    $cnh_numero = $formData['cnh_numero'] ?? '';
-    $cnh_uf = $formData['cnh_uf'] ?? '';
+    // Busca os dados do formulário no banco com todos os campos necessários
+    $sql = "SELECT 
+        tipo_requerente, nome, cpf, endereco, numero, complemento, 
+        bairro, cep, municipio, telefone, gmail as email,
+        placa, marcaModelo as marca_modelo, autoInfracao as auto_infracao,
+        identidade, registro_cnh_infrator
+        FROM solicitacoes_demutran 
+        WHERE id = ? AND tipo_solicitacao = 'apresentacao_condutor'";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $dados = $result->fetch_assoc();
+
+    if (!$dados) {
+        die('Formulário não encontrado ou tipo incorreto');
+    }
+
+    // Atribui os valores do banco às variáveis usando a função verificaValor
+    $tipoRequerente = verificaValor($dados['tipo_requerente']);
+    $nome = verificaValor($dados['nome']);
+    $cpf = verificaValor($dados['cpf']);
+    $endereco = verificaValor($dados['endereco']);
+    $numero = verificaValor($dados['numero']);
+    $complemento = verificaValor($dados['complemento']);
+    $bairro = verificaValor($dados['bairro']);
+    $cep = verificaValor($dados['cep']);
+    $municipio = verificaValor($dados['municipio']);
+    $telefone = verificaValor($dados['telefone']);
+    $email = verificaValor($dados['email']);
+
+    // Dados específicos da apresentação de condutor
+    $placa = verificaValor($dados['placa']);
+    $marcaModelo = verificaValor($dados['marca_modelo']);
+    $autoInfracao = verificaValor($dados['auto_infracao']);
+    $identidade = verificaValor($dados['identidade']);
+    $registro_cnh_infrator = verificaValor($dados['registro_cnh_infrator']);
+    // $cnh_uf = verificaValor($dados['cnh_uf']);
 } else {
     die('Método não permitido');
 }
@@ -258,7 +308,7 @@ $dataAtual = date('d') . ' de ' . $mesPortugues . ' de ' . date('Y');
                 <tr>
                     <td><strong>Auto de Infração:</strong> <?php echo $autoInfracao; ?></td>
                     <td><strong>Placa do Veículo:</strong> <?php echo $placa; ?></td>
-                    <td><strong>Órgão Autuador:</strong> <?php echo $orgao_emissor; ?></td>
+                    <td><strong>Órgão Autuador:</strong> <?php echo ORGAO_EMISSOR; ?></td>
                 </tr>
             </table>
 
@@ -271,8 +321,8 @@ $dataAtual = date('d') . ' de ' . $mesPortugues . ' de ' . date('Y');
                     <td><strong>CPF:</strong> <?php echo $cpf; ?></td>
                 </tr>
                 <tr>
-                    <td><strong>CNH:</strong> <?php echo $cnh_numero; ?></td>
-                    <td><strong>UF:</strong> <?php echo $cnh_uf; ?></td>
+                    <td><strong>CNH:</strong> <?php echo $registro_cnh_infrator; ?></td>
+                    <!-- <td><strong>UF:</strong> <?php echo $cnh_uf; ?></td> -->
                     <td><strong>E-mail:</strong> <?php echo $email; ?></td>
                 </tr>
                 <tr>
@@ -307,8 +357,9 @@ $dataAtual = date('d') . ' de ' . $mesPortugues . ' de ' . date('Y');
                     <p>Assinatura do Proprietário / Principal Condutor<br>(Pessoa que está transferindo a pontuação)</p>
                 </div>
             </div>
-
         </div>
+
+    </div>
     </div>
 
     <!-- Scripts -->

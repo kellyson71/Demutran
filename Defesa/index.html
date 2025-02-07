@@ -18,6 +18,13 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link rel="icon" href="../icon.png" type="image/png" />
+    <style>
+        .required-field::after {
+            content: '*';
+            color: #ef4444;
+            margin-left: 4px;
+        }
+    </style>
   </head>
   <body class="min-h-screen bg-gray-100">
     <!-- Topbar -->
@@ -335,6 +342,7 @@
               type="text"
               id="nome"
               name="nome"
+              required
               placeholder="Exemplo: João da Silva"
               class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
           </div>
@@ -348,6 +356,7 @@
               type="text"
               id="cpf"
               name="cpf"
+              required
               placeholder="Exemplo: 123.456.789-00"
               class="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
           </div>
@@ -1449,6 +1458,139 @@ function checkPopupBlocked(popupWindow) {
             return;
         }
     });
+
+    // Definição dos campos obrigatórios
+const camposComuns = [
+    'nome', 'cpf', 'endereco', 'bairro', 'municipio', 
+    'cep', 'telefone', 'gmail', 'placa', 'marcaModelo'
+];
+
+const camposEspecificos = {
+    'defesa_previa': [
+        'autoInfracao', 'dataInfracao', 'horaInfracao',
+        'localInfracao', 'enquadramento', 'defesa'
+    ],
+    'apresentacao_condutor': [
+        'cnh_numero', 'cnh_uf', 'registro_cnh_infrator'
+    ],
+    'jari': [
+        'autoInfracao', 'defesa'
+    ]
+};
+
+const documentosObrigatorios = {
+    'defesa_previa': ['doc_requerimento', 'notif_DEMUTRAN', 'crlv'],
+    'apresentacao_condutor': ['doc_requerimento', 'cnh_condutor', 'notif_DEMUTRAN'],
+    'jari': ['doc_requerimento', 'cnh', 'crlv', 'notif_DEMUTRAN']
+};
+
+// Modificar o event listener existente do tipo_solicitacao
+document.getElementById('tipo_solicitacao').addEventListener('change', function() {
+    const tipoSelecionado = this.value;
+    
+    // Primeiro, remove required de todos os campos
+    document.querySelectorAll('input, select, textarea').forEach(element => {
+        element.removeAttribute('required');
+    });
+
+    // Adiciona required para campos comuns
+    camposComuns.forEach(campo => {
+        const elemento = document.getElementById(campo);
+        if (elemento) elemento.setAttribute('required', '');
+    });
+
+    // Adiciona required para campos específicos do tipo selecionado
+    if (tipoSelecionado && camposEspecificos[tipoSelecionado]) {
+        camposEspecificos[tipoSelecionado].forEach(campo => {
+            const elemento = document.getElementById(campo);
+            if (elemento) elemento.setAttribute('required', '');
+        });
+    }
+
+    // Adiciona required para documentos obrigatórios
+    if (tipoSelecionado && documentosObrigatorios[tipoSelecionado]) {
+        documentosObrigatorios[tipoSelecionado].forEach(doc => {
+            const elemento = document.getElementById(doc);
+            if (elemento) elemento.setAttribute('required', '');
+        });
+    }
+
+    // Atualiza os indicadores visuais
+    updateRequiredLabels();
+});
+
+// Adicione esta função para gerenciar os indicadores visuais de campos obrigatórios
+function updateRequiredLabels() {
+    // Primeiro, remove todos os indicadores
+    document.querySelectorAll('label').forEach(label => {
+        label.classList.remove('required-field');
+    });
+
+    const tipoSelecionado = document.getElementById('tipo_solicitacao').value;
+    
+    // Adiciona indicadores para campos comuns
+    camposComuns.forEach(campo => {
+        const label = document.querySelector(`label[for="${campo}"]`);
+        if (label) label.classList.add('required-field');
+    });
+
+    // Adiciona indicadores para campos específicos do tipo selecionado
+    if (tipoSelecionado && camposEspecificos[tipoSelecionado]) {
+        camposEspecificos[tipoSelecionado].forEach(campo => {
+            const label = document.querySelector(`label[for="${campo}"]`);
+            if (label) label.classList.add('required-field');
+        });
+    }
+
+    // Adiciona indicadores para documentos obrigatórios
+    if (tipoSelecionado && documentosObrigatorios[tipoSelecionado]) {
+        documentosObrigatorios[tipoSelecionado].forEach(doc => {
+            const label = document.querySelector(`label[for="${doc}"]`);
+            if (label) label.classList.add('required-field');
+        });
+    }
+}
+
+// Modifique o event listener do tipo_solicitacao
+document.getElementById('tipo_solicitacao').addEventListener('change', function() {
+    const tipoSelecionado = this.value;
+    
+    // Primeiro, remove required de todos os campos
+    document.querySelectorAll('input, select, textarea').forEach(element => {
+        element.removeAttribute('required');
+    });
+
+    // Adiciona required para campos comuns
+    camposComuns.forEach(campo => {
+        const elemento = document.getElementById(campo);
+        if (elemento) elemento.setAttribute('required', '');
+    });
+
+    // Adiciona required para campos específicos do tipo selecionado
+    if (tipoSelecionado && camposEspecificos[tipoSelecionado]) {
+        camposEspecificos[tipoSelecionado].forEach(campo => {
+            const elemento = document.getElementById(campo);
+            if (elemento) elemento.setAttribute('required', '');
+        });
+    }
+
+    // Adiciona required para documentos obrigatórios
+    if (tipoSelecionado && documentosObrigatorios[tipoSelecionado]) {
+        documentosObrigatorios[tipoSelecionado].forEach(doc => {
+            const elemento = document.getElementById(doc);
+            if (elemento) elemento.setAttribute('required', '');
+        });
+    }
+
+    // Atualiza os indicadores visuais
+    updateRequiredLabels();
+});
+
+// Chame a função no carregamento da página para marcar os campos iniciais
+document.addEventListener('DOMContentLoaded', function() {
+    updateRequiredLabels();
+});
+
     </script>
   </body>
 </html>
