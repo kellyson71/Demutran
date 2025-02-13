@@ -19,6 +19,12 @@ foreach ($required_fields as $field) {
     }
 }
 
+// Adicione esta função logo após os requires e antes do try-catch
+function verificaValor($valor)
+{
+    return (!empty($valor) && $valor !== 'null') ? $valor : 'não informado';
+}
+
 try {
     require_once '../../env/config.php';
     require_once '../../components/print-components.php';
@@ -27,8 +33,6 @@ try {
     $_SESSION['form_data'] = $_POST;
     $formData = $_POST;
 
-    // Resto do código existente...
-    // Obter dados do formulário via POST ou GET
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['form_data'] = $_POST;
         $formData = $_POST;
@@ -56,41 +60,36 @@ try {
         }
     }
 
-    // Formatar o texto do tipo de solicitação para exibição
-    $tipoRequerente = $formData['tipo_solicitacao'] ?? '';
-    switch ($tipoRequerente) {
-        case 'defesa_previa':
-            $tipoRequerente = 'Defesa Prévia';
-            break;
-        case 'jari':
-            $tipoRequerente = 'JARI';
-            break;
-        default:
-            $tipoRequerente = 'Não informado';
-    }
+
 
     // Extrair dados do formulário
-    $nome = $formData['nome'] ?? '';
-    $cpf = $formData['cpf'] ?? '';
-    $endereco = $formData['endereco'] ?? '';
-    $numero = $formData['numero'] ?? '';
-    $complemento = $formData['complemento'] ?? '';
-    $bairro = $formData['bairro'] ?? '';
-    $cep = $formData['cep'] ?? '';
-    $municipio = $formData['municipio'] ?? '';
-    $telefone = $formData['telefone'] ?? '';
-    $placa = $formData['placa'] ?? '';
-    $marcaModelo = $formData['marcaModelo'] ?? '';
-    $cor = $formData['cor'] ?? '';
-    $especie = $formData['especie'] ?? '';
-    $categoria = $formData['categoria'] ?? '';
-    $ano = $formData['ano'] ?? '';
-    $autoInfracao = $formData['autoInfracao'] ?? '';
-    $dataInfracao = $formData['dataInfracao'] ?? '';
-    $horaInfracao = $formData['horaInfracao'] ?? '';
-    $localInfracao = $formData['localInfracao'] ?? '';
-    $enquadramento = $formData['enquadramento'] ?? '';
-    $defesa = $formData['defesa'] ?? '';
+    $tipo_requerente = verificaValor($formData['tipo_requerente'] ?? '');
+    $nome = verificaValor($formData['nome'] ?? '');
+    $cpf = verificaValor($formData['cpf'] ?? '');
+    $endereco = verificaValor($formData['endereco'] ?? '');
+    $numero = verificaValor($formData['numero'] ?? '');
+    $complemento = verificaValor($formData['complemento'] ?? '');
+    $bairro = verificaValor($formData['bairro'] ?? '');
+    $cep = verificaValor($formData['cep'] ?? '');
+    $municipio = verificaValor($formData['municipio'] ?? '');
+    $telefone = verificaValor($formData['telefone'] ?? '');
+    $email = verificaValor($formData['gmail'] ?? '');
+
+    // Dados do Veículo
+    $placa = verificaValor($formData['placa'] ?? '');
+    $marcaModelo = verificaValor($formData['marcaModelo'] ?? '');
+    $cor = verificaValor($formData['cor'] ?? '');
+    $especie = verificaValor($formData['especie'] ?? '');
+    $categoria = verificaValor($formData['categoria'] ?? '');
+    $ano = verificaValor($formData['ano'] ?? '');
+
+    // Dados da Infração
+    $autoInfracao = verificaValor($formData['autoInfracao'] ?? '');
+    $dataInfracao = verificaValor($formData['dataInfracao'] ?? '');
+    $horaInfracao = verificaValor($formData['horaInfracao'] ?? '');
+    $localInfracao = verificaValor($formData['localInfracao'] ?? '');
+    $enquadramento = verificaValor($formData['enquadramento'] ?? '');
+    $defesa = verificaValor($formData['defesa'] ?? '');
 
     // Configurações baseadas no tipo de solicitação
     $tipoSolicitacao = $formData['tipo_solicitacao'] ?? '';
@@ -351,7 +350,7 @@ try {
             <div class="section-title">DADOS DO REQUERENTE</div>
             <table class="data-table">
                 <tr>
-                    <td><strong>Tipo de Requerente:</strong> <?php echo $tipoRequerente; ?></td>
+                    <td><strong>Tipo de Requerente:</strong> <?php echo $tipo_requerente; ?></td>
                     <td><strong>Nome:</strong> <?php echo $nome; ?></td>
                     <td><strong>CPF:</strong> <?php echo $cpf; ?></td>
                 </tr>
@@ -366,6 +365,9 @@ try {
                     <td><strong>CEP:</strong> <?php echo $cep; ?></td>
                     <td><strong>Município:</strong> <?php echo $municipio; ?></td>
                     <td><strong>Telefone:</strong> <?php echo $telefone; ?></td>
+                </tr>
+                <tr>
+                    <td colspan="3"><strong>E-mail:</strong> <?php echo $email; ?></td>
                 </tr>
             </table>
 
@@ -442,7 +444,7 @@ try {
     <!-- Scripts -->
     <!-- jQuery and Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/js/bootstrap.min.js"></script>
 
 </body>
 

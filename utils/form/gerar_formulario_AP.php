@@ -31,6 +31,21 @@ try {
         $telefone = verificaValor($formData['telefone']);
         $email = verificaValor($formData['gmail']);
 
+        // Dados do Condutor
+        $data_nascimento = verificaValor($formData['data_nascimento']);
+        $nacionalidade = verificaValor($formData['nacionalidade']);
+        $orgao_emissor = verificaValor($formData['orgao_emissor']);
+        $data_emissao_cnh = verificaValor($formData['data_emissao_cnh']);
+        $validade_cnh = verificaValor($formData['validade_cnh']);
+
+
+
+        // Dados da Infração
+        $codigo_infracao = verificaValor($formData['codigo_infracao']);
+        $descricao_infracao = verificaValor($formData['descricao_infracao']);
+        $data_infracao = verificaValor($formData['data_infracao']);
+        $hora_infracao = verificaValor($formData['hora_infracao']);
+
         // Dados do veículo e infração
         $placa = verificaValor($formData['placa']);
         $marcaModelo = verificaValor($formData['marcaModelo']);
@@ -326,14 +341,27 @@ try {
                 <div class="section-title">DADOS DO CONDUTOR INFRATOR</div>
                 <table class="data-table">
                     <tr>
+                        <td><strong>Tipo de Requerente:</strong> <?php echo $tipo_requerente; ?></td>
+
                         <td><strong>Nome:</strong> <?php echo $nome; ?></td>
-                        <td><strong>Identidade/Órgão emissor:</strong> <?php echo $identidade; ?></td>
                         <td><strong>CPF:</strong> <?php echo $cpf; ?></td>
+                        <td><strong>Nacionalidade:</strong> <?php echo $nacionalidade; ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data de Nascimento:</strong> <?php echo date('d/m/Y', strtotime($data_nascimento)); ?>
+                        </td>
+                        <td><strong>Identidade/Órgão emissor:</strong> <?php echo $identidade; ?></td>
+                        <td><strong>Data de Emissão:</strong> <?php echo $orgao_emissor; ?></td>
                     </tr>
                     <tr>
                         <td><strong>CNH:</strong> <?php echo $cnh_numero; ?></td>
                         <td><strong>UF:</strong> <?php echo $cnh_uf; ?></td>
                         <td><strong>Registro CNH:</strong> <?php echo $registro_cnh_infrator; ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data de Emissão CNH:</strong> <?php echo date('d/m/Y', strtotime($data_emissao_cnh)); ?>
+                        </td>
+                        <td><strong>Validade CNH:</strong> <?php echo date('d/m/Y', strtotime($validade_cnh)); ?></td>
                     </tr>
                     <tr>
                         <td colspan="3"><strong>Residente à:</strong> <?php echo $endereco; ?>, Nº <?php echo $numero; ?>
@@ -347,6 +375,30 @@ try {
                     <tr>
                         <td><strong>Telefone:</strong> <?php echo $telefone; ?></td>
                         <td><strong>E-mail:</strong> <?php echo $email; ?></td>
+                    </tr>
+                </table>
+
+                <!-- Dados do Veículo -->
+                <div class="section-title">DADOS DO VEÍCULO</div>
+                <table class="data-table">
+                    <tr>
+                        <td><strong>Placa:</strong> <?php echo $placa; ?></td>
+                    </tr>
+                </table>
+
+                <!-- Dados da Infração -->
+                <div class="section-title">DADOS DA INFRAÇÃO</div>
+                <table class="data-table">
+                    <tr>
+                        <td><strong>Auto de Infração:</strong> <?php echo $autoInfracao; ?></td>
+                        <td><strong>Código da Infração:</strong> <?php echo $codigo_infracao; ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data da Infração:</strong> <?php echo date('d/m/Y', strtotime($data_infracao)); ?></td>
+                        <td><strong>Hora da Infração:</strong> <?php echo $hora_infracao; ?></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><strong>Descrição da Infração:</strong> <?php echo $descricao_infracao; ?></td>
                     </tr>
                 </table>
 
