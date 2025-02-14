@@ -1,6 +1,10 @@
 <?php
 include '../env/config.php';
 
+// Aumentar limite de upload
+ini_set('post_max_size', '64M');
+ini_set('upload_max_filesize', '64M');
+
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Conexão falhou: " . $conn->connect_error);
@@ -45,18 +49,43 @@ function uploadFile($file_key, $upload_dir, $base_url, $id_solicitacao) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Validar campos obrigatórios
+    $required_fields = [
+        'tipo_solicitacao',
+        'emissao_cartao',
+        'solicitante',
+        'nome',
+        'data_nascimento',
+        'cpf',
+        'endereco',
+        'telefone',
+        'doc_identidade_num',
+        'email'
+    ];
+
+    $missing_fields = [];
+    foreach ($required_fields as $field) {
+        if (!isset($_POST[$field]) || empty($_POST[$field])) {
+            $missing_fields[] = $field;
+        }
+    }
+
+    if (!empty($missing_fields)) {
+        die("Campos obrigatórios faltando: " . implode(", ", $missing_fields));
+    }
+
     // Captura os dados do formulário
     $residente = isset($_POST['resident_check']) ? 1 : 0;
-    $tipo_solicitacao = verificaTexto($_POST['tipo_solicitacao']);
-    $emissao_cartao = verificaTexto($_POST['emissao_cartao']);
-    $solicitante = verificaTexto($_POST['solicitante']);
-    $nome = verificaTexto($_POST['nome']);
-    $data_nascimento = verificaTexto($_POST['data_nascimento']);
-    $cpf = verificaTexto($_POST['cpf']);
-    $endereco = verificaTexto($_POST['endereco']);
-    $telefone = verificaTexto($_POST['telefone']);
-    $doc_identidade_num = verificaTexto($_POST['doc_identidade_num']);
-    $email = verificaTexto($_POST['email']);
+    $tipo_solicitacao = $_POST['tipo_solicitacao'];
+    $emissao_cartao = $_POST['emissao_cartao'];
+    $solicitante = $_POST['solicitante'];
+    $nome = $_POST['nome'];
+    $data_nascimento = $_POST['data_nascimento'];
+    $cpf = $_POST['cpf'];
+    $endereco = $_POST['endereco'];
+    $telefone = $_POST['telefone'];
+    $doc_identidade_num = $_POST['doc_identidade_num'];
+    $email = $_POST['email'];
 
     // Inicialmente, os URLs de arquivo serão nulos
     $doc_identidade_url = null;
@@ -75,6 +104,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email_representante = verificaTexto($_POST['email_representante']);
     } else {
         $nome_representante = $cpf_representante = $endereco_representante = $telefone_representante = $email_representante = "não informado";
+    }
+
+    // Verificar se a tabela contadores_cartao existe
+    $check_table = "SHOW TABLES LIKE 'contadores_cartao'";
+    $table_exists = $conn->query($check_table)->num_rows > 0;
+
+    if (!$table_exists) {
+        // Criar tabela se não existir
+        $create_table = "CREATE TABLE IF NOT EXISTS contadores_cartao (
+            tipo VARCHAR(10) PRIMARY KEY,
+            ultimo_numero INT NOT NULL DEFAULT 0
+        )";
+        $conn->query($create_table);
+
+        // Inserir valores iniciais
+        $insert_initial = "INSERT INTO contadores_cartao (tipo, ultimo_numero) VALUES 
+            ('pcd', 0),
+            ('idoso', 0)";
+        $conn->query($insert_initial);
     }
 
     // Preparar a query de inserção
@@ -122,33 +170,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($stmt->execute()) {
         $id_solicitacao = $conn->insert_id;
 
-        // Gerar o número do cartão no novo formato
-        $tipo = $_POST['tipo_solicitacao']; // 'pcd' ou 'idoso'
-
-        // Atualizar o contador e obter o próximo número
-        $update_contador = "UPDATE contadores_cartao SET ultimo_numero = ultimo_numero + 1 WHERE tipo = ?";
-        $stmt_contador = $conn->prepare($update_contador);
-        $stmt_contador->bind_param('s', $tipo);
-        $stmt_contador->execute();
-
-        // Obter o número atual
+        // Obter o número atual e incrementar
         $get_numero = "SELECT ultimo_numero FROM contadores_cartao WHERE tipo = ?";
         $stmt_numero = $conn->prepare($get_numero);
-        $stmt_numero->bind_param('s', $tipo);
+        if (!$stmt_numero) {
+            die("Erro na preparação do número: " . $conn->error);
+        }
+
+        $stmt_numero->bind_param('s', $tipo_solicitacao);
         $stmt_numero->execute();
         $result = $stmt_numero->get_result();
-        $row = $result->fetch_assoc();
-        $ultimo_numero = $row['ultimo_numero'];
 
-        // Formatar o número do cartão
-        $prefixo = strtoupper(substr($tipo, 0, 1)); // 'P' para PCD ou 'I' para Idoso
-        $n_cartao = $prefixo . '2025' . str_pad($ultimo_numero, 3, '0', STR_PAD_LEFT);
-        
-        // Atualizar o registro com o número do cartão
-        $update_cartao = "UPDATE solicitacao_cartao SET n_cartao = ? WHERE id = ?";
-        $stmt_cartao = $conn->prepare($update_cartao);
-        $stmt_cartao->bind_param('si', $n_cartao, $id_solicitacao);
-        $stmt_cartao->execute();
+        if ($row = $result->fetch_assoc()) {
+            $proximo_numero = $row['ultimo_numero'] + 1;
+
+            // Formatar o número do cartão
+            $prefixo = strtoupper(substr($tipo_solicitacao, 0, 1)); // 'P' para PCD ou 'I' para Idoso
+            $n_cartao = $prefixo . '2025' . str_pad($proximo_numero, 3, '0', STR_PAD_LEFT);
+
+            // Atualizar o contador
+            $update_contador = "UPDATE contadores_cartao SET ultimo_numero = ?, data_atualizacao = CURRENT_TIMESTAMP WHERE tipo = ?";
+            $stmt_contador = $conn->prepare($update_contador);
+            $stmt_contador->bind_param('is', $proximo_numero, $tipo_solicitacao);
+            $stmt_contador->execute();
+
+            // Atualizar o registro com o número do cartão
+            $update_cartao = "UPDATE solicitacao_cartao SET n_cartao = ? WHERE id = ?";
+            $stmt_cartao = $conn->prepare($update_cartao);
+            $stmt_cartao->bind_param('si', $n_cartao, $id_solicitacao);
+            $stmt_cartao->execute();
+        }
 
         // Salvar os valores originais do POST
         $original_post = $_POST;

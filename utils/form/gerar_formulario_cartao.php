@@ -35,12 +35,19 @@ function getDadosFormulario($conn, $tipo, $id)
 // Obter parâmetros da URL
 $tipo = $_GET['tipo'] ?? '';
 $id = $_GET['id'] ?? '';
+$with_docs = isset($_GET['with_docs']) && $_GET['with_docs'] === 'true';
 
 // Obter dados do formulário
 $dados = getDadosFormulario($conn, $tipo, $id);
 
 if (!$dados) {
     die('Formulário não encontrado');
+}
+
+// Se with_docs=true, processar documentos
+if ($with_docs) {
+    require_once __DIR__ . '/../../components/document-viewer.php';
+    $dados['documentos'] = processDocuments(['id' => $id], $tipo);
 }
 
 // Incluir o arquivo apropriado baseado no tipo

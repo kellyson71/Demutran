@@ -263,7 +263,7 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                                 $form_url = "../utils/form/gerar_formulario_DAT.php";
                                 break;
                             case 'SAC':
-                                $form_url = "../utils/form/gerar_formulario_sac.php"; // Adicionando o caso do SAC
+                                $form_url = "../utils/form/gerar_formulario_sac.php";
                                 break;
                             case 'Parecer':
                                 $form_url = "../utils/form/gerar_formulario_parecer.php";
@@ -273,16 +273,35 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                         }
 
                         // Adiciona parâmetros necessários
-                        $form_url .= "?id=" . urlencode($id) . "&tipo=" . urlencode(strtolower($tipo));
+                        $base_url = $form_url . "?id=" . urlencode($id) . "&tipo=" . urlencode(strtolower($tipo));
                         if (isset($dados_jari['tipo_solicitacao'])) {
-                            $form_url .= "&tipo_solicitacao=" . urlencode($dados_jari['tipo_solicitacao']);
+                            $base_url .= "&tipo_solicitacao=" . urlencode($dados_jari['tipo_solicitacao']);
                         }
                         ?>
-                        <a href="<?php echo $form_url; ?>" target="_blank"
-                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 shadow-sm">
-                            <span class="material-icons mr-2">description</span>
-                            Ver Formulário
-                        </a>
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open"
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 shadow-sm">
+                                <span class="material-icons mr-2">description</span>
+                                Gerar Formulário
+                                <span class="material-icons ml-2">arrow_drop_down</span>
+                            </button>
+
+                            <div x-show="open" @click.away="open = false"
+                                class="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-50">
+                                <div class="py-1">
+                                    <a href="<?php echo $base_url; ?>" target="_blank"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <span class="material-icons text-sm mr-2 align-middle">description</span>
+                                        Gerar Formulário
+                                    </a>
+                                    <a href="<?php echo $base_url . '&with_docs=true'; ?>" target="_blank"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <span class="material-icons text-sm mr-2 align-middle">folder</span>
+                                        Gerar Formulário + Documentos
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

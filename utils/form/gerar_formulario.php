@@ -7,17 +7,17 @@ header('Cache-Control: post-check=0, pre-check=0', false);
 header('Pragma: no-cache');
 
 // Verificar se é uma requisição POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('Método não permitido');
-}
+// if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+//     die('Método não permitido');
+// }
 
-// Validar dados obrigatórios
-$required_fields = ['nome', 'cpf', 'endereco', 'bairro', 'municipio', 'placa'];
-foreach ($required_fields as $field) {
-    if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) {
-        die('Campos obrigatórios não preenchidos');
-    }
-}
+// // Validar dados obrigatórios
+// $required_fields = ['nome', 'cpf', 'endereco', 'bairro', 'municipio', 'placa'];
+// foreach ($required_fields as $field) {
+//     if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) {
+//         die('Campos obrigatórios não preenchidos');
+//     }
+// }
 
 // Adicione esta função logo após os requires e antes do try-catch
 function verificaValor($valor)
@@ -28,6 +28,7 @@ function verificaValor($valor)
 try {
     require_once '../../env/config.php';
     require_once '../../components/print-components.php';
+    require_once '../../components/document-viewer.php'; // Adicione esta linha
 
     // Armazenar dados do formulário na sessão
     $_SESSION['form_data'] = $_POST;
@@ -438,6 +439,12 @@ try {
                 <div class="signature-line"></div>
                 <p>Assinatura do Requerente</p>
             </div>
+
+            <!-- Visualizador de Documentos -->
+            <?php
+            $documentos = processDocuments($formData, $tipoSolicitacao);
+            echo renderDocumentViewer($documentos);
+            ?>
         </div>
     </div>
 

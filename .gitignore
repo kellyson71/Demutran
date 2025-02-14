@@ -8,7 +8,7 @@ utils/vendor/
 assets/
 lib/
 env/
-
+scripts/
 # Todas as pastas midia em qualquer lugar do projeto
 **/midia/
 **/midia/**

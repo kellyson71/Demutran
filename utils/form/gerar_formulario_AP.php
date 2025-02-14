@@ -85,17 +85,30 @@ try {
         }
 
         // Atribui os valores do banco às variáveis usando a função verificaValor
-        $tipoRequerente = verificaValor($dados['tipo_requerente']);
-        $nome = verificaValor($dados['nome']);
-        $cpf = verificaValor($dados['cpf']);
-        $endereco = verificaValor($dados['endereco']);
-        $numero = verificaValor($dados['numero']);
-        $complemento = verificaValor($dados['complemento']);
-        $bairro = verificaValor($dados['bairro']);
-        $cep = verificaValor($dados['cep']);
-        $municipio = verificaValor($dados['municipio']);
-        $telefone = verificaValor($dados['telefone']);
-        $email = verificaValor($dados['email']);
+        $tipoRequerente = verificaValor($dados['tipo_requerente'] ?? '');
+        $nome = verificaValor($dados['nome'] ?? '');
+        $cpf = verificaValor($dados['cpf'] ?? '');
+        $endereco = verificaValor($dados['endereco'] ?? '');
+        $numero = verificaValor($dados['numero'] ?? '');
+        $complemento = verificaValor($dados['complemento'] ?? '');
+        $bairro = verificaValor($dados['bairro'] ?? '');
+        $cep = verificaValor($dados['cep'] ?? '');
+        $municipio = verificaValor($dados['municipio'] ?? '');
+        $telefone = verificaValor($dados['telefone'] ?? '');
+        $email = verificaValor($dados['email'] ?? '');
+
+        // Dados específicos do condutor
+        $nacionalidade = verificaValor($dados['nacionalidade'] ?? '');
+        $data_nascimento = verificaValor($dados['data_nascimento'] ?? '');
+        $orgao_emissor = verificaValor($dados['orgao_emissor'] ?? '');
+        $data_emissao_cnh = verificaValor($dados['data_emissao_cnh'] ?? '');
+        $validade_cnh = verificaValor($dados['validade_cnh'] ?? '');
+
+        // Dados da infração
+        $codigo_infracao = verificaValor($dados['codigo_infracao'] ?? '');
+        $data_infracao = verificaValor($dados['data_infracao'] ?? '');
+        $hora_infracao = verificaValor($dados['hora_infracao'] ?? '');
+        $descricao_infracao = verificaValor($dados['descricao_infracao'] ?? '');
 
         // Dados específicos da apresentação de condutor
         $placa = verificaValor($dados['placa']);
@@ -341,14 +354,14 @@ try {
                 <div class="section-title">DADOS DO CONDUTOR INFRATOR</div>
                 <table class="data-table">
                     <tr>
-                        <td><strong>Tipo de Requerente:</strong> <?php echo $tipo_requerente; ?></td>
-
+                        <td><strong>Tipo de Requerente:</strong> <?php echo $tipoRequerente; ?></td>
                         <td><strong>Nome:</strong> <?php echo $nome; ?></td>
                         <td><strong>CPF:</strong> <?php echo $cpf; ?></td>
                         <td><strong>Nacionalidade:</strong> <?php echo $nacionalidade; ?></td>
                     </tr>
                     <tr>
-                        <td><strong>Data de Nascimento:</strong> <?php echo date('d/m/Y', strtotime($data_nascimento)); ?>
+                        <td><strong>Data de Nascimento:</strong>
+                            <?php echo $data_nascimento !== 'não informado' ? date('d/m/Y', strtotime($data_nascimento)) : 'não informado'; ?>
                         </td>
                         <td><strong>Identidade/Órgão emissor:</strong> <?php echo $identidade; ?></td>
                         <td><strong>Data de Emissão:</strong> <?php echo $orgao_emissor; ?></td>
@@ -359,9 +372,12 @@ try {
                         <td><strong>Registro CNH:</strong> <?php echo $registro_cnh_infrator; ?></td>
                     </tr>
                     <tr>
-                        <td><strong>Data de Emissão CNH:</strong> <?php echo date('d/m/Y', strtotime($data_emissao_cnh)); ?>
+                        <td><strong>Data de Emissão CNH:</strong>
+                            <?php echo $data_emissao_cnh !== 'não informado' ? date('d/m/Y', strtotime($data_emissao_cnh)) : 'não informado'; ?>
                         </td>
-                        <td><strong>Validade CNH:</strong> <?php echo date('d/m/Y', strtotime($validade_cnh)); ?></td>
+                        <td><strong>Validade CNH:</strong>
+                            <?php echo $validade_cnh !== 'não informado' ? date('d/m/Y', strtotime($validade_cnh)) : 'não informado'; ?>
+                        </td>
                     </tr>
                     <tr>
                         <td colspan="3"><strong>Residente à:</strong> <?php echo $endereco; ?>, Nº <?php echo $numero; ?>
@@ -394,7 +410,9 @@ try {
                         <td><strong>Código da Infração:</strong> <?php echo $codigo_infracao; ?></td>
                     </tr>
                     <tr>
-                        <td><strong>Data da Infração:</strong> <?php echo date('d/m/Y', strtotime($data_infracao)); ?></td>
+                        <td><strong>Data da Infração:</strong>
+                            <?php echo $data_infracao !== 'não informado' ? date('d/m/Y', strtotime($data_infracao)) : 'não informado'; ?>
+                        </td>
                         <td><strong>Hora da Infração:</strong> <?php echo $hora_infracao; ?></td>
                     </tr>
                     <tr>
@@ -420,9 +438,16 @@ try {
                         <p>Assinatura do Proprietário / Principal Condutor<br>(Pessoa que está transferindo a pontuação)</p>
                     </div>
                 </div>
-            </div>
 
-        </div>
+                <!-- Visualizador de Documentos -->
+                <?php
+                if (isset($id)) {
+                    require_once __DIR__ . '/../../components/document-viewer.php';
+                    $documentos = processDocuments(['id' => $id], 'apresentacao_condutor');
+                    echo renderDocumentViewer($documentos);
+                }
+                ?>
+            </div>
         </div>
 
         <!-- Scripts -->

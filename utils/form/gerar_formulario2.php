@@ -108,6 +108,12 @@ require_once '../../components/print-components.php';
             }
         }
     </style>
+
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
 </head>
 
 <body>
@@ -224,7 +230,7 @@ require_once '../../components/print-components.php';
         <div class="signature-section">
             <p class="mb-4">Pau dos Ferros/RN, <?php echo date('d/m/Y'); ?></p>
             <div class="signature-line"></div>
-            <p>Assinatura do Solicitante</p>
+            <p>Assinatura do Solicitante</p>\
             <?php if ($dados['representante_legal'] === 'sim'): ?>
                 <div class="signature-line mt-4"></div>
                 <p>Assinatura do Representante Legal</p>
@@ -234,10 +240,21 @@ require_once '../../components/print-components.php';
         </div>
     </div>
 
+    <!-- Visualizador de Documentos -->
+    <?php
+    if (isset($dados['id'])) {
+        require_once __DIR__ . '/../../components/document-viewer.php';
+        $documentos = processDocuments($dados,  'cartao');
+        echo renderDocumentViewer($documentos);
+    }
+    ?>
+
     <?php if (isset($_GET['print']) && $_GET['print'] === 'true'): ?>
         <script>
             window.onload = function() {
-                window.print();
+                setTimeout(function() {
+                    window.print();
+                }, 2000);
             }
         </script>
     <?php endif; ?>
