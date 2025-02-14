@@ -335,7 +335,11 @@ require_once './includes/formularios/form_list.php';
 
                                 // Coletar detalhes dos pareceres próximos
                                 foreach ($submissoes as $item) {
-                                    if ($item['tipo'] === 'Parecer' && isset($item['data_horario'])) {
+                                    if (
+                                        $item['tipo'] === 'Parecer' &&
+                                        isset($item['data_horario']) &&
+                                        (!isset($item['situacao']) || $item['situacao'] !== 'Concluído')
+                                    ) {
                                         $partes = explode(' ', $item['data_horario']);
                                         if (isset($partes[0])) {
                                             $data = DateTime::createFromFormat('d/m/Y', $partes[0]);
