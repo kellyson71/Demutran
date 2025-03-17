@@ -133,19 +133,54 @@ function renderizarInfoDat(array $item): string
 // Função geral para renderizar informações do card
 function renderizarInfoCard(array $item): string
 {
+    $html = '';
+
+    // Verifique o tipo de formulário e renderize informações específicas
     switch ($item['tipo']) {
         case 'SAC':
-            return renderizarInfoSac($item);
+            $html .= renderInfoLine('Assunto', $item['assunto'] ?? 'Não informado');
+            $html .= renderInfoLine('Departamento', $item['departamento'] ?? 'Não informado');
+            break;
+
         case 'JARI':
-            return renderizarInfoJari($item);
+            $html .= renderInfoLine('Auto de Infração', $item['autoInfracao'] ?? 'Não informado');
+            $html .= renderInfoLine('Placa', $item['placa'] ?? 'Não informado');
+            $html .= renderInfoLine('Defesa', substr($item['defesa'] ?? 'Não informada', 0, 100) . '...');
+            break;
+
         case 'PCD':
         case 'IDOSO':
-            return renderizarInfoCredencial($item);
+            $html .= renderInfoLine('CPF', $item['cpf'] ?? 'Não informado');
+            $html .= renderInfoLine('Cartão', $item['n_cartao'] ?? 'Pendente');
+            break;
+
         case 'DAT':
-            return renderizarInfoDat($item);
+            $html .= renderInfoLine('E-mail', $item['email_usuario'] ?? $item['email'] ?? 'Não informado');
+            $html .= renderInfoLine(
+                'Status',
+                '<span class="px-2 py-1 rounded-full text-xs ' .
+                    ($item['status'] === 'Pendente' ? 'bg-yellow-100 text-yellow-800' : ($item['status'] === 'Concluído' ? 'bg-green-100 text-green-800' : ($item['status'] === 'Em análise' ? 'bg-blue-100 text-blue-800' : ($item['status'] === 'Recusado' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800')))) .
+                    '">' . htmlspecialchars($item['status'] ?? 'Pendente') . '</span>',
+                true
+            );
+            $html .= renderInfoLine(
+                'Preenchimento',
+                '<span class="px-2 py-1 rounded-full text-xs ' .
+                    ($item['preenchimento_status'] === 'Incompleto' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800') .
+                    '">' . htmlspecialchars($item['preenchimento_status'] ?? 'Incompleto') . '</span>',
+                true
+            );
+            $html .= renderInfoLine('Token', '<span class="text-xs font-mono bg-gray-100 p-1 rounded">' .
+                htmlspecialchars($item['token'] ?? 'Não disponível') . '</span>', true);
+            break;
+
         case 'Parecer':
-            return renderizarInfoParecer($item);
+            $html .= renderizarInfoParecer($item);
+            break;
+
         default:
-            return '';
+            $html .= renderInfoLine('ID', '#' . $item['id']);
     }
+
+    return $html;
 }

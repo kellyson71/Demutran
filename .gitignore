@@ -14,6 +14,12 @@ scripts/
 **/midia/**
 Defesa/midia/
 PCD/midia/
-
+tests/
 # Arquivos de configuração
 env/config.php
+bakup/
+vendor/
+composer.lock
+composer.phar
+composer.json
+vendor/

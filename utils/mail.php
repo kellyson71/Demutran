@@ -4,9 +4,38 @@ use PHPMailer\PHPMailer\PHPMailer;
 require_once(__DIR__ . '/../lib/vendor/autoload.php');
 
 // Configuração do modo de teste
-$TEST_MODE = false; // Mude para false quando quiser enviar emails reais
+$TEST_MODE = true; // Mude para false quando quiser enviar emails reais
 
-error_log("chamado ");
+// Processar solicitações AJAX
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+
+    // Verifica se é uma requisição JSON
+    $contentType = isset($_SERVER["CONTENT_TYPE"]) ? trim($_SERVER["CONTENT_TYPE"]) : '';
+
+    if (strpos($contentType, 'application/json') !== false) {
+        // Recebe o conteúdo JSON e converte para array
+        $json = file_get_contents('php://input');
+        $data = json_decode($json, true);
+
+        if (isset($data['email']) && isset($data['nome']) && isset($data['assunto']) && isset($data['mensagem'])) {
+            $result = sendMail($data['email'], $data['nome'], $data['assunto'], $data['mensagem']);
+            echo json_encode(['success' => $result]);
+            exit;
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Dados incompletos']);
+            exit;
+        }
+    } elseif (isset($_POST['email']) && isset($_POST['nome']) && isset($_POST['assunto']) && isset($_POST['mensagem'])) {
+        // Para compatibilidade com form-data
+        $result = sendMail($_POST['email'], $_POST['nome'], $_POST['assunto'], $_POST['mensagem']);
+        echo json_encode(['success' => $result]);
+        exit;
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Dados inválidos']);
+        exit;
+    }
+}
 
 function sendMail($email, $nome, $assunto, $mensagem)
 {

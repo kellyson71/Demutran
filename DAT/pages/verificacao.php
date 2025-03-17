@@ -289,17 +289,17 @@ $currentStep = 1;
             const data = await tokenResponse.json();
 
             if (data.success) {
-                // Enviar email
-                await fetch('../../utils/mail.php', {
+                // Correção na chamada do sistema de e-mail
+                const mailResponse = await fetch('../../utils/mail.php', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Type': 'application/json',
                     },
-                    body: new URLSearchParams({
-                        'email': email,
-                        'nome': nome,
-                        'assunto': 'Seu Token de Acesso DEMUTRAN',
-                        'mensagem': `
+                    body: JSON.stringify({
+                        email: email,
+                        nome: nome,
+                        assunto: 'Seu Token de Acesso DEMUTRAN',
+                        mensagem: `
                     <html>
                     <body style='font-family: Arial, sans-serif;'>
                         <div style='background-color: #f5f5f5; padding: 20px;'>
@@ -328,6 +328,9 @@ $currentStep = 1;
                     </html>`
                     })
                 });
+
+                const mailResult = await mailResponse.json();
+                console.log('Resposta do servidor de email:', mailResult);
 
                 var emailModal = bootstrap.Modal.getInstance(document.getElementById('emailModal'));
                 emailModal.hide();

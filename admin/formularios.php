@@ -589,13 +589,27 @@ require_once './includes/formularios/form_list.php';
                                                 <?php if ($item['tipo'] === 'DAT'): ?>
                                                     <div class="hidden md:flex items-center space-x-4 text-sm">
                                                         <span class="text-gray-500">
-                                                            <?php echo htmlspecialchars($item['email'] ?? 'Não informado'); ?>
+                                                            <?php echo htmlspecialchars($item['email_usuario'] ?? $item['email'] ?? 'Não informado'); ?>
                                                         </span>
                                                         <span class="px-2 py-1 rounded-full text-xs <?php
                                                                                                     $preenchimento = $item['preenchimento_status'] ?? 'Incompleto';
                                                                                                     echo $preenchimento === 'Incompleto' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
                                                                                                     ?>">
                                                             <?php echo htmlspecialchars($preenchimento); ?>
+                                                        </span>
+                                                        <span class="px-2 py-1 rounded-full text-xs <?php
+                                                                                                    $status = $item['status'] ?? 'Pendente';
+                                                                                                    $statusClass = 'bg-yellow-100 text-yellow-800';
+                                                                                                    if ($status === 'Concluído') {
+                                                                                                        $statusClass = 'bg-green-100 text-green-800';
+                                                                                                    } elseif ($status === 'Em análise') {
+                                                                                                        $statusClass = 'bg-blue-100 text-blue-800';
+                                                                                                    } elseif ($status === 'Recusado') {
+                                                                                                        $statusClass = 'bg-red-100 text-red-800';
+                                                                                                    }
+                                                                                                    echo $statusClass;
+                                                                                                    ?>">
+                                                            <?php echo htmlspecialchars($status); ?>
                                                         </span>
                                                     </div>
                                                 <?php endif; ?>
