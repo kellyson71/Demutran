@@ -37,14 +37,17 @@ try {
 
             $token = $dat_data['token'];
 
-            // Mapeamento de tabelas e suas respectivas colunas de token
+            // Log para debug
+            error_log("Excluindo DAT com token: " . $token);
+
+            // Mapeamento correto de tabelas e suas respectivas colunas de token
             $dat_tables = [
-                'DAT1' => ['table' => 'DAT1', 'token_column' => 'token_dat'],
-                'DAT2' => ['table' => 'DAT2', 'token_column' => 'token_dat'],
+                'DAT1' => ['table' => 'DAT1', 'token_column' => 'token'],
+                'DAT2' => ['table' => 'DAT2', 'token_column' => 'token'],
                 'DAT4' => ['table' => 'DAT4', 'token_column' => 'token'],
                 'user_vehicles' => ['table' => 'user_vehicles', 'token_column' => 'token'],
                 'vehicle_damages' => ['table' => 'vehicle_damages', 'token_column' => null], // Esta será tratada separadamente
-                'formularios_dat_central' => ['table' => 'formularios_dat_central', 'token_column' => null] // Esta usa ID
+                'formularios_dat_central' => ['table' => 'formularios_dat_central', 'token_column' => 'token'] // Esta usa token e também ID
             ];
 
             // Primeiro, excluir os registros de vehicle_damages que estão relacionados aos user_vehicles
@@ -59,33 +62,43 @@ try {
                 $stmt_damages = $conn->prepare($sql_damages);
                 $stmt_damages->bind_param('i', $vehicle['id']);
                 $stmt_damages->execute();
+                error_log("Excluindo damages do veículo ID: " . $vehicle['id']);
             }
 
             // Agora exclui os registros das outras tabelas
-            foreach ($dat_tables as $table_info) {
+            foreach ($dat_tables as $table_name => $table_info) {
                 if ($table_info['token_column'] === null) {
-                    if ($table_info['table'] === 'formularios_dat_central') {
-                        // Exclui usando o ID
-                        $sql = "DELETE FROM {$table_info['table']} WHERE id = ?";
-                        $stmt = $conn->prepare($sql);
-                        $stmt->bind_param('i', $id);
-                    }
                     continue; // Pula vehicle_damages pois já foi tratada
                 }
 
                 // Exclui usando a coluna de token apropriada
                 $sql = "DELETE FROM {$table_info['table']} WHERE {$table_info['token_column']} = ?";
+                error_log("SQL para excluir {$table_info['table']}: $sql");
+
                 $stmt = $conn->prepare($sql);
+                if (!$stmt) {
+                    error_log("Erro ao preparar SQL para {$table_info['table']}: " . $conn->error);
+                    continue;
+                }
+
                 $stmt->bind_param('s', $token);
                 $stmt->execute();
+                error_log("Excluídos da tabela {$table_info['table']}: " . $stmt->affected_rows);
             }
+
+            // Por fim, exclui da tabela central pelo ID
+            $sql = "DELETE FROM formularios_dat_central WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            error_log("Excluído da tabela formularios_dat_central: " . $stmt->affected_rows);
         } else {
             // Para outros tipos de formulário
             $tabela = match ($tipo) {
                 'SAC' => 'sac',
                 'JARI' => 'solicitacoes_demutran',
                 'PCD' => 'solicitacao_cartao',
-                'Parecer' => 'Parecer',
+                'Parecer' => 'parecer',
                 default => throw new Exception('Tipo de formulário inválido')
             };
 
