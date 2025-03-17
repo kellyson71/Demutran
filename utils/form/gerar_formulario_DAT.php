@@ -9,13 +9,36 @@ ini_set('display_errors', 1);
 
 // Obter ID do DAT
 $id = $_GET['id'] ?? '';
+$tipo = $_GET['tipo'] ?? 'dat';
 
 if (!$id) {
     die('ID não fornecido');
 }
 
-// Buscar todos os dados relacionados ao DAT usando as tabelas corretas
-$sql = "
+    // Log para depuração
+    error_log("Buscando DAT com ID: $id e tipo: $tipo");
+
+    // Buscar token na tabela formularios_dat_central usando o ID fornecido
+    $check_sql = "SELECT token, email_usuario FROM formularios_dat_central WHERE id = ?";
+    $check_stmt = $conn->prepare($check_sql);
+    $check_stmt->bind_param('i', $id);
+    $check_stmt->execute();
+    $check_result = $check_stmt->get_result();
+
+    if ($check_result->num_rows === 0) {
+        error_log("DAT não encontrado na tabela formularios_dat_central com ID $id");
+        die('DAT não encontrado: ID inexistente');
+    }
+
+    // Recupera o token e email do DAT encontrado
+    $check_data = $check_result->fetch_assoc();
+    $token = $check_data['token'];
+    $email_usuario = $check_data['email_usuario'];
+
+    error_log("Token encontrado: $token para o ID: $id, email: $email_usuario");
+
+    // Agora usamos o token para buscar todos os dados relacionados
+    $sql = "
 SELECT 
     d1.*, 
     d2.*, 
@@ -25,31 +48,38 @@ SELECT
     d4.informacoes_complementares_text,
     d4.meio_ambiente_text,
     d4.patrimonio_text
-FROM DAT4 d4
-LEFT JOIN DAT1 d1 ON d1.token = d4.token
-LEFT JOIN DAT2 d2 ON d2.token = d4.token
-LEFT JOIN user_vehicles uv ON uv.token = d4.token
+FROM DAT1 d1
+LEFT JOIN DAT2 d2 ON d2.token = d1.token
+LEFT JOIN DAT4 d4 ON d4.token = d1.token
+LEFT JOIN user_vehicles uv ON uv.token = d1.token
 LEFT JOIN vehicle_damages vd ON vd.user_vehicles_id = uv.id
-WHERE d4.id = ?";
+WHERE d1.token = ?";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param('i', $id);
+$stmt->bind_param('s', $token);
 $stmt->execute();
 $result = $stmt->get_result();
-$dados = $result->fetch_assoc();
+
+    // Log para depuração
+    error_log("Consulta executada para o token $token. Número de registros: " . $result->num_rows);
+
+    $dados = $result->fetch_assoc();
 
 if (!$dados) {
-    die('DAT não encontrado');
+    error_log("Nenhum dado retornado pela consulta SQL para o token $token");
+    die('DAT não encontrado: nenhum dado retornado pela consulta SQL');
 }
 
-// Buscar veículos adicionais
-$sql_veiculos = "
-    SELECT vd.* 
-    FROM user_vehicles uv 
-    JOIN vehicle_damages vd ON vd.user_vehicles_id = uv.id 
-    WHERE uv.token = ?";
+    error_log("DAT encontrado com sucesso para o token $token");
+
+    // Buscar veículos adicionais com o mesmo token
+    $sql_veiculos = "
+SELECT vd.* 
+FROM user_vehicles uv 
+JOIN vehicle_damages vd ON vd.user_vehicles_id = uv.id 
+WHERE uv.token = ?";
 $stmt = $conn->prepare($sql_veiculos);
-$stmt->bind_param('s', $dados['token']);
+$stmt->bind_param('s', $token);
 $stmt->execute();
 $veiculos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 

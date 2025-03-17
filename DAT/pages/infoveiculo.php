@@ -12,7 +12,7 @@ if (!$token) {
     exit;
 }
 
-require_once(__DIR__ . '/../../env/config.php'); 
+require_once(__DIR__ . '/../../env/config.php');
 ?>
 
 <div class="pt-20 flex justify-center flex-col items-center">
@@ -306,7 +306,7 @@ require_once(__DIR__ . '/../../env/config.php');
                                 <option value="PA">PA</option>
                                 <option value="PB">PB</option>
                                 <option value="PR">PR</option>
-                                <option value="PE">PE"></option>
+                                <option value="PE">PE</option>
                                 <option value="PI">PI</option>
                                 <option value="RJ">RJ</option>
                                 <option value="RN">RN</option>
