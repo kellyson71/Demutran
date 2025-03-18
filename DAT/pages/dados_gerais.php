@@ -12,7 +12,7 @@ if (!$token) {
     exit;
 }
 
-require_once('C:\wamp64\www\Demutran\env\config.php');
+require_once(__DIR__ . '/../../env/config.php');
 ?>
 
 <div class="pt-20 flex justify-center flex-col items-center">
