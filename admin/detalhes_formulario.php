@@ -338,6 +338,15 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 
                 <div class="card">
                     <div class="card-footer p-4 flex justify-end space-x-3">
+                        <!-- Botão de Conclusão -->
+                        <button id="btnConcluir"
+                            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            Concluir Formulário
+                        </button>
+
                         <!-- Botão de Exclusão -->
                         <button id="btnExcluir"
                             class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 shadow-md">
@@ -349,18 +358,55 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                             </svg>
                             Excluir Formulário
                         </button>
+                    </div>
+                </div>
 
-                        <!-- Botão Concluir (existente) -->
-                        <button id="btnConcluir"
-                            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 shadow-md">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            Concluir Solicitação
-                        </button>
+                <!-- Modal de Conclusão e Pré-visualização -->
+                <div id="conclusaoModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+                    <div class="bg-white rounded-lg shadow-xl w-4/5 max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <div class="p-6 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xl font-bold text-gray-900">Concluir Formulário</h3>
+                                <button onclick="closeConclusaoModal()" class="text-gray-400 hover:text-gray-500">
+                                    <span class="material-icons">close</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-6">
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Confirmação</h4>
+                                <p class="text-gray-700">Deseja realmente concluir este formulário e enviar o e-mail de resposta?</p>
+                            </div>
+
+                            <div class="border-t border-gray-200 pt-4 mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Pré-visualização do E-mail</h4>
+
+                                <div id="emailPreviewLoading" class="flex justify-center py-8">
+                                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                                </div>
+
+                                <div id="emailPreviewError" class="hidden bg-red-50 p-4 rounded-md border border-red-200 text-red-700 mb-4">
+                                    Ocorreu um erro ao carregar a pré-visualização do e-mail.
+                                </div>
+
+                                <div id="emailPreviewContent" class="hidden border rounded-md p-4 bg-gray-50">
+                                    <!-- O conteúdo da pré-visualização será carregado aqui -->
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end space-x-3">
+                                <button onclick="closeConclusaoModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
+                                    Cancelar
+                                </button>
+                                <button id="btnConfirmarConclusao" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                    Confirmar e Concluir
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -434,7 +480,7 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                                         </svg>
                                     </div>
                                     <div class="ml-3">
-                                        <p class="text-green-700 font-medium">Solicitação concluída com sucesso!</p>
+                                        <p class="text-green-700 font-medium">Operação realizada com sucesso!</p>
                                     </div>
                                 </div>
                             </div>
@@ -449,8 +495,8 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                 </div>
 
                 <script>
-                    // Removida a declaração duplicada de emailData e isProcessing
-                    // pois agora estão no email_modal.php
+                    // Definir variável global para controlar processamentos
+                    window.isProcessing = false;
 
                     function showModal(state = 'loading') {
                         const modal = document.getElementById('statusModal');
@@ -483,7 +529,7 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
 
                     function closeModal() {
                         const modal = document.getElementById('statusModal');
-                        if (isProcessing) return; // Evita fechamento durante processamento
+                        if (window.isProcessing) return;
 
                         modal.classList.add('hidden');
                         modal.classList.remove('flex');
@@ -492,157 +538,13 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                         }
                     }
 
-                    function closeEmailModal() {
-                        const modal = document.getElementById('emailModal');
-                        modal.classList.add('hidden');
-                        modal.classList.remove('flex');
-                    }
-
-                    function showEmailModal(data) {
-                        emailData = data;
-                        const modal = document.getElementById('emailModal');
-
-                        // Preencher campos do preview
-                        document.getElementById('previewTo').textContent = data.email;
-                        document.getElementById('previewSubject').textContent = data.titulo;
-
-                        // Preencher campos do formulário de edição
-                        document.getElementById('emailTo').value = data.email;
-                        document.getElementById('emailSubject').value = data.titulo;
-                        document.getElementById('emailContent').value = data.conteudo;
-
-                        updatePreview();
-                        modal.classList.remove('hidden');
-                        modal.classList.add('flex');
-
-                        // Esconder formulário de edição
-                        document.getElementById('editForm').classList.add('hidden');
-                    }
-
-                    function showEditForm() {
-                        document.getElementById('editForm').classList.remove('hidden');
-                    }
-
-                    function updatePreview() {
-                        const emailPreview = document.getElementById('emailPreview');
-                        const content = document.getElementById('emailContent').value;
-
-                        emailPreview.innerHTML = content;
-
-                        // Atualizar também o preview do cabeçalho
-                        document.getElementById('previewTo').textContent = document.getElementById('emailTo').value;
-                        document.getElementById('previewSubject').textContent = document.getElementById('emailSubject')
-                            .value;
-                    }
-
-                    async function confirmarEnvio() {
-                        if (isProcessing) return;
-
-                        try {
-                            isProcessing = true;
-                            closeEmailModal();
-                            showModal('loading');
-
-                            const response = await fetch('concluir_formulario_ajax.php', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    id: '<?php echo $id; ?>',
-                                    tipo: '<?php echo $tipo; ?>',
-                                    email: document.getElementById('emailTo').value,
-                                    assunto: document.getElementById('emailSubject').value,
-                                    conteudo: document.getElementById('emailContent').value,
-                                    confirmed: true
-                                })
-                            });
-
-                            const data = await response.json();
-
-                            if (data.success) {
-                                showModal('success');
-                                setTimeout(() => {
-                                    location.reload();
-                                }, 2000);
-                            } else {
-                                document.getElementById('errorMessage').textContent = data.message;
-                                showModal('error');
-                            }
-                        } catch (error) {
-                            console.error('Erro:', error);
-                            document.getElementById('errorMessage').textContent = error.message;
-                            showModal('error');
-                        } finally {
-                            isProcessing = false;
-                        }
-                    }
-
                     // Event Listeners
                     document.addEventListener('DOMContentLoaded', function() {
-                        const btnConcluir = document.getElementById('btnConcluir');
-                        const documentoModal = document.getElementById('documentoModal');
-                        const emailModal = document.getElementById('emailModal');
                         const statusModal = document.getElementById('statusModal');
-
-                        if (btnConcluir) {
-                            btnConcluir.addEventListener('click', async function() {
-                                if (window.isProcessing) return; // Alterado para window.isProcessing
-                                try {
-                                    window.isProcessing = true; // Alterado para window.isProcessing
-                                    showModal('loading');
-
-                                    // Primeiro, solicita o preview do email
-                                    const response = await fetch('concluir_formulario_ajax.php', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify({
-                                            id: '<?php echo $id; ?>',
-                                            tipo: '<?php echo $tipo; ?>',
-                                            preview: true
-                                        })
-                                    });
-
-                                    const data = await response.json();
-
-                                    // Esconder modal de status antes de mostrar o modal de email
-                                    const statusModal = document.getElementById('statusModal');
-                                    statusModal.classList.add('hidden');
-                                    statusModal.classList.remove('flex');
-
-                                    if (data.success && data.preview) {
-                                        showEmailModal(data.preview);
-                                    } else {
-                                        throw new Error(data.message ||
-                                            'Erro ao gerar preview do email');
-                                    }
-                                } catch (error) {
-                                    console.error('Erro:', error);
-                                    document.getElementById('errorMessage').textContent = error.message;
-                                    showModal('error');
-                                } finally {
-                                    window.isProcessing = false; // Alterado para window.isProcessing
-                                }
-                            });
-                        }
-
-                        if (documentoModal) {
-                            documentoModal.addEventListener('click', function(e) {
-                                if (e.target === this && !isProcessing) fecharModal();
-                            });
-                        }
-
-                        if (emailModal) {
-                            emailModal.addEventListener('click', function(e) {
-                                if (e.target === this && !isProcessing) closeEmailModal();
-                            });
-                        }
 
                         if (statusModal) {
                             statusModal.addEventListener('click', function(e) {
-                                if (e.target === this && !isProcessing) closeModal();
+                                if (e.target === this && !window.isProcessing) closeModal();
                             });
                         }
 
@@ -651,12 +553,32 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                             btnExcluir.addEventListener('click', showDeleteModal);
                         }
 
+                        // Adiciona evento para o botão de concluir
+                        const btnConcluir = document.getElementById('btnConcluir');
+                        if (btnConcluir) {
+                            btnConcluir.addEventListener('click', showConclusaoModal);
+                        }
+
                         // Fecha o modal de exclusão quando clica fora
                         const deleteModal = document.getElementById('deleteModal');
                         if (deleteModal) {
                             deleteModal.addEventListener('click', function(e) {
                                 if (e.target === this && !window.isProcessing) closeDeleteModal();
                             });
+                        }
+
+                        // Fecha o modal de conclusão quando clica fora
+                        const conclusaoModal = document.getElementById('conclusaoModal');
+                        if (conclusaoModal) {
+                            conclusaoModal.addEventListener('click', function(e) {
+                                if (e.target === this && !window.isProcessing) closeConclusaoModal();
+                            });
+                        }
+
+                        // Adiciona evento para o botão de confirmar conclusão
+                        const btnConfirmarConclusao = document.getElementById('btnConfirmarConclusao');
+                        if (btnConfirmarConclusao) {
+                            btnConfirmarConclusao.addEventListener('click', confirmarConclusao);
                         }
                     });
 
@@ -817,81 +739,106 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
                             window.isProcessing = false;
                         }
                     }
+
+                    // Funções para o modal de conclusão
+                    function showConclusaoModal() {
+                        const modal = document.getElementById('conclusaoModal');
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+
+                        // Exibe o carregamento e esconde outros elementos
+                        document.getElementById('emailPreviewLoading').classList.remove('hidden');
+                        document.getElementById('emailPreviewError').classList.add('hidden');
+                        document.getElementById('emailPreviewContent').classList.add('hidden');
+
+                        // Carrega a pré-visualização do e-mail
+                        carregarPreviewEmail();
+                    }
+
+                    function closeConclusaoModal() {
+                        const modal = document.getElementById('conclusaoModal');
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                    }
+
+                    async function carregarPreviewEmail() {
+                        try {
+                            const response = await fetch('./includes/conclusao/preview_email.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    id: '<?php echo $id; ?>',
+                                    tipo: '<?php echo $tipo; ?>'
+                                })
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Falha ao carregar pré-visualização do e-mail');
+                            }
+
+                            const data = await response.json();
+
+                            // Esconde o carregamento
+                            document.getElementById('emailPreviewLoading').classList.add('hidden');
+
+                            if (data.success) {
+                                // Mostra o conteúdo
+                                const previewContainer = document.getElementById('emailPreviewContent');
+                                previewContainer.innerHTML = data.html;
+                                previewContainer.classList.remove('hidden');
+                            } else {
+                                throw new Error(data.message || 'Erro ao carregar pré-visualização');
+                            }
+                        } catch (error) {
+                            console.error('Erro:', error);
+                            document.getElementById('emailPreviewLoading').classList.add('hidden');
+                            const errorElement = document.getElementById('emailPreviewError');
+                            errorElement.textContent = error.message;
+                            errorElement.classList.remove('hidden');
+                        }
+                    }
+
+                    async function confirmarConclusao() {
+                        if (window.isProcessing) return;
+
+                        try {
+                            window.isProcessing = true;
+                            closeConclusaoModal();
+                            showModal('loading');
+
+                            const response = await fetch('./includes/conclusao/concluir_formulario.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    id: '<?php echo $id; ?>',
+                                    tipo: '<?php echo $tipo; ?>'
+                                })
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                showModal('success');
+                                // Redireciona após conclusão bem-sucedida
+                                setTimeout(() => {
+                                    window.location.href = '<?php echo $url_retorno; ?>';
+                                }, 1500);
+                            } else {
+                                throw new Error(data.message || 'Erro ao concluir formulário');
+                            }
+                        } catch (error) {
+                            console.error('Erro:', error);
+                            document.getElementById('errorMessage').textContent = error.message;
+                            showModal('error');
+                        } finally {
+                            window.isProcessing = false;
+                        }
+                    }
                 </script>
-
-                <!-- Modal de Preview do Email -->
-                <div id="emailModal"
-                    class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
-                    <div class="bg-white rounded-lg p-6 w-3/4 max-w-4xl max-h-[90vh] flex flex-col">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-bold">Confirmação de Envio</h3>
-                            <button onclick="closeEmailModal()" class="text-gray-500 hover:text-gray-700">
-                                <i class="material-icons">close</i>
-                            </button>
-                        </div>
-
-                        <!-- Preview do Email -->
-                        <div class="flex-grow overflow-auto mb-4">
-                            <div class="border rounded-md p-4 bg-gray-50">
-                                <p class="text-sm text-gray-600 mb-2"><strong>Para:</strong> <span
-                                        id="previewTo"></span></p>
-                                <p class="text-sm text-gray-600 mb-4"><strong>Assunto:</strong> <span
-                                        id="previewSubject"></span></p>
-                                <div class="border-t pt-4">
-                                    <div id="emailPreview" class="prose max-w-none"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Opções de Ação -->
-                        <div class="flex flex-col items-center space-y-4">
-                            <p class="text-gray-700">Precisa fazer alguma alteração no email?</p>
-                            <div class="flex space-x-4">
-                                <button onclick="showEditForm()"
-                                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center">
-                                    <i class="material-icons mr-2">edit</i> Editar Email
-                                </button>
-                                <button onclick="confirmarEnvio()"
-                                    class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center">
-                                    <i class="material-icons mr-2">send</i> Enviar Email
-                                </button>
-                                <button onclick="closeEmailModal()"
-                                    class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 flex items-center">
-                                    <i class="material-icons mr-2">close</i> Cancelar
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Formulário de Edição (inicialmente escondido) -->
-                        <div id="editForm" class="hidden mt-4 border-t pt-4">
-                            <h4 class="text-lg font-semibold mb-4">Editar Email</h4>
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Email do
-                                        Destinatário:</label>
-                                    <input type="email" id="emailTo"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Assunto:</label>
-                                    <input type="text" id="emailSubject"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Mensagem:</label>
-                                    <textarea id="emailContent" rows="6"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
-                                </div>
-                                <div class="flex justify-end space-x-3">
-                                    <button onclick="updatePreview()"
-                                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                        Atualizar Preview
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
             </main>
 
@@ -903,10 +850,6 @@ $notificacoesNaoLidas = contarNotificacoesNaoLidas($conn);
             </footer>
         </div>
     </div>
-
-    <!-- Include do Modal de Email -->
-    <?php require_once './includes/form_tebles/email_modal.php'; ?>
-
 </body>
 
 </html>

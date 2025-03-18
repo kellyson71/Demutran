@@ -31,20 +31,46 @@ try {
     $id = $data['id'];
     $tipo = $data['tipo'];
 
-    // Determinar tabela correta baseado no tipo
-    $tabela = match($tipo) {
-        'SAC' => 'sac',
-        'JARI' => 'solicitacoes_demutran',
-        'PCD' => 'solicitacao_cartao',
-        'DAT' => 'DAT1',
-        'Parecer' => 'Parecer',
-        default => throw new Exception('Tipo de formulário inválido')
-    };
+    // Log para debug
+    error_log("Tentando concluir formulário: Tipo=$tipo, ID=$id");
 
-    // Primeiro buscar os dados antes de atualizar o status
-    $sql_dados = "SELECT * FROM $tabela WHERE id = ?";
-    $stmt_dados = $conn->prepare($sql_dados);
-    $stmt_dados->bind_param('i', $id);
+    // Se for DAT, precisamos buscar o token e usar a tabela correta
+    if ($tipo === 'DAT') {
+        // Primeiro, buscar o token na tabela central
+        $sql_token = "SELECT token FROM formularios_dat_central WHERE id = ?";
+        $stmt_token = $conn->prepare($sql_token);
+        $stmt_token->bind_param('i', $id);
+        $stmt_token->execute();
+        $result = $stmt_token->get_result();
+        $dat_data = $result->fetch_assoc();
+
+        if (!$dat_data) {
+            throw new Exception('Formulário DAT não encontrado');
+        }
+
+        $token = $dat_data['token'];
+        error_log("Token DAT encontrado: $token");
+
+        // Agora buscamos os dados na tabela DAT1 usando o token
+        $sql_dados = "SELECT * FROM DAT1 WHERE token = ?";
+        $stmt_dados = $conn->prepare($sql_dados);
+        $stmt_dados->bind_param('s', $token);
+    } else {
+        // Determinar tabela correta baseado no tipobb
+        $tabela = match ($tipo) {
+            'SAC' => 'sac',
+            'JARI' => 'solicitacoes_demutran',
+            'PCD' => 'solicitacao_cartao',
+            'Parecer' => 'parecer', // Corrigido para minúsculo
+            default => throw new Exception('Tipo de formulário inválido')
+        };
+
+        // Buscar os dados antes de atualizar o status
+        $sql_dados = "SELECT * FROM $tabela WHERE id = ?";
+        $stmt_dados = $conn->prepare($sql_dados);
+        $stmt_dados->bind_param('i', $id);
+    }
+
     $stmt_dados->execute();
     $dados = $stmt_dados->get_result()->fetch_assoc();
 
@@ -52,7 +78,7 @@ try {
         throw new Exception('Dados do formulário não encontrados');
     }
 
-    // Preparar e enviar o email primeiro
+    // Preparar dados para o email
     $emailData = [
         'id' => $id,
         'tipo' => $tipo,
@@ -61,7 +87,7 @@ try {
         'status' => 'Concluído'
     ];
 
-    // Remover a chamada anterior do processar_email e substituir por:
+    // Carregar biblioteca de email
     require_once '../utils/mail.php';
 
     // Antes do template de email, adicionar a verificação do tipo específico de recurso
@@ -90,7 +116,7 @@ try {
         }
     }
 
-    // Substituir a parte do template de email por:
+    // Template de email
     $baseTemplate = "
         <html>
         <body style='font-family: Arial, sans-serif;'>
@@ -217,23 +243,48 @@ try {
     }
 
     // Se o email foi enviado com sucesso, atualiza o status
-    $sql = match ($tipo) {
-        'SAC' => "UPDATE sac SET situacao = 'Concluído', is_read = 1 WHERE id = ?",
-        'JARI' => "UPDATE solicitacoes_demutran SET situacao = 'Concluído', is_read = 1 WHERE id = ?",
-        'PCD' => "UPDATE solicitacao_cartao SET situacao = 'Concluído', is_read = 1 WHERE id = ?",
-        'DAT' => "UPDATE DAT1 SET situacao = 'Concluído', is_read = 1 WHERE id = ?",
-        'Parecer' => "UPDATE Parecer SET situacao = 'Concluído', is_read = 1 WHERE id = ?",
-        default => throw new Exception('Tipo de formulário inválido')
-    };
+    if ($tipo === 'DAT') {
+        // Atualiza DAT1 usando o token
+        $sql = "UPDATE DAT1 SET situacao = 'Concluído', is_read = 1 WHERE token = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('s', $token);
 
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', $id);
-    
-    if (!$stmt->execute()) {
-        throw new Exception('Erro ao atualizar status: ' . $stmt->error);
+        if (!$stmt->execute()) {
+            throw new Exception('Erro ao atualizar status em DAT1: ' . $stmt->error);
+        }
+
+        // Também atualiza formularios_dat_central
+        $sql = "UPDATE formularios_dat_central SET situacao = 'Concluído', is_read = 1 WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('i', $id);
+
+        if (!$stmt->execute()) {
+            throw new Exception('Erro ao atualizar status em formularios_dat_central: ' . $stmt->error);
+        }
+
+        error_log("Status atualizado nas tabelas DAT usando token: $token e ID: $id");
+    } else {
+        // Para os outros tipos de formulário
+        $tabela = match ($tipo) {
+            'SAC' => 'sac',
+            'JARI' => 'solicitacoes_demutran',
+            'PCD' => 'solicitacao_cartao',
+            'Parecer' => 'parecer', // Corrigido para minúsculo
+            default => throw new Exception('Tipo de formulário inválido')
+        };
+
+        $sql = "UPDATE $tabela SET situacao = 'Concluído', is_read = 1 WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('i', $id);
+
+        if (!$stmt->execute()) {
+            throw new Exception('Erro ao atualizar status: ' . $stmt->error);
+        }
+
+        error_log("Status atualizado na tabela $tabela com ID: $id");
     }
 
-    // Modificar esta parte do código onde registra o log
+    // Registra o log
     $usuario_id = $_SESSION['usuario_id'];
     $data_hora = date('Y-m-d H:i:s');
     $acao = 'Concluiu';
@@ -242,7 +293,10 @@ try {
                 VALUES (?, ?, ?, ?, ?)";
     $stmt_log = $conn->prepare($sql_log);
     $stmt_log->bind_param('issss', $usuario_id, $acao, $tipo, $id, $data_hora);
-    $stmt_log->execute();
+
+    if (!$stmt_log->execute()) {
+        error_log("Erro ao inserir no log: " . $stmt_log->error);
+    }
 
     // Retorna apenas uma resposta JSON
     echo json_encode([
@@ -252,13 +306,30 @@ try {
 
 } catch (Throwable $e) {
     if (ob_get_length()) ob_clean();
+    error_log("Erro ao concluir formulário: " . $e->getMessage());
 
     // Reverter a atualização do status em caso de erro
-    if (isset($tabela) && isset($id)) {
-        $sql_reverter = "UPDATE $tabela SET situacao = 'Pendente', is_read = 0 WHERE id = ?";
-        $stmt_reverter = $conn->prepare($sql_reverter);
-        $stmt_reverter->bind_param('i', $id);
-        $stmt_reverter->execute();
+    if (isset($tipo) && isset($id)) {
+        try {
+            if ($tipo === 'DAT' && isset($token)) {
+                $sql_reverter = "UPDATE DAT1 SET situacao = 'Pendente', is_read = 0 WHERE token = ?";
+                $stmt_reverter = $conn->prepare($sql_reverter);
+                $stmt_reverter->bind_param('s', $token);
+                $stmt_reverter->execute();
+
+                $sql_reverter = "UPDATE formularios_dat_central SET situacao = 'Pendente', is_read = 0 WHERE id = ?";
+                $stmt_reverter = $conn->prepare($sql_reverter);
+                $stmt_reverter->bind_param('i', $id);
+                $stmt_reverter->execute();
+            } else if (isset($tabela)) {
+                $sql_reverter = "UPDATE $tabela SET situacao = 'Pendente', is_read = 0 WHERE id = ?";
+                $stmt_reverter = $conn->prepare($sql_reverter);
+                $stmt_reverter->bind_param('i', $id);
+                $stmt_reverter->execute();
+            }
+        } catch (Exception $reverterErro) {
+            error_log("Erro ao reverter status: " . $reverterErro->getMessage());
+        }
     }
 
     http_response_code(500);

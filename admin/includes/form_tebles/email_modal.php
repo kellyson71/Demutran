@@ -100,8 +100,19 @@
 
 <!-- Script do Modal de Email -->
 <script>
-    window.emailData = null;
-    window.isProcessing = false;
+    // Não redeclarar as variáveis se já existirem
+    if (typeof window.emailData === 'undefined') {
+        window.emailData = null;
+    }
+    if (typeof window.isProcessing === 'undefined') {
+        window.isProcessing = false;
+    }
+
+    function closeEmailModal() {
+        const modal = document.getElementById('emailModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
 
     function showEmailModal(data) {
         window.emailData = data;
@@ -129,12 +140,6 @@
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.getElementById('editForm').classList.add('hidden');
-    }
-
-    function closeEmailModal() {
-        const modal = document.getElementById('emailModal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
     }
 
     function showEditForm() {
@@ -165,7 +170,7 @@
             </div>
         `;
 
-        // Atualiza o preview do cabeçalho
+        // Atualizar também o preview do cabeçalho
         document.getElementById('previewTo').textContent = document.getElementById('emailTo').value;
         document.getElementById('previewSubject').textContent = document.getElementById('emailSubject').value;
     }
@@ -178,7 +183,7 @@
             closeEmailModal();
             showModal('loading');
 
-            const response = await fetch('concluir_formulario_ajax.php', {
+            const response = await fetch('./actions/concluir_formulario.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -223,4 +228,32 @@
             });
         }
     });
+</script>
+
+<?php
+// Esse arquivo é incluído no detalhes_formulario.php
+// e pode conter scripts que usam as variáveis isProcessing e emailData
+?>
+
+<script>
+    // Remover qualquer declaração duplicada destas variáveis
+    // window.isProcessing e window.emailData já estão definidos no arquivo principal
+
+    // Exemplo de função que usa as variáveis globais corretamente
+    function enviarEmailProcessado() {
+        if (window.isProcessing) return;
+
+        try {
+            window.isProcessing = true;
+
+            // Lógica para processar o email usando window.emailData
+            console.log('Processando email para:', window.emailData.email);
+
+            // Restante do código...
+        } catch (error) {
+            console.error('Erro ao processar email:', error);
+        } finally {
+            window.isProcessing = false;
+        }
+    }
 </script>
