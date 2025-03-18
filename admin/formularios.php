@@ -429,7 +429,19 @@ require_once './includes/formularios/form_list.php';
                     'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4': viewMode === 'grid',
                     'space-y-3': viewMode === 'list'
                 }">
-                    <?php if (empty($submissoes_pagina)): ?>
+                    <?php
+                    // Filtrar DATs incompletos (sem token DAT4)
+                    $submissoes_filtradas = array_filter($submissoes_pagina, function ($item) {
+                        // Se for DAT, verificar se está completo (tem token DAT4)
+                        if ($item['tipo'] === 'DAT') {
+                            return isset($item['token_dat4']) && !empty($item['token_dat4']);
+                        }
+                        // Para outros tipos de formulários, sempre mostrar
+                        return true;
+                    });
+
+                    if (empty($submissoes_filtradas)):
+                    ?>
                         <div class="bg-white rounded-lg shadow-sm p-6 text-center flex flex-col items-center">
                             <span class="material-icons text-gray-400 mb-4" style="font-size: 48px;">inbox</span>
                             <p class="text-gray-600 text-lg">
@@ -437,7 +449,7 @@ require_once './includes/formularios/form_list.php';
                             </p>
                         </div>
                     <?php else: ?>
-                        <?php foreach ($submissoes_pagina as $item): ?>
+                        <?php foreach ($submissoes_filtradas as $item): ?>
                             <?php $style = getFormularioStyle($item['tipo'], $item['subtipo'] ?? null); ?>
 
                             <div class="form-card bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 <?php echo ($item['situacao'] ?? '') === 'Concluído' ? 'card-completed' : ''; ?>"

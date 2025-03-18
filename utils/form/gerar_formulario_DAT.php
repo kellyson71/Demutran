@@ -15,68 +15,72 @@ if (!$id) {
     die('ID não fornecido');
 }
 
-    // Log para depuração
-    error_log("Buscando DAT com ID: $id e tipo: $tipo");
+// Log para depuração
+error_log("Buscando DAT com ID: $id e tipo: $tipo");
 
-    // Buscar token na tabela formularios_dat_central usando o ID fornecido
-    $check_sql = "SELECT token, email_usuario FROM formularios_dat_central WHERE id = ?";
-    $check_stmt = $conn->prepare($check_sql);
-    $check_stmt->bind_param('i', $id);
-    $check_stmt->execute();
-    $check_result = $check_stmt->get_result();
+// Buscar token na tabela formularios_dat_central usando o ID fornecido
+$check_sql = "SELECT token, email_usuario FROM formularios_dat_central WHERE id = ?";
+$check_stmt = $conn->prepare($check_sql);
+$check_stmt->bind_param('i', $id);
+$check_stmt->execute();
+$check_result = $check_stmt->get_result();
 
-    if ($check_result->num_rows === 0) {
-        error_log("DAT não encontrado na tabela formularios_dat_central com ID $id");
-        die('DAT não encontrado: ID inexistente');
-    }
+if ($check_result->num_rows === 0) {
+    error_log("DAT não encontrado na tabela formularios_dat_central com ID $id");
+    die('DAT não encontrado: ID inexistente');
+}
 
-    // Recupera o token e email do DAT encontrado
-    $check_data = $check_result->fetch_assoc();
-    $token = $check_data['token'];
-    $email_usuario = $check_data['email_usuario'];
+// Recupera o token e email do DAT encontrado
+$check_data = $check_result->fetch_assoc();
+$token = $check_data['token'];
+$email_usuario = $check_data['email_usuario'];
 
-    error_log("Token encontrado: $token para o ID: $id, email: $email_usuario");
+error_log("Token encontrado: $token para o ID: $id, email: $email_usuario");
 
-    // Agora usamos o token para buscar todos os dados relacionados
-    $sql = "
+// Agora usamos o token para buscar todos os dados relacionados
+// Usando LEFT JOIN para obter formulário mesmo que algumas tabelas não estejam preenchidas
+$sql = "
 SELECT 
-    d1.*, 
-    d2.*, 
-    d4.*,
-    uv.*,
-    vd.*,
-    d4.informacoes_complementares_text,
-    d4.meio_ambiente_text,
-    d4.patrimonio_text
-FROM DAT1 d1
-LEFT JOIN DAT2 d2 ON d2.token = d1.token
-LEFT JOIN DAT4 d4 ON d4.token = d1.token
-LEFT JOIN user_vehicles uv ON uv.token = d1.token
+    formularios_dat_central.id as formulario_id,
+    formularios_dat_central.token as formulario_token,
+    COALESCE(d1.*, NULL) as d1_data,
+    COALESCE(d2.*, NULL) as d2_data,
+    COALESCE(d4.*, NULL) as d4_data,
+    COALESCE(uv.*, NULL) as uv_data,
+    COALESCE(vd.*, NULL) as vd_data,
+    COALESCE(d4.informacoes_complementares_text, '') as informacoes_complementares_text,
+    COALESCE(d4.meio_ambiente_text, '') as meio_ambiente_text,
+    COALESCE(d4.patrimonio_text, '') as patrimonio_text
+FROM formularios_dat_central
+LEFT JOIN DAT1 d1 ON d1.token = formularios_dat_central.token
+LEFT JOIN DAT2 d2 ON d2.token = formularios_dat_central.token
+LEFT JOIN DAT4 d4 ON d4.token = formularios_dat_central.token
+LEFT JOIN user_vehicles uv ON uv.token = formularios_dat_central.token
 LEFT JOIN vehicle_damages vd ON vd.user_vehicles_id = uv.id
-WHERE d1.token = ?";
+WHERE formularios_dat_central.token = ?";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param('s', $token);
 $stmt->execute();
 $result = $stmt->get_result();
 
-    // Log para depuração
-    error_log("Consulta executada para o token $token. Número de registros: " . $result->num_rows);
+// Log para depuração
+error_log("Consulta executada para o token $token. Número de registros: " . $result->num_rows);
 
-    $dados = $result->fetch_assoc();
+$dados = $result->fetch_assoc();
 
 if (!$dados) {
     error_log("Nenhum dado retornado pela consulta SQL para o token $token");
     die('DAT não encontrado: nenhum dado retornado pela consulta SQL');
 }
 
-    error_log("DAT encontrado com sucesso para o token $token");
+error_log("DAT encontrado com sucesso para o token $token");
 
-    // Buscar veículos adicionais com o mesmo token
-    $sql_veiculos = "
+// Buscar veículos adicionais com o mesmo token
+$sql_veiculos = "
 SELECT vd.* 
 FROM user_vehicles uv 
-JOIN vehicle_damages vd ON vd.user_vehicles_id = uv.id 
+LEFT JOIN vehicle_damages vd ON vd.user_vehicles_id = uv.id 
 WHERE uv.token = ?";
 $stmt = $conn->prepare($sql_veiculos);
 $stmt->bind_param('s', $token);
@@ -89,6 +93,11 @@ $imagePath = '../../assets/';
 // Função de formatação
 function formatValue($field, $value)
 {
+    // Se o valor estiver vazio, retorna "Não informado"
+    if ($value === '' || $value === null || $value === false) {
+        return 'Não informado';
+    }
+
     // Campos booleanos
     $booleanFields = ['estrangeiro', 'segurado', 'nao_habilitado', 'veiculo_articulado', 'has_insurance'];
     if (in_array($field, $booleanFields)) {
@@ -109,7 +118,7 @@ function formatValue($field, $value)
     // Campos de texto longo
     $textFields = ['informacoes_complementares_text', 'meio_ambiente_text', 'patrimonio_text'];
     if (in_array($field, $textFields)) {
-        return nl2br(htmlspecialchars($value));
+        return empty($value) ? 'Não informado' : nl2br(htmlspecialchars($value));
     }
 
     // Campos específicos
@@ -502,17 +511,12 @@ $gruposDAT4 = [
                 <?php foreach ($gruposDAT1 as $titulo => $campos): ?>
                     <div class="info-group">
                         <h6><?php echo $titulo; ?></h6>
-                        <?php foreach ($campos as $campo => $label):
-                            if (isset($dados[$campo])) {
-                                $value = formatValue($campo, $dados[$campo]);
-                                if ($value !== '' && $value !== null) { ?>
-                                    <div class="info-row">
-                                        <div class="info-label"><?php echo $label; ?></div>
-                                        <div class="info-value"><?php echo $value; ?></div>
-                                    </div>
-                        <?php }
-                            }
-                        endforeach; ?>
+                        <?php foreach ($campos as $campo => $label): ?>
+                            <div class="info-row">
+                                <div class="info-label"><?php echo $label; ?></div>
+                                <div class="info-value"><?php echo formatValue($campo, $dados[$campo] ?? null); ?></div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -524,17 +528,12 @@ $gruposDAT4 = [
                 <?php foreach ($gruposDAT2 as $titulo => $campos): ?>
                     <div class="info-group">
                         <h6><?php echo $titulo; ?></h6>
-                        <?php foreach ($campos as $campo => $label):
-                            if (isset($dados[$campo])) {
-                                $value = formatValue($campo, $dados[$campo]);
-                                if ($value !== '' && $value !== null) { ?>
-                                    <div class="info-row">
-                                        <div class="info-label"><?php echo $label; ?></div>
-                                        <div class="info-value"><?php echo $value; ?></div>
-                                    </div>
-                        <?php }
-                            }
-                        endforeach; ?>
+                        <?php foreach ($campos as $campo => $label): ?>
+                            <div class="info-row">
+                                <div class="info-label"><?php echo $label; ?></div>
+                                <div class="info-value"><?php echo formatValue($campo, $dados[$campo] ?? null); ?></div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -561,15 +560,10 @@ $gruposDAT4 = [
                             ];
 
                             foreach ($outrosVeiculosFields as $field => $label) {
-                                if (isset($veiculo[$field]) && !empty($veiculo[$field])) {
-                                    $value = formatValue($field, $veiculo[$field]);
-                                    if ($value !== '' && $value !== null) {
-                                        echo "<div class='info-row'>";
-                                        echo "<div class='info-label'>$label</div>";
-                                        echo "<div class='info-value'>$value</div>";
-                                        echo "</div>";
-                                    }
-                                }
+                                echo "<div class='info-row'>";
+                                echo "<div class='info-label'>$label</div>";
+                                echo "<div class='info-value'>" . formatValue($field, $veiculo[$field] ?? null) . "</div>";
+                                echo "</div>";
                             }
                             ?>
                         </div>
@@ -585,24 +579,19 @@ $gruposDAT4 = [
                 <?php foreach ($gruposDAT4 as $titulo => $campos): ?>
                     <div class="info-group">
                         <?php foreach ($campos as $campo => $label):
-                            if (isset($dados[$campo]) && !empty($dados[$campo])) {
-                                $value = formatValue($campo, $dados[$campo]);
-                                if ($value !== '' && $value !== null) {
-                                    if (in_array($campo, ['informacoes_complementares_text', 'meio_ambiente_text', 'patrimonio_text'])) { ?>
-                                        <div class="text-block">
-                                            <h6><?php echo $label; ?></h6>
-                                            <div class="text-content">
-                                                <?php echo $value; ?>
-                                            </div>
-                                        </div>
-                                    <?php } else { ?>
-                                        <div class="info-row">
-                                            <div class="info-label"><?php echo $label; ?></div>
-                                            <div class="info-value"><?php echo $value; ?></div>
-                                        </div>
+                            if (in_array($campo, ['informacoes_complementares_text', 'meio_ambiente_text', 'patrimonio_text'])) { ?>
+                                <div class="text-block">
+                                    <h6><?php echo $label; ?></h6>
+                                    <div class="text-content">
+                                        <?php echo formatValue($campo, $dados[$campo] ?? null); ?>
+                                    </div>
+                                </div>
+                            <?php } else { ?>
+                                <div class="info-row">
+                                    <div class="info-label"><?php echo $label; ?></div>
+                                    <div class="info-value"><?php echo formatValue($campo, $dados[$campo] ?? null); ?></div>
+                                </div>
                         <?php }
-                                }
-                            }
                         endforeach; ?>
                     </div>
                 <?php endforeach; ?>
@@ -618,8 +607,8 @@ $gruposDAT4 = [
                     <div class="signature-line"></div>
                     <p class="mb-0">Assinatura do Declarante</p>
                     <p class="signature-info">
-                        <?php echo htmlspecialchars($dados['nome'] ?? ''); ?><br>
-                        CPF: <?php echo htmlspecialchars($dados['cpf'] ?? ''); ?>
+                        <?php echo htmlspecialchars($dados['nome'] ?? 'Não informado'); ?><br>
+                        CPF: <?php echo htmlspecialchars($dados['cpf'] ?? 'Não informado'); ?>
                     </p>
                 </div>
 
