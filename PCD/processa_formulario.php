@@ -1,9 +1,15 @@
 <?php
 include '../env/config.php';
 
-// Aumentar limite de upload
-ini_set('post_max_size', '64M');
-ini_set('upload_max_filesize', '64M');
+// Aumentar limite de upload para 50MB
+ini_set('post_max_size', '50M');
+ini_set('upload_max_filesize', '50M');
+ini_set('memory_limit', '128M');
+ini_set('max_execution_time', 300); // 5 minutos
+ini_set('max_input_time', 300); // 5 minutos
+
+// Definir o tamanho máximo de arquivo em bytes (50MB)
+$max_file_size = 50 * 1024 * 1024;
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
@@ -17,35 +23,116 @@ function verificaTexto($valor) {
 
 // Função para fazer upload de arquivo (atualizada com nomes personalizados)
 function uploadFile($file_key, $upload_dir, $base_url, $id_solicitacao) {
-    if (isset($_FILES[$file_key]) && $_FILES[$file_key]['error'] === UPLOAD_ERR_OK) {
-        // Obter extensão do arquivo original
-        $ext = strtolower(pathinfo($_FILES[$file_key]['name'], PATHINFO_EXTENSION));
+    $error_message = null;
 
-        // Define o nome do arquivo baseado no tipo de documento
-        $nomes_arquivos = [
-            'doc_identidade' => 'rg',
-            'comprovante_residencia' => 'comprovante_residencia',
-            'laudo_medico' => 'laudo_medico',
-            'doc_identidade_representante' => 'rg_representante',
-            'proc_comprovante' => 'procuracao'
-        ];
+    // Verificar permissões de escrita no servidor
+    $server_tmp_dir = sys_get_temp_dir();
+    if (!is_writable($server_tmp_dir)) {
+        error_log("Diretório temporário do servidor não tem permissão de escrita: " . $server_tmp_dir);
+    }
 
-        // Pega o nome apropriado ou usa o file_key como fallback
-        $novo_nome = isset($nomes_arquivos[$file_key]) ? $nomes_arquivos[$file_key] : $file_key;
+    // Caminho absoluto do diretório de upload
+    $abs_upload_dir = realpath(dirname(__FILE__) . '/../') . '/midia/cartao/';
+    error_log("Caminho absoluto do diretório de upload: " . $abs_upload_dir);
 
-        // Criar nome final do arquivo
-        $file_name = $novo_nome . '.' . $ext;
-        
-        $dir_with_id = $upload_dir . $id_solicitacao . '/';
-        if (!is_dir($dir_with_id)) {
-            mkdir($dir_with_id, 0777, true);
+    // Verificar se o arquivo foi enviado
+    if (!isset($_FILES[$file_key]) || $_FILES[$file_key]['error'] !== UPLOAD_ERR_OK) {
+        $error_code = isset($_FILES[$file_key]) ? $_FILES[$file_key]['error'] : -1;
+
+        switch ($error_code) {
+            case UPLOAD_ERR_INI_SIZE:
+                $error_message = "O arquivo excede o tamanho máximo permitido pelo servidor.";
+                break;
+            case UPLOAD_ERR_FORM_SIZE:
+                $error_message = "O arquivo excede o tamanho máximo permitido pelo formulário.";
+                break;
+            case UPLOAD_ERR_PARTIAL:
+                $error_message = "O upload do arquivo foi interrompido.";
+                break;
+            case UPLOAD_ERR_NO_FILE:
+                $error_message = "Nenhum arquivo foi enviado.";
+                break;
+            case UPLOAD_ERR_NO_TMP_DIR:
+                $error_message = "Diretório temporário não encontrado.";
+                break;
+            case UPLOAD_ERR_CANT_WRITE:
+                $error_message = "Falha ao gravar arquivo no disco.";
+                break;
+            case UPLOAD_ERR_EXTENSION:
+                $error_message = "Upload interrompido por extensão.";
+                break;
+            default:
+                $error_message = "Erro desconhecido ao fazer upload.";
         }
-        $target_path = $dir_with_id . $file_name;
-        if (move_uploaded_file($_FILES[$file_key]['tmp_name'], $target_path)) {
-            return 'https://' . $base_url . '/midia/cartao/' . $id_solicitacao . '/' . $file_name;
+
+        error_log("Erro ao fazer upload do arquivo '{$file_key}': {$error_message}");
+        return ['url' => null, 'error' => $error_message];
+    }
+
+    // Obter extensão do arquivo original
+    $ext = strtolower(pathinfo($_FILES[$file_key]['name'], PATHINFO_EXTENSION));
+
+    // Verificar extensão permitida
+    $allowed_extensions = ['pdf', 'jpg', 'jpeg', 'png'];
+    if (!in_array($ext, $allowed_extensions)) {
+        $error_message = "Extensão de arquivo não permitida. Apenas PDF, JPG, JPEG e PNG são aceitos.";
+        error_log("Erro de extensão ({$ext}) para o arquivo '{$file_key}': {$error_message}");
+        return ['url' => null, 'error' => $error_message];
+    }
+
+    // Define o nome do arquivo baseado no tipo de documento
+    $nomes_arquivos = [
+        'doc_identidade' => 'rg',
+        'comprovante_residencia' => 'comprovante_residencia',
+        'laudo_medico' => 'laudo_medico',
+        'doc_identidade_representante' => 'rg_representante',
+        'proc_comprovante' => 'procuracao'
+    ];
+
+    // Pega o nome apropriado ou usa o file_key como fallback
+    $novo_nome = isset($nomes_arquivos[$file_key]) ? $nomes_arquivos[$file_key] : $file_key;
+
+    // Criar nome final do arquivo
+    $file_name = $novo_nome . '.' . $ext;
+
+    // Criar diretório se não existir
+    $dir_with_id = $upload_dir . $id_solicitacao . '/';
+    if (!is_dir($dir_with_id)) {
+        // Verificar permissões de diretório pai
+        error_log("Tentando criar diretório: " . $dir_with_id);
+        error_log("Diretório pai existe: " . (is_dir($upload_dir) ? "Sim" : "Não"));
+        error_log("Permissões do diretório pai: " . substr(sprintf('%o', fileperms($upload_dir)), -4));
+
+        if (!mkdir($dir_with_id, 0777, true)) {
+            $error_message = "Erro ao criar diretório para os arquivos.";
+            error_log("Falha ao criar diretório: {$dir_with_id}");
+            return ['url' => null, 'error' => $error_message];
+        } else {
+            // Garantir permissões corretas
+            chmod($dir_with_id, 0777);
+            error_log("Diretório criado com sucesso: " . $dir_with_id);
         }
     }
-    return null;
+
+    $target_path = $dir_with_id . $file_name;
+
+    // Fazer upload do arquivo
+    if (move_uploaded_file($_FILES[$file_key]['tmp_name'], $target_path)) {
+        // Verificar se o arquivo foi realmente criado
+        if (file_exists($target_path)) {
+            error_log("Arquivo '{$file_key}' salvo com sucesso em: {$target_path}");
+            // Retornar URL relativa para o banco de dados
+            return ['url' => '/midia/cartao/' . $id_solicitacao . '/' . $file_name, 'error' => null];
+        } else {
+            $error_message = "Arquivo foi movido mas não encontrado no destino.";
+            error_log("Arquivo não encontrado após upload: {$target_path}");
+            return ['url' => null, 'error' => $error_message];
+        }
+    } else {
+        $error_message = "Falha ao mover o arquivo para o destino.";
+        error_log("Falha ao mover arquivo para: {$target_path}");
+        return ['url' => null, 'error' => $error_message];
+    }
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -170,6 +257,144 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($stmt->execute()) {
         $id_solicitacao = $conn->insert_id;
 
+        // Configurar diretório de upload
+        $base_path = realpath(dirname(__FILE__) . '/../');
+        $upload_dir = $base_path . '/midia/cartao/';
+        $base_url = $_SERVER['HTTP_HOST'];
+
+        // Verificar e criar o diretório raiz se necessário
+        $root_dir = $base_path . '/midia/';
+        $cartao_dir = $base_path . '/midia/cartao/';
+
+        error_log("Usando caminho base: " . $base_path);
+        error_log("Diretório raiz: " . $root_dir);
+        error_log("Diretório cartão: " . $cartao_dir);
+
+        // Criar diretórios se não existirem
+        if (!is_dir($root_dir)) {
+            error_log("Criando diretório raiz: " . $root_dir);
+            if (!mkdir($root_dir, 0777, true)) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'errors' => ["Erro ao criar diretório base."]]);
+                exit;
+            }
+            chmod($root_dir, 0777);
+        }
+
+        if (!is_dir($cartao_dir)) {
+            error_log("Criando diretório de cartões: " . $cartao_dir);
+            if (!mkdir($cartao_dir, 0777, true)) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'errors' => ["Erro ao criar diretório de cartões."]]);
+                exit;
+            }
+            chmod($cartao_dir, 0777);
+        }
+
+        // Array para armazenar erros de upload
+        $upload_errors = [];
+
+        // Verificar se os documentos obrigatórios foram enviados
+        $documentos_obrigatorios = ['doc_identidade', 'comprovante_residencia'];
+        if ($tipo_solicitacao === 'pcd') {
+            $documentos_obrigatorios[] = 'laudo_medico';
+        }
+
+        // Verificar existência dos documentos obrigatórios
+        foreach ($documentos_obrigatorios as $doc) {
+            if (!isset($_FILES[$doc]) || $_FILES[$doc]['error'] === UPLOAD_ERR_NO_FILE) {
+                $upload_errors[] = "O documento " . str_replace('_', ' ', $doc) . " é obrigatório.";
+            }
+        }
+
+        if ($representante_legal) {
+            if (!isset($_FILES['doc_identidade_representante']) || $_FILES['doc_identidade_representante']['error'] === UPLOAD_ERR_NO_FILE) {
+                $upload_errors[] = "O documento de identidade do representante é obrigatório.";
+            }
+            if (!isset($_FILES['proc_comprovante']) || $_FILES['proc_comprovante']['error'] === UPLOAD_ERR_NO_FILE) {
+                $upload_errors[] = "O documento de procuração é obrigatório.";
+            }
+        }
+
+        // Se houver erros de documentos obrigatórios, não continuar com o upload
+        if (!empty($upload_errors)) {
+            // Remover o registro criado, pois faltam documentos
+            $delete_sql = "DELETE FROM solicitacao_cartao WHERE id = ?";
+            $delete_stmt = $conn->prepare($delete_sql);
+            $delete_stmt->bind_param('i', $id_solicitacao);
+            $delete_stmt->execute();
+
+            // Retornar erro em formato JSON
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'errors' => $upload_errors]);
+            exit;
+        }
+
+        // Fazer upload dos arquivos
+        $upload_doc_identidade = uploadFile('doc_identidade', $upload_dir, $base_url, $id_solicitacao);
+        $upload_comprovante_residencia = uploadFile('comprovante_residencia', $upload_dir, $base_url, $id_solicitacao);
+        $upload_laudo_medico = uploadFile('laudo_medico', $upload_dir, $base_url, $id_solicitacao);
+        $upload_doc_identidade_representante = uploadFile('doc_identidade_representante', $upload_dir, $base_url, $id_solicitacao);
+        $upload_proc_comprovante = uploadFile('proc_comprovante', $upload_dir, $base_url, $id_solicitacao);
+
+        // Extrair URLs e verificar erros
+        $doc_identidade_url = $upload_doc_identidade['url'];
+        $comprovante_residencia_url = $upload_comprovante_residencia['url'];
+        $laudo_medico_url = $upload_laudo_medico['url'];
+        $doc_identidade_representante_url = $upload_doc_identidade_representante['url'];
+        $proc_comprovante_url = $upload_proc_comprovante['url'];
+
+        // Coletar erros
+        if ($upload_doc_identidade['error']) $upload_errors[] = "Documento de identidade: " . $upload_doc_identidade['error'];
+        if ($upload_comprovante_residencia['error']) $upload_errors[] = "Comprovante de residência: " . $upload_comprovante_residencia['error'];
+        if ($tipo_solicitacao === 'pcd' && $upload_laudo_medico['error']) $upload_errors[] = "Laudo médico: " . $upload_laudo_medico['error'];
+        if ($representante_legal) {
+            if ($upload_doc_identidade_representante['error']) $upload_errors[] = "Documento do representante: " . $upload_doc_identidade_representante['error'];
+            if ($upload_proc_comprovante['error']) $upload_errors[] = "Procuração: " . $upload_proc_comprovante['error'];
+        }
+
+        // Se houver erros de upload, remover o registro e retornar erro
+        if (!empty($upload_errors)) {
+            // Remover o registro criado, pois houve erro no upload
+            $delete_sql = "DELETE FROM solicitacao_cartao WHERE id = ?";
+            $delete_stmt = $conn->prepare($delete_sql);
+            $delete_stmt->bind_param('i', $id_solicitacao);
+            $delete_stmt->execute();
+
+            // Retornar erro em formato JSON
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'errors' => $upload_errors]);
+            exit;
+        }
+
+        // Atualizar o registro com as URLs dos arquivos
+        $update_sql = "UPDATE solicitacao_cartao SET 
+            doc_identidade_url = ?,
+            comprovante_residencia_url = ?,
+            laudo_medico_url = ?,
+            doc_identidade_representante_url = ?,
+            proc_comprovante_url = ?
+            WHERE id = ?";
+
+        $update_stmt = $conn->prepare($update_sql);
+        $update_stmt->bind_param(
+            'sssssi',
+            $doc_identidade_url,
+            $comprovante_residencia_url,
+            $laudo_medico_url,
+            $doc_identidade_representante_url,
+            $proc_comprovante_url,
+            $id_solicitacao
+        );
+
+        if (!$update_stmt->execute()) {
+            // Se falhar em atualizar o banco de dados
+            error_log("Erro ao atualizar URLs dos documentos: " . $update_stmt->error);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'errors' => ["Erro ao salvar os dados dos documentos no sistema."]]);
+            exit;
+        }
+
         // Obter o número atual e incrementar
         $get_numero = "SELECT ultimo_numero FROM contadores_cartao WHERE tipo = ?";
         $stmt_numero = $conn->prepare($get_numero);
@@ -249,62 +474,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Restaurar os valores originais do POST
         $_POST = $original_post;
 
-        // Diretório base para upload
-        $upload_dir = '../midia/cartao/';
-        // Não precisa mais definir $base_url aqui pois já vem do config.php
-
-        // Criar pasta com o ID da solicitação
-        $dir_with_id = $upload_dir . $id_solicitacao . '/';
-        if (!is_dir($dir_with_id)) {
-            mkdir($dir_with_id, 0777, true);
-        }
-
-        // Agora processar os arquivos e salvar nas novas pastas
-        $doc_identidade_url = uploadFile('doc_identidade', $upload_dir, $base_url, $id_solicitacao);
-        $comprovante_residencia_url = uploadFile('comprovante_residencia', $upload_dir, $base_url, $id_solicitacao);
-
-        if ($tipo_solicitacao === 'pcd') {
-            $laudo_medico_url = uploadFile('laudo_medico', $upload_dir, $base_url, $id_solicitacao);
-        }
-
-        if ($representante_legal) {
-            $doc_identidade_representante_url = uploadFile('doc_identidade_representante', $upload_dir, $base_url, $id_solicitacao);
-            $proc_comprovante_url = uploadFile('proc_comprovante', $upload_dir, $base_url, $id_solicitacao);
-        }
-
-        // Atualizar os campos de URLs no banco de dados
-        $update_sql = "UPDATE solicitacao_cartao SET 
-            doc_identidade_url = ?, 
-            comprovante_residencia_url = ?, 
-            laudo_medico_url = ?, 
-            doc_identidade_representante_url = ?, 
-            proc_comprovante_url = ?
-            WHERE id = ?";
-
-        $update_stmt = $conn->prepare($update_sql);
-        if (!$update_stmt) {
-            die("Erro na preparação da atualização: " . $conn->error);
-        }
-
-        $update_stmt->bind_param(
-            "sssssi",
-            $doc_identidade_url,
-            $comprovante_residencia_url,
-            $laudo_medico_url,
-            $doc_identidade_representante_url,
-            $proc_comprovante_url,
-            $id_solicitacao
-        );
-
-        if ($update_stmt->execute()) {
-            echo "Dados inseridos com sucesso!";
-        } else {
-            echo "Erro ao atualizar os arquivos: " . $update_stmt->error;
-        }
-
-        $update_stmt->close();
+        // Enviar resposta de sucesso em JSON
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => true,
+            'message' => 'Solicitação realizada com sucesso!',
+            'id_solicitacao' => $id_solicitacao
+        ]);
+        exit;
     } else {
-        echo "Erro: " . $stmt->error;
+        // Erro ao executar a consulta principal
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => false,
+            'errors' => ["Erro ao processar a solicitação: " . $stmt->error]
+        ]);
+        exit;
     }
 
     $stmt->close();

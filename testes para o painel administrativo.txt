@@ -1,0 +1,125 @@
+testes para o painel administrativo
+
+### 1. Autenticação e Gerenciamento de Usuários
+- [ ] Login
+  - Testar login com credenciais válidas
+  - Testar login com credenciais inválidas
+  - Verificar redirecionamento após login
+  - Testar recuperação de senha
+
+- [ ] Gerenciamento de Usuários (usuarios.php)
+  - Criar novo usuário
+  - Editar usuário existente
+  - Excluir usuário
+  - Alterar permissões de administrador
+  - Verificar listagem de usuários
+  - Testar filtros de busca
+
+### 2. Perfil e Configurações Pessoais
+- [ ] Perfil (perfil.php)
+  - Atualizar informações pessoais
+  - Alterar senha
+  - Upload de avatar
+  - Verificar exibição correta das informações
+
+### 3. Gerenciamento de Formulários
+- [ ] Lista de Formulários (formularios.php)
+  - Verificar listagem completa
+  - Testar filtros de busca
+  - Ordenação por diferentes campos
+  - Paginação
+
+- [ ] Detalhes do Formulário (detalhes_formulario.php)
+  - Visualizar todos os detalhes
+  - Verificar documentos anexados
+  - Testar download de arquivos
+  - Verificar histórico de alterações
+
+- [ ] Ações em Formulários
+  - Marcar como concluído
+  - Excluir formulário
+  - Editar informações
+  - Atualizar status
+  - Adicionar observações
+
+### 4. Notificações e Comunicações
+- [ ] Sistema de Notificações
+  - Verificar recebimento de novas notificações
+  - Marcar como lido
+  - Testar filtros de notificações
+  - Verificar notificações por email
+
+### 5. Gerenciamento de Notícias
+- [ ] Notícias (gerenciar_noticias.php)
+  - Adicionar nova notícia
+  - Editar notícia existente
+  - Excluir notícia
+  - Visualizar notícia
+  - Upload de imagens
+  - Formatação de texto
+
+### 6. Analytics e Relatórios
+- [ ] Dashboard (analytics.php)
+  - Verificar gráficos e estatísticas
+  - Testar filtros por período
+  - Exportar relatórios
+  - Verificar contadores em tempo real
+
+### 7. Processamento de Formulários
+- [ ] Fluxo de Aprovação
+  - Testar processo de aprovação
+  - Verificar rejeição de formulários
+  - Testar envio de feedback
+  - Verificar notificações automáticas
+
+### 8. Funcionalidades Específicas
+- [ ] Apresentação de Condutor
+  - Verificar campos específicos
+  - Testar upload de documentos
+  - Validar assinaturas
+
+- [ ] Defesa Prévia
+  - Verificar campos obrigatórios
+  - Testar anexos específicos
+  - Validar processo de análise
+
+- [ ] JARI
+  - Testar fluxo completo
+  - Verificar documentação necessária
+  - Validar processo decisório
+
+### 9. Testes de Segurança
+- [ ] Permissões
+  - Verificar acesso a diferentes níveis
+  - Testar restrições de páginas
+  - Validar tokens de segurança
+
+- [ ] Validações
+  - Testar injeção SQL
+  - Verificar XSS
+  - Validar upload de arquivos
+  - Testar limites de tamanho
+
+### 10. Testes de Interface
+- [ ] Responsividade
+  - Testar em diferentes dispositivos
+  - Verificar adaptação de layout
+  - Validar funcionamento de menus
+
+- [ ] Compatibilidade
+  - Testar em diferentes navegadores
+  - Verificar carregamento de recursos
+  - Validar funcionamento de JavaScript
+
+### 11. Testes de Performance
+- [ ] Carregamento
+  - Tempo de resposta das páginas
+  - Performance com muitos registros
+  - Comportamento com arquivos grandes
+
+- [ ] Concorrência
+  - Múltiplos usuários simultâneos
+  - Processamento paralelo
+  - Tempo de resposta do servidor
+
+Esta lista serve como um guia geral para garantir que todas as funcionalidades principais estejam funcionando corretamente. É recomendável documentar os resultados de cada teste e manter um registro de possíveis problemas encontrados.
