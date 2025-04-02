@@ -323,22 +323,41 @@ try {
         <!-- Conteúdo -->
         <div class="content">
             <!-- Documentos Necessários -->
-            <p><strong>Documentos necessários para apresentação de Defesa Prévia:</strong></p>
-            <ul>
-                <li>Requerimento da Defesa datada e assinada;</li>
-                <li>Cópia da CNH ou outro documento de identificação que comprove a assinatura que consta no
-                    requerimento do Recurso. Quando o requerente for representado, apresentar também a cópia do
-                    documento de identificação do representante legal. E, quando pessoa jurídica, apresentar também ato
-                    constitutivo da empresa;</li>
-                <li>Cópia do CRLV;</li>
-                <li>Cópia da Notificação da Penalidade;</li>
-                <li>Procuração, quando for o caso;</li>
-                <li>Outros documentos que considerar necessários para apoiar as alegações da Defesa.</li>
-            </ul>
-            <p>
-                A Defesa prévia deverá ser preenchida, assinada, e entregue junto com os demais documentos acima
-                relacionados, ou enviada pelos Correios para o endereço:
-            </p>
+            <?php if ($tipoSolicitacao == 'defesa_previa'): ?>
+                <p><strong>Documentos necessários para apresentação de Defesa Prévia:</strong></p>
+                <ul>
+                    <li>Requerimento da Defesa datada e assinada;</li>
+                    <li>Cópia da CNH ou outro documento de identificação que comprove a assinatura que consta no
+                        requerimento do Recurso. Quando o requerente for representado, apresentar também a cópia do
+                        documento de identificação do representante legal. E, quando pessoa jurídica, apresentar também ato
+                        constitutivo da empresa;</li>
+                    <li>Cópia do CRLV;</li>
+                    <li>Cópia da Notificação da Penalidade;</li>
+                    <li>Procuração, quando for o caso;</li>
+                    <li>Outros documentos que considerar necessários para apoiar as alegações da Defesa.</li>
+                </ul>
+                <p>
+                    A Defesa prévia deverá ser preenchida, assinada, e entregue junto com os demais documentos acima
+                    relacionados, ou enviada pelos Correios para o endereço:
+                </p>
+            <?php else: ?>
+                <p><strong>Documentos necessários para apresentação de Recurso à JARI:</strong></p>
+                <ul>
+                    <li>Requerimento de Recurso datado e assinado;</li>
+                    <li>Cópia da CNH ou outro documento de identificação que comprove a assinatura que consta no
+                        requerimento do Recurso. Quando o requerente for representado, apresentar também a cópia do
+                        documento de identificação do representante legal. E, quando pessoa jurídica, apresentar também ato
+                        constitutivo da empresa;</li>
+                    <li>Cópia do CRLV;</li>
+                    <li>Cópia da Notificação da Penalidade;</li>
+                    <li>Procuração, quando for o caso;</li>
+                    <li>Outros documentos que considerar necessários para apoiar as alegações do Recurso.</li>
+                </ul>
+                <p>
+                    O Recurso à JARI deverá ser preenchido, assinado, e entregue junto com os demais documentos acima
+                    relacionados, ou enviada pelos Correios para o endereço:
+                </p>
+            <?php endif; ?>
             <p>
                 Av. Dom Pedro II nº 1121, Centro – Pau dos Ferros/RN CEP: 59900 - 000
             </p>
