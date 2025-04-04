@@ -309,7 +309,7 @@ $currentStep = 1;
                             <p style='word-break: break-all;'><strong>Seu Email:</strong> ${email}</p>
                             <p><strong>Token:</strong> ${data.token}</p>
                             <div style='margin: 20px 0; text-align: center;'>
-                                <a href='http://localhost/demutran/DAT/index.php?token=${data.token}' 
+                                <a href='http://localhost/demutran/DAT/escolher-dat.html?token=${data.token}' 
                                    style='background-color: #48bb78; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; display: inline-block;'>
                                     Continuar Preenchimento
                                 </a>

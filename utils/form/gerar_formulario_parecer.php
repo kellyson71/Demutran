@@ -153,7 +153,6 @@ if (!$dados) {
             <div class="centered-title">
                 <p>Estado do Rio Grande do Norte</p>
                 <p>Prefeitura Municipal de Pau dos Ferros</p>
-                <p>Secretaria de Governo – SEGOV</p>
                 <p>Departamento Municipal de Trânsito – DEMUTRAN</p>
             </div>
         </div>
@@ -225,6 +224,11 @@ if (!$dados) {
                     </tr>
                 <?php endif; ?>
             </table>
+        </div>
+
+        <div class="mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800">
+            <p><strong>Observação:</strong> A responsabilidade para interdição do espaço de evento é do requerente,
+                conforme determinado pelo DEMUTRAN.</p>
         </div>
 
         <div class="signature-section">

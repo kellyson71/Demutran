@@ -137,6 +137,7 @@ $variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 10
 
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Relatório Analítico - DEMUTRAN</title>
@@ -146,61 +147,77 @@ $variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 10
         body {
             background: #f8f9fa;
         }
+
         .container {
             max-width: 1000px;
             margin: auto;
         }
+
         .logo-container {
             position: relative;
             text-align: center;
             margin-bottom: 1rem;
             padding: 1rem 0;
         }
+
         .logo {
-            height: 60px; /* Reduzido de 80px */
+            height: 60px;
+            /* Reduzido de 80px */
             margin: 0 15px;
         }
+
         .header-title {
             text-align: center;
             margin-bottom: 0.5rem;
             font-size: 0.9rem;
         }
+
         .header-title p {
             margin: 0;
             line-height: 1.2;
         }
+
         .stat-card {
             background: #fff;
             border-radius: 8px;
             padding: 1rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
             margin-bottom: 0.5rem;
             border: 1px solid #e5e7eb;
         }
+
         .stat-number {
-            font-size: 1.5rem; /* Reduzido de 2rem */
+            font-size: 1.5rem;
+            /* Reduzido de 2rem */
             font-weight: bold;
             color: #2196F3;
         }
+
         .chart-container {
             background: #fff;
             border-radius: 8px;
             padding: 0.75rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
             margin-bottom: 1rem;
             border: 1px solid #e5e7eb;
-            height: 180px; /* Reduzido de 250px para 180px */
-            width: 100%; /* Garante que ocupe toda a largura disponível */
+            height: 180px;
+            /* Reduzido de 250px para 180px */
+            width: 100%;
+            /* Garante que ocupe toda a largura disponível */
         }
+
         .charts-row {
             display: flex;
             gap: 1rem;
             margin-bottom: 1rem;
         }
+
         .chart-wrapper {
             flex: 1;
-            min-width: 0; /* Previne overflow em flex items */
+            min-width: 0;
+            /* Previne overflow em flex items */
         }
+
         @media print {
             body {
                 background: #fff;
@@ -208,38 +225,43 @@ $variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 10
                 margin: 0;
                 padding: 15px;
             }
+
             .no-print {
                 display: none;
             }
+
             .container {
                 width: 100% !important;
                 max-width: none !important;
                 padding: 0 !important;
                 margin: 0 !important;
             }
-            
+
             /* Corrigir para manter layout em grid */
             .row {
-                display: flex !important; /* Forçar flex */
+                display: flex !important;
+                /* Forçar flex */
                 flex-wrap: wrap !important;
                 width: 100% !important;
                 page-break-inside: avoid;
             }
-            
+
             /* Manter colunas lado a lado */
             .col-md-3 {
                 width: 25% !important;
                 flex: 0 0 25% !important;
             }
+
             .col-md-4 {
                 width: 33.333% !important;
                 flex: 0 0 33.333% !important;
             }
+
             .col-md-6 {
                 width: 50% !important;
                 flex: 0 0 50% !important;
             }
-            
+
             /* Manter gráficos lado a lado */
             .charts-row {
                 display: flex !important;
@@ -247,29 +269,34 @@ $variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 10
                 break-inside: avoid;
                 page-break-inside: avoid;
             }
+
             .chart-wrapper {
                 width: 50% !important;
                 flex: 1 !important;
             }
+
             .chart-container {
                 height: 200px !important;
                 break-inside: avoid;
                 page-break-inside: avoid;
             }
-            
+
             /* Ajustes para melhorar espaçamento */
-            .stat-card, .detail-table, .table-responsive {
+            .stat-card,
+            .detail-table,
+            .table-responsive {
                 margin-bottom: 15px !important;
                 break-inside: avoid;
                 page-break-inside: avoid;
             }
-            
+
             /* Garantir que cores e backgrounds sejam impressos */
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
         }
+
         .section-title {
             background-color: #f8f9fa;
             padding: 0.75rem;
@@ -279,34 +306,34 @@ $variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 10
             font-size: 0.9rem;
             break-inside: avoid;
         }
-        
+
         .detail-table {
             width: 100%;
             margin-bottom: 1rem;
             font-size: 0.9rem;
         }
-        
+
         .detail-table td {
             padding: 0.5rem;
             border-bottom: 1px solid #e5e7eb;
         }
-        
+
         .detail-table tr:last-child td {
             border-bottom: none;
         }
     </style>
 </head>
+
 <body class="bg-light">
     <div class="container py-4"> <!-- Reduzido padding -->
         <div class="logo-container">
             <img src="./image1.png" alt="Logo Esquerda" class="logo">
             <img src="./image3.png" alt="Logo Direita" class="logo">
         </div>
-        
+
         <div class="header-title">
             <p>Estado do Rio Grande do Norte</p>
             <p>Prefeitura Municipal de Pau dos Ferros</p>
-            <p>Secretaria de Governo – SEGOV</p>
             <p>Departamento Municipal de Trânsito – DEMUTRAN</p>
         </div>
 
@@ -325,7 +352,8 @@ $variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 10
                     <small class="text-muted">Solicitações (Últimos 30 dias)</small>
                     <div class="stat-number"><?php echo $periodoAtual; ?></div>
                     <div class="small <?php echo $variacao >= 0 ? 'text-success' : 'text-danger'; ?>">
-                        <?php echo $variacao >= 0 ? '+' : ''; echo $variacao; ?>% vs período anterior
+                        <?php echo $variacao >= 0 ? '+' : '';
+                        echo $variacao; ?>% vs período anterior
                     </div>
                 </div>
             </div>
@@ -373,7 +401,7 @@ $variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 10
                 <td width="70%">Serviço de Atendimento ao Cidadão (SAC)</td>
                 <td class="text-right"><strong><?php echo $sacTotal; ?></strong> solicitações</td>
             </tr>
-            
+
             <!-- Grupo JARI/Defesas com subcategorias -->
             <tr style="background-color: #f8f9fa;">
                 <td colspan="2"><strong>Solicitações e Defesas</strong></td>
@@ -392,7 +420,7 @@ $variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 10
                 </tr>";
             }
             ?>
-            
+
             <!-- Grupo PCD/Idoso com subcategorias -->
             <tr style="background-color: #f8f9fa;">
                 <td colspan="2"><strong>Credenciais Especiais</strong></td>
@@ -410,7 +438,7 @@ $variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 10
                 </tr>";
             }
             ?>
-            
+
             <tr>
                 <td>Declaração de Acidente de Trânsito (DAT)</td>
                 <td class="text-right"><strong><?php echo $datTotal; ?></strong> solicitações</td>
@@ -471,15 +499,15 @@ $variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 10
                     ];
 
                     foreach ($tiposSolicitacao as $tipo => $dados) {
-                        $variacao = $dados['anterior'] > 0 ? 
+                        $variacao = $dados['anterior'] > 0 ?
                             round(($dados['atual'] - $dados['anterior']) * 100 / $dados['anterior'], 1) : 100;
                         $variacaoClass = $variacao >= 0 ? 'text-success' : 'text-danger';
-                        
+
                         echo "<tr>
                             <td>{$tipo}</td>
                             <td class='text-right'>{$dados['atual']}</td>
                             <td class='text-right'>{$dados['anterior']}</td>
-                            <td class='text-right {$variacaoClass}'>" . 
+                            <td class='text-right {$variacaoClass}'>" .
                             ($variacao >= 0 ? '+' : '') . "{$variacao}%</td>
                         </tr>";
                     }
@@ -510,7 +538,7 @@ $variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 10
         // Configurações comuns dos gráficos
         Chart.defaults.font.size = 9; // Reduzido de 11
         Chart.defaults.plugins.legend.labels.boxWidth = 8; // Reduzido de 12
-        
+
         // Gráfico de Distribuição
         new Chart(document.getElementById('distributionChart'), {
             type: 'doughnut',
@@ -528,7 +556,9 @@ $variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 10
                     legend: {
                         position: 'right',
                         labels: {
-                            font: { size: 8 }, // Reduzido de 10
+                            font: {
+                                size: 8
+                            }, // Reduzido de 10
                             padding: 8 // Reduzido padding
                         }
                     }
@@ -543,9 +573,9 @@ $variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 10
                 labels: <?php echo json_encode($labels); ?>,
                 datasets: [{
                     label: 'Total de Solicitações',
-                    data: <?php echo json_encode(array_map(function($sac, $jari, $pcd, $dat, $parecer) {
-                        return $sac + $jari + $pcd + $dat + $parecer;
-                    }, $datasets['sac'], $datasets['jari'], $datasets['pcd'], $datasets['dat'], $datasets['parecer'])); ?>,
+                    data: <?php echo json_encode(array_map(function ($sac, $jari, $pcd, $dat, $parecer) {
+                                return $sac + $jari + $pcd + $dat + $parecer;
+                            }, $datasets['sac'], $datasets['jari'], $datasets['pcd'], $datasets['dat'], $datasets['parecer'])); ?>,
                     borderColor: '#2196F3',
                     tension: 0.1
                 }]
@@ -557,7 +587,9 @@ $variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 10
                     legend: {
                         position: 'top',
                         labels: {
-                            font: { size: 8 }, // Reduzido de 10
+                            font: {
+                                size: 8
+                            }, // Reduzido de 10
                             padding: 4 // Reduzido padding
                         }
                     }
@@ -565,14 +597,18 @@ $variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 10
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: { 
+                        ticks: {
                             stepSize: 1,
-                            font: { size: 8 } // Reduzido de 10
+                            font: {
+                                size: 8
+                            } // Reduzido de 10
                         }
                     },
                     x: {
                         ticks: {
-                            font: { size: 8 } // Reduzido de 10
+                            font: {
+                                size: 8
+                            } // Reduzido de 10
                         }
                     }
                 }
@@ -580,4 +616,5 @@ $variacao = $periodoAnterior > 0 ? round(($periodoAtual - $periodoAnterior) * 10
         });
     </script>
 </body>
+
 </html>

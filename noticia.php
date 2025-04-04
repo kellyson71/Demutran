@@ -82,7 +82,7 @@ $conn->close();
             <nav class="hidden md:flex space-x-6">
                 <a href="../PCD/index.html" class="hover:text-green-300">Cartão Vaga Especial</a>
                 <a href="../Defesa/index.html" class="hover:text-green-300">Defesa Prévia/JARI</a>
-                <a href="../DAT/index.php" class="hover:text-green-300">DAT</a>
+                <a href="../DAT/escolher-dat.html" class="hover:text-green-300">DAT</a>
                 <a href="../contato/index.html" class="hover:text-green-300">Contato</a>
             </nav>
 
@@ -102,7 +102,7 @@ $conn->close();
         <div id="mobile-menu" class="hidden md:hidden bg-green-600">
             <a href="../PCD/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Cartão Vaga Especial</a>
             <a href="../Defesa/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Defesa Prévia/JARI</a>
-            <a href="../DAT/index.php" class="block px-4 py-2 text-white hover:bg-green-500">DAT</a>
+            <a href="../DAT/escolher-dat.html" class="block px-4 py-2 text-white hover:bg-green-500">DAT</a>
             <a href="../contato/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Contato</a>
         </div>
     </header>
@@ -144,18 +144,18 @@ $conn->close();
             <!-- Conteúdo da Notícia -->
             <div class="p-6 prose prose-lg max-w-none">
                 <style>
-                /* Estilos para as imagens dentro do conteúdo */
-                .prose img {
-                    margin: 1.5rem auto;
-                    border-radius: 0.375rem;
-                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-                    max-width: 100%;
-                    height: auto;
-                }
+                    /* Estilos para as imagens dentro do conteúdo */
+                    .prose img {
+                        margin: 1.5rem auto;
+                        border-radius: 0.375rem;
+                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                        max-width: 100%;
+                        height: auto;
+                    }
 
-                .prose p {
-                    margin-bottom: 1.5rem;
-                }
+                    .prose p {
+                        margin-bottom: 1.5rem;
+                    }
                 </style>
                 <?php echo $news['conteudo']; ?>
             </div>
@@ -210,13 +210,13 @@ $conn->close();
     <!-- Scripts -->
     <!-- JavaScript -->
     <script>
-    // Mobile Menu Toggle
-    const menuBtn = document.getElementById("menu-btn");
-    const mobileMenu = document.getElementById("mobile-menu");
+        // Mobile Menu Toggle
+        const menuBtn = document.getElementById("menu-btn");
+        const mobileMenu = document.getElementById("mobile-menu");
 
-    menuBtn.addEventListener("click", () => {
-        mobileMenu.classList.toggle("hidden");
-    });
+        menuBtn.addEventListener("click", () => {
+            mobileMenu.classList.toggle("hidden");
+        });
     </script>
 </body>
 

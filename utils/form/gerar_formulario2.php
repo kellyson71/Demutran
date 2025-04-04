@@ -126,7 +126,6 @@ require_once '../../components/print-components.php';
             <div class="centered-title">
                 <p>Estado do Rio Grande do Norte</p>
                 <p>Prefeitura Municipal de Pau dos Ferros</p>
-                <p>Secretaria de Governo – SEGOV</p>
                 <p>Departamento Municipal de Trânsito – DEMUTRAN</p>
             </div>
         </div>

@@ -90,7 +90,7 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                     Especial</a>
                 <a href="../Defesa/index.html" class="hover:text-green-300 text-white no-underline">Defesa
                     Prévia/JARI</a>
-                <a href="../DAT/index.php" class="hover:text-green-300 text-white no-underline">DAT</a>
+                <a href="../DAT/escolher-dat.html" class="hover:text-green-300 text-white no-underline">DAT</a>
                 <a href="../contato/index.html" class="hover:text-green-300 text-white no-underline">Contato</a>
             </nav>
 
@@ -111,7 +111,8 @@ unset($_SESSION['success_message'], $_SESSION['error_message']);
                 Especial</a>
             <a href="../Defesa/index.html" class="block px-4 py-2 text-white hover:bg-green-500 no-underline">Defesa
                 Prévia/JARI</a>
-            <a href="../DAT/index.php" class="block px-4 py-2 text-white hover:bg-green-500 no-underline">DAT</a>
+            <a href="../DAT/escolher-dat.html"
+                class="block px-4 py-2 text-white hover:bg-green-500 no-underline">DAT</a>
             <a href="../contato/index.html"
                 class="block px-4 py-2 text-white hover:bg-green-500 no-underline">Contato</a>
         </div>

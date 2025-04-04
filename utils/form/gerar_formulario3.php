@@ -150,7 +150,6 @@
             <div class="centered-title text-center">
                 <p>Estado do Rio Grande do Norte</p>
                 <p>Prefeitura Municipal de Pau dos Ferros</p>
-                <p>Secretaria de Governo – SEGOV</p>
                 <p>Departamento Municipal de Trânsito – DEMUTRAN</p>
             </div>
         </div>

@@ -127,7 +127,7 @@
             <nav class="hidden md:flex space-x-6">
                 <a href="../../PCD/index.html" class="hover:text-green-300">Cartão Vaga Especial</a>
                 <a href="../../Defesa/index.html" class="hover:text-green-300">Defesa Prévia/JARI</a>
-                <a href="../../DAT/index.php" class="hover:text-green-300">DAT</a>
+                <a href="../../DAT/escolher-dat.html" class="hover:text-green-300">DAT</a>
                 <a href="../../Parecer/index.php" class="hover:text-green-300">Parecer</a>
                 <a href="../../contato/index.html" class="hover:text-green-300">Contato</a>
             </nav>
@@ -150,7 +150,7 @@
                 Especial</a>
             <a href="../../Defesa/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Defesa
                 Prévia/JARI</a>
-            <a href="../../DAT/index.php" class="block px-4 py-2 text-white hover:bg-green-500">DAT</a>
+            <a href="../../DAT/escolher-dat.html" class="block px-4 py-2 text-white hover:bg-green-500">DAT</a>
             <a href="../../Parecer/index.php" class="block px-4 py-2 text-white hover:bg-green-500">Parecer</a>
             <a href="../../contato/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Contato</a>
         </div>

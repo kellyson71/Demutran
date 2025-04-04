@@ -81,21 +81,21 @@ $conn->close();
 </head>
 
 <style>
-.square-image {
-    position: relative;
-    width: 100%;
-    padding-bottom: 100%;
-    overflow: hidden;
-}
+    .square-image {
+        position: relative;
+        width: 100%;
+        padding-bottom: 100%;
+        overflow: hidden;
+    }
 
-.square-image img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+    .square-image img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 </style>
 </head>
 
@@ -146,56 +146,56 @@ $conn->close();
 
         <!-- Estilos adicionais -->
         <style>
-        .bg-grid-pattern {
-            background-image:
-                linear-gradient(to right, rgba(0, 128, 0, 0.05) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(0, 128, 0, 0.05) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-
-        .bg-texture {
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23green' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        }
-
-        .bg-dots {
-            background-image: radial-gradient(circle, rgba(0, 128, 0, 0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-
-        @keyframes pulse-slow {
-
-            0%,
-            100% {
-                opacity: 0.2;
-                transform: scale(1);
+            .bg-grid-pattern {
+                background-image:
+                    linear-gradient(to right, rgba(0, 128, 0, 0.05) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(0, 128, 0, 0.05) 1px, transparent 1px);
+                background-size: 20px 20px;
             }
 
-            50% {
-                opacity: 0.3;
-                transform: scale(1.05);
-            }
-        }
-
-        .animate-pulse-slow {
-            animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        /* Animações para formas geométricas */
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0) rotate(45deg);
+            .bg-texture {
+                background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23green' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
             }
 
-            50% {
-                transform: translateY(-10px) rotate(45deg);
+            .bg-dots {
+                background-image: radial-gradient(circle, rgba(0, 128, 0, 0.1) 1px, transparent 1px);
+                background-size: 20px 20px;
             }
-        }
 
-        .absolute[class*="border-"] {
-            animation: float 15s ease-in-out infinite;
-        }
+            @keyframes pulse-slow {
+
+                0%,
+                100% {
+                    opacity: 0.2;
+                    transform: scale(1);
+                }
+
+                50% {
+                    opacity: 0.3;
+                    transform: scale(1.05);
+                }
+            }
+
+            .animate-pulse-slow {
+                animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+
+            /* Animações para formas geométricas */
+            @keyframes float {
+
+                0%,
+                100% {
+                    transform: translateY(0) rotate(45deg);
+                }
+
+                50% {
+                    transform: translateY(-10px) rotate(45deg);
+                }
+            }
+
+            .absolute[class*="border-"] {
+                animation: float 15s ease-in-out infinite;
+            }
         </style>
 
         <!-- Top Bar fixo -->
@@ -211,7 +211,7 @@ $conn->close();
                 <nav class="hidden md:flex space-x-6">
                     <a href="../PCD/index.html" class="hover:text-green-300">Cartão Vaga Especial</a>
                     <a href="../Defesa/index.html" class="hover:text-green-300">Defesa Prévia/JARI</a>
-                    <a href="../DAT/index.php" class="hover:text-green-300">DAT</a>
+                    <a href="../DAT/escolher-dat.html" class="hover:text-green-300">DAT</a>
                     <a href="../contato/index.html" class="hover:text-green-300">Contato</a>
                 </nav>
 
@@ -233,7 +233,7 @@ $conn->close();
                     Especial</a>
                 <a href="../Defesa/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Defesa
                     Prévia/JARI</a>
-                <a href="../DAT/index.php" class="block px-4 py-2 text-white hover:bg-green-500">DAT</a>
+                <a href="../DAT/escolher-dat.html" class="block px-4 py-2 text-white hover:bg-green-500">DAT</a>
                 <a href="../contato/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Contato</a>
             </div>
         </header>
@@ -376,7 +376,6 @@ $conn->close();
                                     <p class="text-lg font-semibold text-gray-800">Prefeitura Municipal de Pau dos
                                         Ferros
                                     </p>
-                                    <p class="text-sm text-gray-600">Administração 2021-2024</p>
                                 </div>
                             </div>
                         </div>
@@ -394,96 +393,96 @@ $conn->close();
             <!-- Notícia Principal com Carrossel -->
             <div class="lg:col-span-2">
                 <?php if (count($carouselItems) > 0): ?>
-                <div id="default-carousel" class="relative w-full" data-carousel="slide">
-                    <!-- Wrapper do Carrossel - Mantendo 4:3 -->
-                    <div class="relative w-full h-0 pb-[66.67%] overflow-hidden rounded-lg">
-                        <?php foreach ($carouselItems as $index => $item): ?>
-                        <div class="hidden duration-700 ease-in-out absolute inset-0" data-carousel-item>
-                            <img src="<?php echo get_image_path($item['imagem_url']); ?>"
-                                alt="<?php echo htmlspecialchars($item['titulo'], ENT_QUOTES, 'UTF-8'); ?>"
-                                class="absolute block w-full h-full object-cover">
+                    <div id="default-carousel" class="relative w-full" data-carousel="slide">
+                        <!-- Wrapper do Carrossel - Mantendo 4:3 -->
+                        <div class="relative w-full h-0 pb-[66.67%] overflow-hidden rounded-lg">
+                            <?php foreach ($carouselItems as $index => $item): ?>
+                                <div class="hidden duration-700 ease-in-out absolute inset-0" data-carousel-item>
+                                    <img src="<?php echo get_image_path($item['imagem_url']); ?>"
+                                        alt="<?php echo htmlspecialchars($item['titulo'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        class="absolute block w-full h-full object-cover">
+                                </div>
+                            <?php endforeach; ?>
                         </div>
-                        <?php endforeach; ?>
-                    </div>
 
-                    <!-- Indicadores -->
-                    <div class="absolute z-30 flex -translate-x-1/2 space-x-3 rtl:space-x-reverse bottom-5 left-1/2">
-                        <?php foreach ($carouselItems as $index => $item): ?>
-                        <button type="button" class="w-3 h-3 rounded-full bg-white/50 hover:bg-white"
-                            aria-current="<?php echo $index === 0 ? 'true' : 'false'; ?>"
-                            aria-label="Slide <?php echo $index + 1; ?>" data-carousel-slide-to="<?php echo $index; ?>">
+                        <!-- Indicadores -->
+                        <div class="absolute z-30 flex -translate-x-1/2 space-x-3 rtl:space-x-reverse bottom-5 left-1/2">
+                            <?php foreach ($carouselItems as $index => $item): ?>
+                                <button type="button" class="w-3 h-3 rounded-full bg-white/50 hover:bg-white"
+                                    aria-current="<?php echo $index === 0 ? 'true' : 'false'; ?>"
+                                    aria-label="Slide <?php echo $index + 1; ?>" data-carousel-slide-to="<?php echo $index; ?>">
+                                </button>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <!-- Controles -->
+                        <button type="button"
+                            class="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+                            data-carousel-prev>
+                            <span
+                                class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none">
+                                <svg class="w-4 h-4 text-white rtl:rotate-180" aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2" d="M5 1 1 5l4 4" />
+                                </svg>
+                                <span class="sr-only">Anterior</span>
+                            </span>
                         </button>
-                        <?php endforeach; ?>
+                        <button type="button"
+                            class="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+                            data-carousel-next>
+                            <span
+                                class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none">
+                                <svg class="w-4 h-4 text-white rtl:rotate-180" aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2" d="m1 9 4-4-4-4" />
+                                </svg>
+                                <span class="sr-only">Próximo</span>
+                            </span>
+                        </button>
                     </div>
-
-                    <!-- Controles -->
-                    <button type="button"
-                        class="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-                        data-carousel-prev>
-                        <span
-                            class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none">
-                            <svg class="w-4 h-4 text-white rtl:rotate-180" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="2" d="M5 1 1 5l4 4" />
-                            </svg>
-                            <span class="sr-only">Anterior</span>
-                        </span>
-                    </button>
-                    <button type="button"
-                        class="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-                        data-carousel-next>
-                        <span
-                            class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none">
-                            <svg class="w-4 h-4 text-white rtl:rotate-180" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="2" d="m1 9 4-4-4-4" />
-                            </svg>
-                            <span class="sr-only">Próximo</span>
-                        </span>
-                    </button>
-                </div>
                 <?php else: ?>
-                <div class="relative w-full h-0 pb-[66.67%] bg-gray-100 rounded-lg overflow-hidden">
-                    <div class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-                        <i class="fas fa-newspaper text-gray-400 text-5xl mb-4"></i>
-                        <h3 class="text-xl font-semibold text-gray-600 mb-2">Nenhuma notícia disponível</h3>
-                        <p class="text-gray-500">Em breve publicaremos novidades aqui!</p>
+                    <div class="relative w-full h-0 pb-[66.67%] bg-gray-100 rounded-lg overflow-hidden">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                            <i class="fas fa-newspaper text-gray-400 text-5xl mb-4"></i>
+                            <h3 class="text-xl font-semibold text-gray-600 mb-2">Nenhuma notícia disponível</h3>
+                            <p class="text-gray-500">Em breve publicaremos novidades aqui!</p>
+                        </div>
                     </div>
-                </div>
                 <?php endif; ?>
             </div>
 
             <!-- Barra Lateral de Notícias -->
             <div class="flex flex-col justify-between h-full">
                 <?php if (count($latestNews) > 0): ?>
-                <?php foreach ($latestNews as $news): ?>
-                <a href="noticia.php?id=<?php echo $news['id']; ?>"
-                    class="flex bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100">
-                    <div class="relative w-[200px] h-[150px] flex-shrink-0">
-                        <img src="<?php echo get_image_path($news['imagem_url']); ?>"
-                            alt="<?php echo htmlspecialchars($news['titulo'], ENT_QUOTES, 'UTF-8'); ?>"
-                            class="absolute inset-0 w-full h-full object-cover rounded-l-lg"
-                            onerror="this.onerror=null; this.src='./assets/placeholder.jpg';" loading="lazy">
-                    </div>
-                    <div class="flex flex-col justify-between p-4 flex-grow">
-                        <h3 class="text-lg font-bold text-gray-900 line-clamp-2">
-                            <?php echo htmlspecialchars($news['titulo'], ENT_QUOTES, 'UTF-8'); ?>
-                        </h3>
-                        <p class="text-sm text-gray-600 line-clamp-2 mt-2">
-                            <?php echo htmlspecialchars($news['resumo'], ENT_QUOTES, 'UTF-8'); ?>
-                        </p>
-                    </div>
-                </a>
-                <?php endforeach; ?>
+                    <?php foreach ($latestNews as $news): ?>
+                        <a href="noticia.php?id=<?php echo $news['id']; ?>"
+                            class="flex bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100">
+                            <div class="relative w-[200px] h-[150px] flex-shrink-0">
+                                <img src="<?php echo get_image_path($news['imagem_url']); ?>"
+                                    alt="<?php echo htmlspecialchars($news['titulo'], ENT_QUOTES, 'UTF-8'); ?>"
+                                    class="absolute inset-0 w-full h-full object-cover rounded-l-lg"
+                                    onerror="this.onerror=null; this.src='./assets/placeholder.jpg';" loading="lazy">
+                            </div>
+                            <div class="flex flex-col justify-between p-4 flex-grow">
+                                <h3 class="text-lg font-bold text-gray-900 line-clamp-2">
+                                    <?php echo htmlspecialchars($news['titulo'], ENT_QUOTES, 'UTF-8'); ?>
+                                </h3>
+                                <p class="text-sm text-gray-600 line-clamp-2 mt-2">
+                                    <?php echo htmlspecialchars($news['resumo'], ENT_QUOTES, 'UTF-8'); ?>
+                                </p>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
                 <?php else: ?>
-                <div
-                    class="bg-white border border-gray-200 rounded-lg shadow p-6 text-center h-full flex flex-col items-center justify-center">
-                    <i class="fas fa-inbox text-gray-400 text-4xl mb-4"></i>
-                    <h3 class="text-lg font-semibold text-gray-600 mb-2">Nenhuma notícia recente</h3>
-                    <p class="text-gray-500">Fique atento para as próximas atualizações!</p>
-                </div>
+                    <div
+                        class="bg-white border border-gray-200 rounded-lg shadow p-6 text-center h-full flex flex-col items-center justify-center">
+                        <i class="fas fa-inbox text-gray-400 text-4xl mb-4"></i>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">Nenhuma notícia recente</h3>
+                        <p class="text-gray-500">Fique atento para as próximas atualizações!</p>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -612,41 +611,41 @@ $conn->close();
 
             <!-- JavaScript do Carrossel -->
             <script>
-            // Mobile Menu Toggle
-            const menuBtn = document.getElementById("menu-btn");
-            const mobileMenu = document.getElementById("mobile-menu");
+                // Mobile Menu Toggle
+                const menuBtn = document.getElementById("menu-btn");
+                const mobileMenu = document.getElementById("mobile-menu");
 
-            menuBtn.addEventListener("click", () => {
-                mobileMenu.classList.toggle("hidden");
-            });
-
-            // Evento para o Select de Formulários
-            document
-                .getElementById("pageSelect")
-                .addEventListener("change", function() {
-                    var selectedPage = this.value;
-                    if (selectedPage) {
-                        window.open(selectedPage, "_blank");
-                    }
+                menuBtn.addEventListener("click", () => {
+                    mobileMenu.classList.toggle("hidden");
                 });
 
-            // Swiper Initialization
-            var swiper = new Swiper(".swiper-container", {
-                loop: true,
-                autoplay: {
-                    delay: 5000,
-                },
-                pagination: {
-                    el: ".swiper-pagination",
-                    clickable: true,
-                },
-                navigation: {
-                    nextEl: ".swiper-button-next",
-                    prevEl: ".swiper-button-prev",
-                },
-                slidesPerView: 1,
-                spaceBetween: 10,
-            });
+                // Evento para o Select de Formulários
+                document
+                    .getElementById("pageSelect")
+                    .addEventListener("change", function() {
+                        var selectedPage = this.value;
+                        if (selectedPage) {
+                            window.open(selectedPage, "_blank");
+                        }
+                    });
+
+                // Swiper Initialization
+                var swiper = new Swiper(".swiper-container", {
+                    loop: true,
+                    autoplay: {
+                        delay: 5000,
+                    },
+                    pagination: {
+                        el: ".swiper-pagination",
+                        clickable: true,
+                    },
+                    navigation: {
+                        nextEl: ".swiper-button-next",
+                        prevEl: ".swiper-button-prev",
+                    },
+                    slidesPerView: 1,
+                    spaceBetween: 10,
+                });
             </script>
 </body>
 

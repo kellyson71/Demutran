@@ -86,7 +86,7 @@ $conn->close();
             <nav class="hidden md:flex space-x-6">
                 <a href="../PCD/index.html" class="hover:text-green-300">Cartão Vaga Especial</a>
                 <a href="../Defesa/index.html" class="hover:text-green-300">Defesa Prévia/JARI</a>
-                <a href="../DAT/index.php" class="hover:text-green-300">DAT</a>
+                <a href="../DAT/escolher-dat.html" class="hover:text-green-300">DAT</a>
                 <a href="../contato/index.html" class="hover:text-green-300">Contato</a>
             </nav>
 
@@ -106,7 +106,7 @@ $conn->close();
         <div id="mobile-menu" class="hidden md:hidden bg-green-600">
             <a href="../PCD/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Cartão Vaga Especial</a>
             <a href="../Defesa/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Defesa Prévia/JARI</a>
-            <a href="../DAT/index.php" class="block px-4 py-2 text-white hover:bg-green-500">DAT</a>
+            <a href="../DAT/escolher-dat.html" class="block px-4 py-2 text-white hover:bg-green-500">DAT</a>
             <a href="../contato/index.html" class="block px-4 py-2 text-white hover:bg-green-500">Contato</a>
         </div>
     </header>
