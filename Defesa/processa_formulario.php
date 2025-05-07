@@ -10,7 +10,8 @@ error_reporting(E_ALL);
 header('Content-Type: application/json; charset=utf-8');
 
 // Error handler function
-function returnError($message) {
+function returnError($message)
+{
     echo json_encode([
         'success' => false,
         'message' => $message
@@ -33,6 +34,10 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
     returnError("Método inválido");
 }
 
+// Definir explicitamente o diretório de upload
+$upload_dir = 'midia/';
+$base_url = $_SERVER['HTTP_HOST'];
+
 // Get tipo_solicitacao from POST data
 $tipo_solicitacao = null;
 if (isset($_POST['tipo_solicitacao'])) {
@@ -50,7 +55,8 @@ if (empty($tipo_solicitacao)) {
 }
 
 // Função para verificar campos de texto e atribuir "não informado" se não receber valor
-function verificaTexto($valor) {
+function verificaTexto($valor)
+{
     return isset($valor) && !empty($valor) ? $valor : "não informado";
 }
 
@@ -76,10 +82,10 @@ function getFileNameByType($file_key)
 // Função modificada para fazer upload de arquivo
 function uploadFile($file_key, $tipo_solicitacao, $id_solicitacao, $base_url)
 {
-    global $upload_dir; // Adicione esta linha para usar a variável global
-    
+    global $upload_dir; // Usar a variável global
+
     error_log("Tentando fazer upload do arquivo: " . $file_key);
-    
+
     if (!isset($_FILES[$file_key])) {
         error_log("Arquivo não encontrado para: " . $file_key);
         return null;
@@ -90,25 +96,44 @@ function uploadFile($file_key, $tipo_solicitacao, $id_solicitacao, $base_url)
         $mime_type = finfo_file($finfo, $_FILES[$file_key]['tmp_name']);
         finfo_close($finfo);
 
-        if ($mime_type !== 'application/pdf') {
+        // Lista de tipos MIME permitidos
+        $allowed_types = [
+            'application/pdf',
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ];
+
+        if (!in_array($mime_type, $allowed_types)) {
             error_log("Tipo de arquivo inválido para {$file_key}: {$mime_type}");
             return null;
         }
 
+        // Extensão do arquivo original
+        $ext = pathinfo($_FILES[$file_key]['name'], PATHINFO_EXTENSION);
+
         // Gera o nome do arquivo baseado no tipo
-        $file_name = getFileNameByType($file_key) . '.pdf';
+        $file_name = getFileNameByType($file_key) . '.' . $ext;
 
         // Cria o diretório com o tipo de solicitação e ID
         $full_upload_dir = dirname(__DIR__) . '/' . $upload_dir . $tipo_solicitacao . '/' . $id_solicitacao . '/';
         if (!is_dir($full_upload_dir)) {
             if (!mkdir($full_upload_dir, 0777, true)) {
                 error_log("Falha ao criar diretório: " . $full_upload_dir);
+                error_log("Erro: " . error_get_last()['message']);
                 return null;
             }
         }
 
         $target_path = $full_upload_dir . $file_name;
-        
+
+        // Verificar permissões do diretório
+        if (!is_writable(dirname($full_upload_dir))) {
+            error_log("O diretório pai não tem permissões de escrita: " . dirname($full_upload_dir));
+        }
+
         if (move_uploaded_file($_FILES[$file_key]['tmp_name'], $target_path)) {
             error_log("Upload bem sucedido para: " . $target_path);
             // Retorna a URL completa usando o base_url do config
@@ -116,9 +141,37 @@ function uploadFile($file_key, $tipo_solicitacao, $id_solicitacao, $base_url)
         } else {
             error_log("Falha no upload para: " . $target_path);
             error_log("Erro de upload: " . $_FILES[$file_key]['error']);
+            error_log("Erro do sistema: " . error_get_last()['message']);
         }
     } else {
-        error_log("Erro no arquivo {$file_key}: " . $_FILES[$file_key]['error']);
+        $error_message = '';
+        switch ($_FILES[$file_key]['error']) {
+            case UPLOAD_ERR_INI_SIZE:
+                $error_message = 'O arquivo excede o limite definido no php.ini';
+                break;
+            case UPLOAD_ERR_FORM_SIZE:
+                $error_message = 'O arquivo excede o limite definido no formulário HTML';
+                break;
+            case UPLOAD_ERR_PARTIAL:
+                $error_message = 'O arquivo foi apenas parcialmente carregado';
+                break;
+            case UPLOAD_ERR_NO_FILE:
+                $error_message = 'Nenhum arquivo foi enviado';
+                break;
+            case UPLOAD_ERR_NO_TMP_DIR:
+                $error_message = 'Pasta temporária ausente';
+                break;
+            case UPLOAD_ERR_CANT_WRITE:
+                $error_message = 'Falha ao escrever arquivo em disco';
+                break;
+            case UPLOAD_ERR_EXTENSION:
+                $error_message = 'Uma extensão PHP interrompeu o upload do arquivo';
+                break;
+            default:
+                $error_message = 'Erro desconhecido';
+                break;
+        }
+        error_log("Erro no arquivo {$file_key}: " . $error_message);
     }
     return null;
 }
@@ -127,7 +180,7 @@ function uploadFile($file_key, $tipo_solicitacao, $id_solicitacao, $base_url)
 function uploadMultipleFiles($file_key, $tipo_solicitacao, $id_solicitacao, $base_url)
 {
     global $upload_dir; // Adicione esta linha para usar a variável global
-    
+
     $urls = [];
     if (isset($_FILES[$file_key])) {
         for ($i = 0; $i < count($_FILES[$file_key]['name']); $i++) {
@@ -151,7 +204,8 @@ function uploadMultipleFiles($file_key, $tipo_solicitacao, $id_solicitacao, $bas
 }
 
 // Function to check if a column exists in a table
-function columnExists($conn, $table, $column) {
+function columnExists($conn, $table, $column)
+{
     $result = $conn->query("SHOW COLUMNS FROM `$table` LIKE '$column'");
     return $result && $result->num_rows > 0;
 }
@@ -177,20 +231,6 @@ foreach ($columns as $column) {
 
 // Modifique a validação inicial
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Validar se os arquivos obrigatórios foram enviados
-    $required_files = ['doc_requerimento', 'crlv', 'notif_DEMUTRAN'];
-    $missing_files = [];
-
-    foreach ($required_files as $file) {
-        if (!isset($_FILES[$file]) || $_FILES[$file]['error'] === UPLOAD_ERR_NO_FILE) {
-            $missing_files[] = $file;
-        }
-    }
-
-    if (!empty($missing_files)) {
-        returnError("Arquivos obrigatórios não enviados: " . implode(", ", $missing_files));
-    }
-
     // Captura o tipo de solicitação
     $tipo_solicitacao = isset($_POST['tipo_solicitacao']) ? $_POST['tipo_solicitacao'] : null;
 
@@ -202,19 +242,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Se chegou aqui, temos um tipo de solicitação válido
     $tipo_solicitacao = verificaTexto($tipo_solicitacao);
 
-    // Diretório base para upload
-    // $upload_dir = 'midia/';
-    // $base_url = "https://seusite.com/Defesa/midia/"; // Atualize com a URL base correta
+    // Validar arquivos obrigatórios de acordo com o tipo de solicitação
+    $required_files = [];
+    switch ($tipo_solicitacao) {
+        case 'apresentacao_condutor':
+            $required_files = ['doc_requerimento', 'cnh_condutor', 'notif_DEMUTRAN'];
+            break;
+        case 'jari':
+            $required_files = ['doc_requerimento', 'cnh', 'notif_DEMUTRAN', 'crlv'];
+            break;
+        case 'defesa_previa':
+        default:
+            $required_files = ['doc_requerimento', 'crlv', 'notif_DEMUTRAN'];
+    }
 
-    // Inicialmente, os URLs de arquivo serão nulos
-    $doc_requerimento_url = null;
-    $cnh_url = null;
-    $cnh_condutor_url = null;
-    $notif_DEMUTRAN_url = null;
-    $crlv_url = null;
-    $comprovante_residencia_url = null;+
-    $signed_document_url = null;
-    $descricao = null;
+    // Verificar se os arquivos obrigatórios foram enviados
+    $missing_files = [];
+    foreach ($required_files as $file) {
+        if (!isset($_FILES[$file]) || $_FILES[$file]['error'] === UPLOAD_ERR_NO_FILE) {
+            $missing_files[] = $file;
+        }
+    }
+
+    if (!empty($missing_files)) {
+        returnError("Arquivos obrigatórios não enviados: " . implode(", ", $missing_files));
+    }
 
     // Captura os emails
     $gmail = isset($_POST['gmail']) ? $_POST['gmail'] : null;
@@ -263,7 +315,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Inserir registro com os dados
     $sql =
-    "INSERT INTO solicitacoes_demutran (
+        "INSERT INTO solicitacoes_demutran (
         tipo_solicitacao, 
         tipo_requerente,
         nome, 
@@ -301,7 +353,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
-    
+
     // Verifique se a preparação foi bem-sucedida
     if (!$stmt) {
         returnError("Erro na preparação da declaração: " . $conn->error);
@@ -364,34 +416,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $comprovante_residencia_url = uploadFile('comprovante_residencia', $tipo_solicitacao, $id_solicitacao, $base_url);
         $doc_complementares_urls = uploadMultipleFiles('doc_complementares', $tipo_solicitacao, $id_solicitacao, $base_url);
 
-        // Remova ou modifique esta parte que está causando o erro
-        /*
-        if (isset($_FILES['signedDocument']) && $_FILES['signedDocument']['error'] === UPLOAD_ERR_OK) {
-            $file_name = basename($_FILES['signedDocument']['name']);
-            $file_name = preg_replace('/[^A-Za-z0-9\-_\.]/', '_', $file_name);
-            $target_path = $dir_with_id . $file_name;
-            if (move_uploaded_file($_FILES['signedDocument']['tmp_name'], $target_path)) {
-                $signed_document_url = $base_url . $id_solicitacao . '/' . $file_name;
-            } else {
-                returnError("Erro ao enviar o arquivo.");
-            }
-        } else {
-            returnError("Nenhum arquivo enviado ou erro no upload.");
-        }
-        */
-
-        // Substitua por:
         $signed_document_url = null; // Inicializa como null, já que não é mais obrigatório
 
         // Adicione ao trecho onde são capturados os dados do formulário
         if ($tipo_solicitacao === 'apresentacao_condutor') {
             $identidade = verificaTexto($_POST['identidade']);
             $registro_cnh_infrator = verificaTexto($_POST['registro_cnh_infrator']); // Nova linha
-            
-            // Adicione os campos de assinatura
-            $assinatura_condutor_url = uploadFile('assinatura_condutor', $upload_dir, $base_url, $id_solicitacao);
-            $assinatura_proprietario_url = uploadFile('assinatura_proprietario', $upload_dir, $base_url, $id_solicitacao);
-            
+
+            // Adicione os campos de assinatura - corrigindo parâmetros da função
+            $assinatura_condutor_url = uploadFile('assinatura_condutor', $tipo_solicitacao, $id_solicitacao, $base_url);
+            $assinatura_proprietario_url = uploadFile('assinatura_proprietario', $tipo_solicitacao, $id_solicitacao, $base_url);
+
             // Modifique a query SQL removendo o orgao_emissor
             $sql = "UPDATE solicitacoes_demutran SET 
                     identidade = ?,
@@ -399,9 +434,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     assinatura_condutor_url = ?,
                     assinatura_proprietario_url = ?
                     WHERE id = ?";
-                    
+
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssssi", 
+            $stmt->bind_param(
+                "ssssi",
                 $identidade,
                 $registro_cnh_infrator,
                 $assinatura_condutor_url,
@@ -468,7 +504,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 'success' => true,
                 'message' => 'Dados inseridos com sucesso! Um email de confirmação foi enviado.'
             ], JSON_UNESCAPED_UNICODE);
-            
+
             // Dentro do if ($update_stmt->execute())
             $to = $gmail;
             $subject = "Confirmação de Defesa/JARI - Protocolo #{$id_solicitacao}";
@@ -514,12 +550,97 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Após o upload, verifique se pelo menos um arquivo foi enviado com sucesso
-    if (!$doc_requerimento_url && !$cnh_url && !$cnh_condutor_url && 
-        !$notif_DEMUTRAN_url && !$crlv_url && !$comprovante_residencia_url) {
+    if (
+        !$doc_requerimento_url && !$cnh_url && !$cnh_condutor_url &&
+        !$notif_DEMUTRAN_url && !$crlv_url && !$comprovante_residencia_url
+    ) {
         returnError("Nenhum arquivo foi enviado com sucesso. Por favor, tente novamente.");
+    }
+
+    // Verificação adicional para garantir que os arquivos obrigatórios foram realmente armazenados
+    $arquivos_verificar = [];
+    $mensagens_erro = [];
+
+    // Verificar quais arquivos devem existir fisicamente com base no tipo de solicitação
+    switch ($tipo_solicitacao) {
+        case 'apresentacao_condutor':
+            if ($doc_requerimento_url) $arquivos_verificar['doc_requerimento'] = $doc_requerimento_url;
+            if ($cnh_condutor_url) $arquivos_verificar['cnh_condutor'] = $cnh_condutor_url;
+            if ($notif_DEMUTRAN_url) $arquivos_verificar['notif_DEMUTRAN'] = $notif_DEMUTRAN_url;
+            break;
+        case 'jari':
+            if ($doc_requerimento_url) $arquivos_verificar['doc_requerimento'] = $doc_requerimento_url;
+            if ($cnh_url) $arquivos_verificar['cnh'] = $cnh_url;
+            if ($notif_DEMUTRAN_url) $arquivos_verificar['notif_DEMUTRAN'] = $notif_DEMUTRAN_url;
+            if ($crlv_url) $arquivos_verificar['crlv'] = $crlv_url;
+            break;
+        case 'defesa_previa':
+        default:
+            if ($doc_requerimento_url) $arquivos_verificar['doc_requerimento'] = $doc_requerimento_url;
+            if ($notif_DEMUTRAN_url) $arquivos_verificar['notif_DEMUTRAN'] = $notif_DEMUTRAN_url;
+            if ($crlv_url) $arquivos_verificar['crlv'] = $crlv_url;
+            break;
+    }
+
+    // Verificar fisicamente se os arquivos existem no servidor
+    foreach ($arquivos_verificar as $tipo => $url) {
+        // Extrair o caminho do arquivo da URL
+        $path_parts = parse_url($url);
+        if (isset($path_parts['path'])) {
+            $file_path = dirname(__DIR__) . $path_parts['path'];
+
+            // Verificar se o arquivo existe fisicamente
+            if (!file_exists($file_path)) {
+                $mensagens_erro[] = "O arquivo {$tipo} não foi armazenado corretamente";
+                error_log("Falha na verificação física do arquivo: {$file_path}");
+            } else {
+                // Verificar se o arquivo tem conteúdo
+                if (filesize($file_path) === 0) {
+                    $mensagens_erro[] = "O arquivo {$tipo} está vazio";
+                    error_log("Arquivo vazio detectado: {$file_path}");
+                }
+            }
+        } else {
+            $mensagens_erro[] = "URL inválida para o arquivo {$tipo}";
+            error_log("URL inválida para verificação de arquivo: {$url}");
+        }
+    }
+
+    // Se houver erros, excluir os arquivos e o registro no banco de dados e retornar erro
+    if (!empty($mensagens_erro)) {
+        // Excluir arquivos já enviados para não deixar lixo no servidor
+        $full_upload_dir = dirname(__DIR__) . '/' . $upload_dir . $tipo_solicitacao . '/' . $id_solicitacao . '/';
+        if (is_dir($full_upload_dir)) {
+            // Função recursiva para excluir diretório e conteúdo
+            function deleteDir($dirPath)
+            {
+                if (!is_dir($dirPath)) {
+                    return;
+                }
+                $files = scandir($dirPath);
+                foreach ($files as $file) {
+                    if ($file == "." || $file == "..") {
+                        continue;
+                    }
+                    $filePath = $dirPath . "/" . $file;
+                    if (is_dir($filePath)) {
+                        deleteDir($filePath);
+                    } else {
+                        unlink($filePath);
+                    }
+                }
+                rmdir($dirPath);
+            }
+            deleteDir($full_upload_dir);
+        }
+
+        // Excluir o registro do banco de dados
+        $conn->query("DELETE FROM solicitacoes_demutran WHERE id = {$id_solicitacao}");
+
+        // Retornar erro para o usuário
+        returnError("Falha no armazenamento de arquivos: " . implode(", ", $mensagens_erro));
     }
 
     $stmt->close();
     $conn->close();
 }
-?>
